@@ -1,0 +1,11 @@
+_target_: src.data.mri_datamodule.MRIDataModule
+data_dir: ${paths.data_dir}
+batch_size: 8 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+train_val_test_split: [55_000, 5_000, 10_000]
+num_workers: 0
+pin_memory: False
+shuffle: True
+smap : 'circle_R_9'
+smap_style : 'circle_ring'
+coils : 8
+

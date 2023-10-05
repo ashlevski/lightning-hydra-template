@@ -1,0 +1,27 @@
+_target_: src.models.mri_module.MRILitModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+net:
+  _target_: src.models.components.cascaded_map_branch.CascadedModel
+  input_channels: 16
+  reps: 5
+  block_depth: 5
+  filters: 80
+  smap_layers: 12
+  smap_filters: 50
+
+
+# compile model for faster training with pytorch 2.0
+compile: false
