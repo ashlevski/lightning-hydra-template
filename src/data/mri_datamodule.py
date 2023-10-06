@@ -57,7 +57,9 @@ class MRIDataModule(LightningDataModule):
 
     def __init__(
         self,
-        data_dir: str = "data/",
+        data_dir : str = "data/MRI/12-channel",
+        smaps_dir : str = "data/MRI/sensitivity_maps/218_170",
+        mask_dir: str = "data/MRI/undersampling_masks/218_170",
         train_val_test_split: Tuple[int, int, int] = (55_000, 5_000, 10_000),
         batch_size: int = 64,
         num_workers: int = 0,
@@ -85,12 +87,9 @@ class MRIDataModule(LightningDataModule):
         self.transforms = transforms.Compose(
             [transforms.ToTensor(), ReImgChannels()]
         )
-        self.smap = smap
-        self.smap_style = smap_style
-        self.coils = coils
-        self.folder_path = 'D:\\Datasets\\home\\pasala\\Data\\12-channel\\'
-        self.smaps = glob.glob(f'D:/Work/MRI_REC_template/data/MRI/sensitivity_maps/218_170/{smap_style}/{smap}.npy')
-        self.slice_ids = pd.read_csv(self.folder_path + 'slice_ids_v2.csv')
+
+        self.smaps = glob.glob(f'{smaps_dir}/{smap_style}/{smap}.npy')
+        self.slice_ids = pd.read_csv(data_dir + 'slice_ids_v2.csv')
         self.slice_ids = self.slice_ids.loc[((self.slice_ids['slice'] >= 55)
                                    & (self.slice_ids['slice'] <= 200)), :]  # remove first and last 55 for training
         self.slice_ids_val = self.slice_ids.loc[((self.slice_ids['slice'] >= 77)
@@ -121,12 +120,12 @@ class MRIDataModule(LightningDataModule):
         """
         # MNIST(self.hparams.data_dir, train=True, download=True)
         # MNIST(self.hparams.data_dir, train=False, download=True)
-        if self.smap_style == 'circle_ring':
-            self.masks = ['D:/Work/MRI_REC_template/data/MRI/undersampling_masks/218_170/uniform_mask_R=6.npy',
-                     'D:/Work/MRI_REC_template/data/MRI/undersampling_masks/218_170/uniform_mask_R=8.npy']
+        if self.hparams.smap_style == 'circle_ring':
+            self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=6.npy',
+                     f'{self.hparams.mask_dir}/uniform_mask_R=8.npy']
         else:
-            self.masks = ['D:/Work/MRI_REC_template/data/MRI/undersampling_masks/218_170/uniform_mask_R=2.npy',
-                     'D:/Work/MRI_REC_template/data/MRI/undersampling_masks/218_170/uniform_mask_R=4.npy']
+            self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=2.npy',
+                     f'{self.hparams.mask_dir}/218_170/uniform_mask_R=4.npy']
 
 
 
@@ -150,11 +149,11 @@ class MRIDataModule(LightningDataModule):
 
         # load and split datasets only if not loaded already
         if not self.data_train and not self.data_val and not self.data_test:
-            self.data_train = SliceDataset(self.folder_path, self.slice_ids, 'train', self.smaps, self.masks, 'nlinv', self.coils,
+            self.data_train = SliceDataset(self.hparams.data_dir, self.slice_ids, 'train', self.smaps, self.masks, 'nlinv', self.hparams.coils,
                                       data_transforms=self.transforms, target_transforms=self.transforms)
-            self.data_val = SliceDataset(self.folder_path, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.coils,
+            self.data_val = SliceDataset(self.hparams.data_dir, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.hparams.coils,
                                       data_transforms=self.transforms, target_transforms=self.transforms)
-            self.data_test = SliceDataset(self.folder_path, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.coils,
+            self.data_test = SliceDataset(self.hparams.data_dir, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.hparams.coils,
                                       data_transforms=self.transforms, target_transforms=self.transforms)
 
 
@@ -182,7 +181,7 @@ class MRIDataModule(LightningDataModule):
             batch_size=self.batch_size_per_device,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            shuffle=self.hparams.shuffle,
+            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader[Any]:
@@ -195,7 +194,7 @@ class MRIDataModule(LightningDataModule):
             batch_size=self.batch_size_per_device,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            shuffle=self.hparams.shuffle,
+            shuffle=False,
         )
 
     def teardown(self, stage: Optional[str] = None) -> None:
