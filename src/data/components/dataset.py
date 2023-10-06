@@ -110,7 +110,8 @@ class SliceTestDataset(Dataset):
         if target_type == 'nlinv':
             self.file_paths = data_df.loc[data_df['split']==split, 'nlinv_path'].tolist() 
         else:
-            self.file_paths = data_df.loc[data_df['split']==split, 'espirit_path'].tolist() 
+            self.file_paths = data_df.loc[data_df['split']==split, 'espirit_path'].tolist()
+
         self.smaps = smaps
         self.us_masks = us_masks
         self.data_transforms = data_transforms

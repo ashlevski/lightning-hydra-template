@@ -9,7 +9,7 @@ def to_re_img(batch):   # changes complex into re/img channels
     empty_batch[:, ::2, :, :] = re_img
     empty_batch[:, 1::2, :, :] = im_img
 
-    return empty_batch.to('cuda:0')
+    return empty_batch
 
 def to_complex(batch): # changes re/img channels into complex valued data
     batch = batch[:, ::2, :, :] + 1j * batch[:, 1::2, :, :]
@@ -114,23 +114,23 @@ class CascadedModel(Module):
         return x, smap
     
 
-def test(): 
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    print(device)
-    # B, C, H, W
-    input_img = torch.randn(size=(1, 8, 256, 256), dtype=torch.float32).to(device)  # size 1, 2, 256, 256
-    ref_kspace = torch.complex(torch.randn(size=(1, 4, 256, 256)), torch.randn(size=(1, 4, 256, 256))).to(device)
-    mask = torch.randn(size=(1, 4, 256, 256), dtype=torch.float32).to(device)
-
-    input_channels = 8
-    model = CascadedModel(input_channels).type(torch.float32).to(device)
-    pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    alt_params = sum(p.numel() for p in model.parameters())
-    print(f"Total trainable params: {pytorch_total_params}")
-
-    input_tuple = (input_img, ref_kspace, mask)
-    img_output, smap_output = model(input_tuple)
-    print(input_img.shape, img_output.shape, smap_output.shape)
-
-if __name__ == "__main__":
-    test()
+# def test():
+#     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+#     print(device)
+#     # B, C, H, W
+#     input_img = torch.randn(size=(1, 8, 256, 256), dtype=torch.float32)  # size 1, 2, 256, 256
+#     ref_kspace = torch.complex(torch.randn(size=(1, 4, 256, 256)), torch.randn(size=(1, 4, 256, 256)))
+#     mask = torch.randn(size=(1, 4, 256, 256), dtype=torch.float32)
+#
+#     input_channels = 8
+#     model = CascadedModel(input_channels).type(torch.float32)
+#     pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+#     alt_params = sum(p.numel() for p in model.parameters())
+#     print(f"Total trainable params: {pytorch_total_params}")
+#
+#     input_tuple = (input_img, ref_kspace, mask)
+#     img_output, smap_output = model(input_tuple)
+#     print(input_img.shape, img_output.shape, smap_output.shape)
+#
+# if __name__ == "__main__":
+#     test()

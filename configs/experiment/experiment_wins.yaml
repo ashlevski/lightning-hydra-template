@@ -7,7 +7,7 @@ defaults:
   - override /data: mri
   - override /model: mri
   - override /callbacks: default
-  - override /trainer: default
+  - override /trainer: cpu
   - override /logger: wandb
 
 # all parameters below will be merged with parameters from default configurations set above
