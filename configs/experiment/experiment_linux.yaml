@@ -8,11 +8,12 @@ defaults:
   - override /model: mri
   - override /callbacks: default
   - override /trainer: default
+  - override /logger: wandb
 
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mri", "cascade"]
+tags: ["mri_recon", "cascade"]
 
 seed: 12345
 
@@ -23,8 +24,5 @@ data:
   batch_size: 8
 
 trainer:
-  strategy: ddp
   accelerator: cpu
-  devices: 2
-  num_nodes: 1
-  sync_batchnorm: True
+

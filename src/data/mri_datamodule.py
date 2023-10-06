@@ -120,12 +120,7 @@ class MRIDataModule(LightningDataModule):
         """
         # MNIST(self.hparams.data_dir, train=True, download=True)
         # MNIST(self.hparams.data_dir, train=False, download=True)
-        if self.hparams.smap_style == 'circle_ring':
-            self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=6.npy',
-                     f'{self.hparams.mask_dir}/uniform_mask_R=8.npy']
-        else:
-            self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=2.npy',
-                     f'{self.hparams.mask_dir}/218_170/uniform_mask_R=4.npy']
+
 
 
 
@@ -149,6 +144,12 @@ class MRIDataModule(LightningDataModule):
 
         # load and split datasets only if not loaded already
         if not self.data_train and not self.data_val and not self.data_test:
+            if self.hparams.smap_style == 'circle_ring':
+                self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=6.npy',
+                              f'{self.hparams.mask_dir}/uniform_mask_R=8.npy']
+            else:
+                self.masks = [f'{self.hparams.mask_dir}/uniform_mask_R=2.npy',
+                              f'{self.hparams.mask_dir}/218_170/uniform_mask_R=4.npy']
             self.data_train = SliceDataset(self.hparams.data_dir, self.slice_ids, 'train', self.smaps, self.masks, 'nlinv', self.hparams.coils,
                                       data_transforms=self.transforms, target_transforms=self.transforms)
             self.data_val = SliceDataset(self.hparams.data_dir, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.hparams.coils,
