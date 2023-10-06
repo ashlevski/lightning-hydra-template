@@ -7,7 +7,7 @@ defaults:
   - override /data: mri
   - override /model: mri
   - override /callbacks: default
-  - override /trainer: default
+  - override /trainer: cpu
   - override /logger: wandb
 
 # all parameters below will be merged with parameters from default configurations set above
@@ -23,8 +23,6 @@ data:
   mask_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/undersampling_masks/218_170'
   batch_size: 8
 
-trainer:
-  accelerator: cpu
 
 logger:
   wandb:
