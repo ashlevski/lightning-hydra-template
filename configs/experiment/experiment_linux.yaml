@@ -24,7 +24,7 @@ data:
 
 trainer:
   strategy: ddp
-  accelerator: gpu
+  accelerator: cpu
   devices: 2
   num_nodes: 1
   sync_batchnorm: True
