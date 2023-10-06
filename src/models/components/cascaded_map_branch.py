@@ -9,7 +9,7 @@ def to_re_img(batch):   # changes complex into re/img channels
     empty_batch[:, ::2, :, :] = re_img
     empty_batch[:, 1::2, :, :] = im_img
 
-    return empty_batch
+    return empty_batch.cuda()
 
 def to_complex(batch): # changes re/img channels into complex valued data
     batch = batch[:, ::2, :, :] + 1j * batch[:, 1::2, :, :]

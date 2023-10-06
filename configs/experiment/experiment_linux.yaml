@@ -24,10 +24,3 @@ data:
   batch_size: 8
 
 
-logger:
-  wandb:
-    project: 'mri_recon'
-    tags: ${tags}
-    group: "mri_recon"
-  aim:
-    experiment: "mri_recon"
