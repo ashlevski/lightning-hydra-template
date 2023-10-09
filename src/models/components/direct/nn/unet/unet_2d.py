@@ -9,7 +9,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from direct.data import transforms as T
+from src.models.components.direct.data import transforms as T
 
 
 class ConvBlock(nn.Module):

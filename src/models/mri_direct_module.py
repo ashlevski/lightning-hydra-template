@@ -7,7 +7,7 @@ from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.regression import MeanSquaredError as Accuracy
 
 
-class MRILitModule(LightningModule):
+class MRI_Direct_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
     A `LightningModule` implements 8 key methods:
@@ -105,15 +105,15 @@ class MRILitModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        inputs, img_labels, smap_labels = batch[0].type(dtype=torch.float32), batch[1].type(dtype=torch.float32), batch[2].type(dtype=torch.float32)
-        scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
+        input_img, target_img, smap, input_max, input_kspace, mask = [element for element in batch]
+        # inputs, img_labels, smap_labels = batch[0].type(dtype=torch.float32), batch[1].type(dtype=torch.float32), batch[2].type(dtype=torch.float32)
+        # scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
 
+        output_imgs, output_smaps = self.forward((input_kspace, mask, smap))
+        target_img = torch.abs(target_img).squeeze()
+        loss = self.criterion(output_imgs, target_img)
 
-        output_imgs, output_smaps = self.forward((inputs, input_kspaces, masks))
-
-        loss = self.criterion(output_imgs, img_labels) + self.criterion(output_smaps, smap_labels)
-
-        return loss, output_imgs, img_labels
+        return loss, output_imgs, target_img
 
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -131,8 +131,8 @@ class MRILitModule(LightningModule):
         # self.log('loss', loss)
         self.train_loss(loss)
         self.train_acc(preds, targets)
-        self.log("train_loss", self.train_loss.compute(), on_step=True, on_epoch=True, prog_bar=True)
-        self.log("train_acc", self.train_acc.compute(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_loss", self.train_loss.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train_acc", self.train_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
 
         # return loss or backpropagation will fail
         return loss
@@ -222,4 +222,4 @@ class MRILitModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = MRILitModule(None, None, None, None)
+    _ = MRI_Direct_LitModule(None, None, None, None)

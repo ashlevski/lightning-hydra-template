@@ -6,8 +6,8 @@ from typing import Callable
 import torch
 import torch.nn as nn
 
-import direct.data.transforms as T
-from direct.nn.multidomainnet.multidomain import MultiDomainUnet2d
+import src.models.components.direct.data.transforms as T
+from src.models.components.direct.nn.multidomainnet.multidomain import MultiDomainUnet2d
 
 
 class StandardizationLayer(nn.Module):

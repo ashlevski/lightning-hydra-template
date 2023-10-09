@@ -9,10 +9,10 @@ import numpy as np
 import torch
 from torch import nn
 
-from direct.algorithms.optimization import MaximumEigenvaluePowerMethod
-from direct.data.transforms import crop_to_acs, view_as_complex, view_as_real
-from direct.types import KspaceKey
-from direct.utils import DirectModule
+from src.models.components.direct.algorithms.optimization import MaximumEigenvaluePowerMethod
+from src.models.components.direct.data.transforms import crop_to_acs, view_as_complex, view_as_real
+from src.models.components.direct.types import KspaceKey
+from src.models.components.direct.utils import DirectModule
 
 
 class EspiritCalibration(DirectModule):

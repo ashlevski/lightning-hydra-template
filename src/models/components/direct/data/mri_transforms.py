@@ -14,12 +14,12 @@ import numpy as np
 import torch
 import torchvision
 
-from direct.algorithms.mri_algorithms import EspiritCalibration
-from direct.data import transforms as T
-from direct.exceptions import ItemNotFoundException
-from direct.types import DirectEnum, IntegerListOrTupleString, KspaceKey
-from direct.utils import DirectModule, DirectTransform
-from direct.utils.asserts import assert_complex
+from src.models.components.direct.algorithms.mri_algorithms import EspiritCalibration
+from src.models.components.direct.data import transforms as T
+from src.models.components.direct.exceptions import ItemNotFoundException
+from src.models.components.direct.types import DirectEnum, IntegerListOrTupleString, KspaceKey
+from src.models.components.direct.utils import DirectModule, DirectTransform
+from src.models.components.direct.utils.asserts import assert_complex
 
 logger = logging.getLogger(__name__)
 
@@ -349,10 +349,10 @@ class CropKspace(DirectTransform):
             Shape to crop the input to or a string pointing to a crop key (e.g. `reconstruction_size`).
         forward_operator: Callable
             The forward operator, e.g. some form of FFT (centered or uncentered).
-            Default: :class:`direct.data.transforms.fft2`.
+            Default: :class:`src.models.components.direct.data.transforms.fft2`.
         backward_operator: Callable
             The backward operator, e.g. some form of inverse FFT (centered or uncentered).
-            Default: :class:`direct.data.transforms.ifft2`.
+            Default: :class:`src.models.components.direct.data.transforms.ifft2`.
         image_space_center_crop: bool
             If set, the crop in the data will be taken in the center
         random_crop_sampler_type: Optional[str]

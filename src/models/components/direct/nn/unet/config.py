@@ -2,7 +2,7 @@
 # Copyright (c) DIRECT Contributors
 from dataclasses import dataclass
 
-from direct.config.defaults import ModelConfig
+from src.models.components.direct.config.defaults import ModelConfig
 
 
 @dataclass

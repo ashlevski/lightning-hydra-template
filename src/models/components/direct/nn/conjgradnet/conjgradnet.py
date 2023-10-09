@@ -6,10 +6,10 @@ from typing import Callable, Optional, Tuple
 import torch
 from torch import nn
 
-from direct.data.transforms import reduce_operator
-from direct.nn.conjgradnet.conjgrad import CGUpdateType, ConjGrad
-from direct.nn.get_nn_model_config import ModelName, _get_model_config
-from direct.types import DirectEnum
+from src.models.components.direct.data.transforms import reduce_operator
+from src.models.components.direct.nn.conjgradnet.conjgrad import CGUpdateType, ConjGrad
+from src.models.components.direct.nn.get_nn_model_config import ModelName, _get_model_config
+from src.models.components.direct.types import DirectEnum
 
 
 class ConjGradNetInitType(DirectEnum):

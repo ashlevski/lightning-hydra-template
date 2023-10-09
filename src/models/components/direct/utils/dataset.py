@@ -4,8 +4,8 @@ import pathlib
 import urllib.parse
 from typing import List
 
-from direct.types import PathOrString
-from direct.utils.io import check_is_valid_url, read_list
+from src.models.components.direct.types import PathOrString
+from src.models.components.direct.utils.io import check_is_valid_url, read_list
 
 
 def get_filenames_for_datasets_from_config(cfg, files_root: PathOrString, data_root: pathlib.Path):

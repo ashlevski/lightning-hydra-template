@@ -4,8 +4,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from direct.config.defaults import ModelConfig
-from direct.nn.types import ActivationType, ModelName
+from src.models.components.direct.config.defaults import ModelConfig
+from src.models.components.direct.nn.types import ActivationType, ModelName
 
 
 @dataclass

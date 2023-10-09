@@ -15,11 +15,11 @@ import numpy as np
 from omegaconf import DictConfig
 from torch.utils.data import Dataset, IterableDataset
 
-from direct.data.fake import FakeMRIData
-from direct.data.h5_data import H5SliceData
-from direct.data.sens import simulate_sensitivity_maps
-from direct.data.types import PathOrString
-from direct.utils import remove_keys, str_to_class
+from src.models.components.direct.data.fake import FakeMRIData
+from src.models.components.direct.data.h5_data import H5SliceData
+from src.models.components.direct.data.sens import simulate_sensitivity_maps
+from src.models.components.direct.data.types import PathOrString
+from src.models.components.direct.utils import remove_keys, str_to_class
 
 logger = logging.getLogger(__name__)
 
@@ -959,7 +959,7 @@ def build_dataset(
     Parameters
     ----------
     name: str
-        Name of dataset class (without `Dataset`) in direct.data.datasets.
+        Name of dataset class (without `Dataset`) in src.models.components.direct.data.datasets.
     transforms: Callable
         Transformation object. Default: None.
     kwargs: Dict[str, Any]
@@ -981,7 +981,7 @@ def build_dataset(
     Dataset
     """
     logger.info("Building dataset for: %s", name)
-    dataset_class: Callable = str_to_class("direct.data.datasets", name + "Dataset")
+    dataset_class: Callable = str_to_class("src.models.components.direct.data.datasets", name + "Dataset")
     logger.debug("Dataset class: %s", dataset_class)
     dataset = dataset_class(transform=transforms, **kwargs)
 

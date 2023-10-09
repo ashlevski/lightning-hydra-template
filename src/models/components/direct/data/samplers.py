@@ -3,7 +3,7 @@
 # `DistributedSampler` below taken from Detectron 2, licensed under Apache 2.0.
 # Changes:
 # - Docstring to match the rest of the library
-# - Calls to other subroutines which do not exist in DIRECT.
+# - Calls to other subroutines which do not exist in src.models.components.direct.
 """Module containing all sampler logic."""
 import itertools
 import logging
@@ -15,7 +15,7 @@ import numpy as np
 import torch
 from torch.utils.data.sampler import Sampler
 
-from direct.utils import chunks, communication
+from src.models.components.direct.utils import chunks, communication
 
 
 class DistributedSampler(Sampler):

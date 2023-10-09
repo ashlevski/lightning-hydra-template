@@ -6,10 +6,10 @@ from typing import Callable, Optional
 import torch
 from torch import nn
 
-from direct.constants import COMPLEX_SIZE
-from direct.data.transforms import expand_operator, reduce_operator
-from direct.nn.get_nn_model_config import ModelName, _get_model_config
-from direct.nn.types import InitType
+from src.models.components.direct.constants import COMPLEX_SIZE
+from src.models.components.direct.data.transforms import expand_operator, reduce_operator
+from src.models.components.direct.nn.get_nn_model_config import ModelName, _get_model_config
+from src.models.components.direct.nn.types import InitType
 
 
 class MRIVarSplitNet(nn.Module):

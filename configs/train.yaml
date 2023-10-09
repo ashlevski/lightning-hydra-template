@@ -15,7 +15,7 @@ defaults:
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
-  - experiment: experiment_wins
+  - experiment: experiment_wins_recvarnet
 
   # config for hyperparameter optimization
   - hparams_search: null
@@ -47,3 +47,6 @@ ckpt_path: null
 
 # seed for random number generators in pytorch, numpy and python.random
 seed: null
+
+# set precision of Tensor Core
+precision: 'medium'

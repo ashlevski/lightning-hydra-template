@@ -4,10 +4,10 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from direct.config.defaults import ModelConfig
-from direct.nn.conjgradnet.conjgrad import CGUpdateType
-from direct.nn.conjgradnet.conjgradnet import ConjGradNetInitType
-from direct.nn.types import ActivationType, ModelName
+from src.models.components.direct.config.defaults import ModelConfig
+from src.models.components.direct.nn.conjgradnet.conjgrad import CGUpdateType
+from src.models.components.direct.nn.conjgradnet.conjgradnet import ConjGradNetInitType
+from src.models.components.direct.nn.types import ActivationType, ModelName
 
 
 @dataclass

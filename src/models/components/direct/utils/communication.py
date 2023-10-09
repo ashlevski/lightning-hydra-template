@@ -5,7 +5,7 @@
 # https://github.com/facebookresearch/detectron2/blob/989f52d67d05445ccd030d8f13d6cc53e297fb91/detectron2/utils/comm.py
 # Changes:
 # - Docstring to match the rest of the library.
-# - Calls to other subroutines which do not exist in DIRECT.
+# - Calls to other subroutines which do not exist in src.models.components.direct.
 # - Extra logging.
 
 # TODO: Mypy has a lot of difficulties parsing this file

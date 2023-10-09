@@ -6,8 +6,8 @@ from typing import Callable
 import torch
 import torch.nn as nn
 
-from direct.data.transforms import expand_operator, reduce_operator
-from direct.nn.unet import UnetModel2d
+from src.models.components.direct.data.transforms import expand_operator, reduce_operator
+from src.models.components.direct.nn.unet import UnetModel2d
 
 
 class EndToEndVarNet(nn.Module):

@@ -17,7 +17,7 @@ import numpy as np
 import torch
 from omegaconf.omegaconf import DictConfig
 
-from direct.types import DictOrDictConfig
+from src.models.components.direct.types import DictOrDictConfig
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def str_to_class(module_name: str, function_name: str) -> Callable:
     Parameters
     ----------
     module_name: str
-        e.g. direct.data.transforms
+        e.g. src.models.components.direct.data.transforms
     function_name: str
         e.g. Identity
     Returns

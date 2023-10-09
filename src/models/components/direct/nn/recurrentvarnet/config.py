@@ -4,8 +4,8 @@
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
-from direct.config.defaults import ModelConfig
-from direct.nn.types import InitType
+from src.models.components.direct.config.defaults import ModelConfig
+from src.models.components.direct.nn.types import InitType
 
 
 @dataclass

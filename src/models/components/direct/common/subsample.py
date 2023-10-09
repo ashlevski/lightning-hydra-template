@@ -16,13 +16,13 @@ from typing import Iterable, List, Optional, Tuple, Union
 import numpy as np
 import torch
 
-import direct.data.transforms as T
-from direct.common._gaussian import gaussian_mask_1d, gaussian_mask_2d  # pylint: disable=no-name-in-module
-from direct.common._poisson import poisson as _poisson  # pylint: disable=no-name-in-module
-from direct.environment import DIRECT_CACHE_DIR
-from direct.types import Number
-from direct.utils import str_to_class
-from direct.utils.io import download_url
+import src.models.components.direct.data.transforms as T
+from src.models.components.direct.common._gaussian import gaussian_mask_1d, gaussian_mask_2d  # pylint: disable=no-name-in-module
+from src.models.components.direct.common._poisson import poisson as _poisson  # pylint: disable=no-name-in-module
+from src.models.components.direct.environment import DIRECT_CACHE_DIR
+from src.models.components.direct.types import Number
+from src.models.components.direct.utils import str_to_class
+from src.models.components.direct.utils.io import download_url
 
 # pylint: disable=arguments-differ
 
@@ -1119,7 +1119,7 @@ class DictionaryMaskFunc(BaseMaskFunc):
 
 
 def build_masking_function(name, accelerations, center_fractions=None, uniform_range=False, **kwargs):
-    MaskFunc: BaseMaskFunc = str_to_class("direct.common.subsample", name + "MaskFunc")  # noqa
+    MaskFunc: BaseMaskFunc = str_to_class("src.models.components.direct.common.subsample", name + "MaskFunc")  # noqa
     mask_func = MaskFunc(
         accelerations=accelerations,
         center_fractions=center_fractions,

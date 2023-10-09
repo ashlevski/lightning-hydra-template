@@ -6,8 +6,8 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 import torch
 from torch import nn
 
-from direct.data.transforms import expand_operator, reduce_operator
-from direct.nn.rim.rim import MRILogLikelihood
+from src.models.components.direct.data.transforms import expand_operator, reduce_operator
+from src.models.components.direct.nn.rim.rim import MRILogLikelihood
 
 
 class ConvRNNStack(nn.Module):

@@ -6,8 +6,8 @@ from typing import Any, List, Optional
 
 from omegaconf import MISSING
 
-from direct.config import BaseConfig
-from direct.data.datasets_config import DatasetConfig
+from src.models.components.direct.config import BaseConfig
+from src.models.components.direct.data.datasets_config import DatasetConfig
 
 
 @dataclass

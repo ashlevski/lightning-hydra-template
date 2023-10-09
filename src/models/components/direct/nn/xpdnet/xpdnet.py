@@ -5,11 +5,11 @@ from typing import Callable, Optional
 
 import torch.nn as nn
 
-from direct.nn.conv.conv import Conv2d
-from direct.nn.crossdomain.crossdomain import CrossDomainNetwork
-from direct.nn.crossdomain.multicoil import MultiCoil
-from direct.nn.didn.didn import DIDN
-from direct.nn.mwcnn.mwcnn import MWCNN
+from src.models.components.direct.nn.conv.conv import Conv2d
+from src.models.components.direct.nn.crossdomain.crossdomain import CrossDomainNetwork
+from src.models.components.direct.nn.crossdomain.multicoil import MultiCoil
+from src.models.components.direct.nn.didn.didn import DIDN
+from src.models.components.direct.nn.mwcnn.mwcnn import MWCNN
 
 
 class XPDNet(CrossDomainNetwork):

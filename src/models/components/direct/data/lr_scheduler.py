@@ -6,7 +6,7 @@
 # https://github.com/facebookresearch/detectron2/blob/60d7a1fd33cc48e58968659cd3301f3300b2786b/detectron2/solver/lr_scheduler.py
 # Changes:
 # - Docstring to match the rest of the library.
-# - Calls to other subroutines which do not exist in DIRECT.
+# - Calls to other subroutines which do not exist in src.models.components.direct.
 # - Stylistic changes.
 
 import logging

@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from torch import nn
 
-from direct.utils import str_to_class
+from src.models.components.direct.utils import str_to_class
 
 __all__ = ["MobileNetV2"]
 

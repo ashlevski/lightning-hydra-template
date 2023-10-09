@@ -1,7 +1,7 @@
 # coding=utf-8
 # Copyright (c) DIRECT Contributors
 
-from direct.types import DirectEnum
+from src.models.components.direct.types import DirectEnum
 
 
 class ActivationType(DirectEnum):

@@ -7,10 +7,10 @@ from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
 from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 import pandas as pd
-from src.data.components.dataset_mri import ReImgChannels, SliceDataset
+from src.data.components.dataset_direct_mri import ReImgChannels, SliceDataset
 
 
-class MRIDataModule(LightningDataModule):
+class MRI_Direct_DataModule(LightningDataModule):
     """`LightningDataModule` for the MNIST dataset.
 
     The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.

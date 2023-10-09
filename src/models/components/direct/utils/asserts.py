@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import torch
 
-from direct.utils import is_complex_data
+from src.models.components.direct.utils import is_complex_data
 
 
 def assert_positive_integer(*variables, strict: bool = False) -> None:

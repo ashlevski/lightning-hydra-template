@@ -33,7 +33,7 @@ import numpy as np
 import torch
 from tqdm.auto import tqdm
 
-from direct.types import PathOrString
+from src.models.components.direct.types import PathOrString
 
 logger = logging.getLogger(__name__)
 

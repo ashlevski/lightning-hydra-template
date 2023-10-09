@@ -6,7 +6,7 @@ from typing import Callable, Optional, Union
 import torch
 import torch.nn as nn
 
-import direct.data.transforms as T
+import src.models.components.direct.data.transforms as T
 
 
 class CrossDomainNetwork(nn.Module):

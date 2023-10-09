@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, Optional, Tuple
 import torch
 from torch import nn
 
-from direct.config import BaseConfig
-from direct.nn.mri_models import MRIModelEngine
+from src.models.components.direct.config import BaseConfig
+from src.models.components.direct.nn.mri_models import MRIModelEngine
 
 
 class JointICNetEngine(MRIModelEngine):

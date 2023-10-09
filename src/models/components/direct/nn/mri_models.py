@@ -1,7 +1,7 @@
 # coding=utf-8
 # Copyright (c) DIRECT Contributors
 
-"""MRI model engine of DIRECT."""
+"""MRI model engine of src.models.components.direct."""
 
 import gc
 import pathlib
@@ -17,12 +17,12 @@ from torch.cuda.amp import autocast
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 
-import direct.data.transforms as T
-from direct.config import BaseConfig
-from direct.engine import DoIterationOutput, Engine
-from direct.functionals import NMAELoss, NMSELoss, NRMSELoss, SobelGradL1Loss, SobelGradL2Loss, SSIMLoss
-from direct.types import TensorOrNone
-from direct.utils import (
+import src.models.components.direct.data.transforms as T
+from src.models.components.direct.config import BaseConfig
+from src.models.components.direct.engine import DoIterationOutput, Engine
+from src.models.components.direct.functionals import NMAELoss, NMSELoss, NRMSELoss, SobelGradL1Loss, SobelGradL2Loss, SSIMLoss
+from src.models.components.direct.types import TensorOrNone
+from src.models.components.direct.utils import (
     communication,
     detach_dict,
     dict_to_device,
@@ -30,7 +30,7 @@ from direct.utils import (
     multiply_function,
     reduce_list_of_dicts,
 )
-from direct.utils.communication import reduce_tensor_dict
+from src.models.components.direct.utils.communication import reduce_tensor_dict
 
 
 class MRIModelEngine(Engine):
@@ -514,7 +514,7 @@ class MRIModelEngine(Engine):
         slice_counter = 0
         filenames_seen = 0
 
-        # Loop over dataset. This requires the use of direct.data.sampler.DistributedSequentialSampler as this sampler
+        # Loop over dataset. This requires the use of src.models.components.direct.data.sampler.DistributedSequentialSampler as this sampler
         # splits the data over the different processes, and outputs the slices linearly. The implicit assumption here is
         # that the slices are outputted from the Dataset *sequentially* for each volume one by one, and each batch only
         # contains data from one volume.

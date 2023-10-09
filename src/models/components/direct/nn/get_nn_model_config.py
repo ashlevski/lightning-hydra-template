@@ -3,12 +3,12 @@
 
 from torch import nn
 
-from direct.constants import COMPLEX_SIZE
-from direct.nn.conv.conv import Conv2d
-from direct.nn.didn.didn import DIDN
-from direct.nn.resnet.resnet import ResNet
-from direct.nn.types import ActivationType, ModelName
-from direct.nn.unet.unet_2d import NormUnetModel2d, UnetModel2d
+from src.models.components.direct.constants import COMPLEX_SIZE
+from src.models.components.direct.nn.conv.conv import Conv2d
+from src.models.components.direct.nn.didn.didn import DIDN
+from src.models.components.direct.nn.resnet.resnet import ResNet
+from src.models.components.direct.nn.types import ActivationType, ModelName
+from src.models.components.direct.nn.unet.unet_2d import NormUnetModel2d, UnetModel2d
 
 
 def _get_model_config(

@@ -6,14 +6,14 @@ from typing import Callable, List
 import torch
 from torch import nn
 
-from direct.data.transforms import (
+from src.models.components.direct.data.transforms import (
     complex_division,
     complex_dot_product,
     complex_multiplication,
     expand_operator,
     reduce_operator,
 )
-from direct.types import DirectEnum
+from src.models.components.direct.types import DirectEnum
 
 
 class CGUpdateType(DirectEnum):

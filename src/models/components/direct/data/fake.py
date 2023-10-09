@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 from sklearn.datasets import make_blobs
 
-from direct.data.sens import simulate_sensitivity_maps
+from src.models.components.direct.data.sens import simulate_sensitivity_maps
 
 logger = logging.getLogger(__name__)
 

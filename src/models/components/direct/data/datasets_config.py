@@ -8,8 +8,8 @@ from typing import List, Optional, Tuple
 
 from omegaconf import MISSING
 
-from direct.common.subsample_config import MaskingConfig
-from direct.config.defaults import BaseConfig
+from src.models.components.direct.common.subsample_config import MaskingConfig
+from src.models.components.direct.config.defaults import BaseConfig
 
 
 @dataclass

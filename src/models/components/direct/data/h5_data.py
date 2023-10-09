@@ -9,9 +9,9 @@ import h5py
 import numpy as np
 from torch.utils.data import Dataset
 
-from direct.types import PathOrString
-from direct.utils import cast_as_path
-from direct.utils.dataset import get_filenames_for_datasets
+from src.models.components.direct.types import PathOrString
+from src.models.components.direct.utils import cast_as_path
+from src.models.components.direct.utils.dataset import get_filenames_for_datasets
 
 logger = logging.getLogger(__name__)
 

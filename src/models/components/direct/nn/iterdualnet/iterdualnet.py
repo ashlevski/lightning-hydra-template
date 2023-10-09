@@ -6,9 +6,9 @@ from typing import Callable
 import torch
 from torch import nn
 
-import direct.data.transforms as T
-from direct.constants import COMPLEX_SIZE
-from direct.nn.unet.unet_2d import NormUnetModel2d, UnetModel2d
+import src.models.components.direct.data.transforms as T
+from src.models.components.direct.constants import COMPLEX_SIZE
+from src.models.components.direct.nn.unet.unet_2d import NormUnetModel2d, UnetModel2d
 
 
 class IterDualNet(nn.Module):

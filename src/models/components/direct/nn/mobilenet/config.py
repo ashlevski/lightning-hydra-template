@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from direct.config.defaults import ModelConfig
+from src.models.components.direct.config.defaults import ModelConfig
 
 
 @dataclass
