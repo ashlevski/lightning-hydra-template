@@ -15,7 +15,7 @@ defaults:
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
-  - experiment: experiment_wins_recvarnet
+  - experiment: experiment_recvarnet
 
   # config for hyperparameter optimization
   - hparams_search: null
