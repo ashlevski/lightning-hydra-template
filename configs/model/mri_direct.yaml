@@ -23,3 +23,14 @@ net:
 
 # compile model for faster training with pytorch 2.0
 compile: false
+
+criterions:
+  mse:
+    _target_: torch.nn.MSELoss
+#  ssim:
+#    _target_: src.models.components.losses.SSIMLoss
+#
+#criterion_2:
+#    _target_: torch.nn.L1Loss
+
+

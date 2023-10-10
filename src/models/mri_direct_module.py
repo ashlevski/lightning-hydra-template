@@ -1,11 +1,11 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Callable, List
 
 import torch
 from lightning import LightningModule
 from torch import nn
 from torchmetrics import MaxMetric, MeanMetric
-from torchmetrics.regression import MeanSquaredError as Accuracy
-
+from torchmetrics.image import StructuralSimilarityIndexMeasure as Accuracy
+from torch.nn import MSELoss
 
 class MRI_Direct_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
@@ -46,6 +46,7 @@ class MRI_Direct_LitModule(LightningModule):
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
+        criterions: Dict = {'mse': torch.nn.MSELoss},
     ) -> None:
         """Initialize a `MNISTLitModule`.
 
@@ -61,8 +62,8 @@ class MRI_Direct_LitModule(LightningModule):
 
         self.net = net
 
-        # loss function
-        self.criterion = nn.MSELoss()
+        # loss functions
+        self.criterions = criterions
 
         # metric objects for calculating and averaging accuracy across batches
         self.train_acc = Accuracy()
@@ -109,9 +110,12 @@ class MRI_Direct_LitModule(LightningModule):
         # inputs, img_labels, smap_labels = batch[0].type(dtype=torch.float32), batch[1].type(dtype=torch.float32), batch[2].type(dtype=torch.float32)
         # scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
 
-        output_imgs, output_smaps = self.forward((input_kspace, mask, smap))
+        output_imgs, output_kspace = self.forward((input_kspace, mask, smap))
         target_img = torch.abs(target_img).squeeze()
-        loss = self.criterion(output_imgs, target_img)
+        loss = {}
+
+        for key, criterion in self.criterions.items():
+            loss[key] = criterion(output_imgs, target_img)
 
         return loss, output_imgs, target_img
 
@@ -125,17 +129,18 @@ class MRI_Direct_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
-        loss , preds, targets= self.model_step(batch)
+        losses , preds, targets = self.model_step(batch)
 
-        # update and log metrics
-        # self.log('loss', loss)
-        self.train_loss(loss)
-        self.train_acc(preds, targets)
-        self.log("train_loss", self.train_loss.compute(), on_step=False, on_epoch=True, prog_bar=True)
-        self.log("train_acc", self.train_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        self.train_acc(preds.unsqueeze(1), targets.unsqueeze(1))
+        self.log(f"train_acc", self.train_acc, on_step=True, on_epoch=True, prog_bar=True)
+
+        for key, loss in losses.items():
+            # self.train_loss(loss)
+            self.log(f"train_loss_{key}", loss, on_step=True, on_epoch=True, prog_bar=True)
+
 
         # return loss or backpropagation will fail
-        return loss
+        return sum(losses.values())
 
     def on_train_epoch_end(self) -> None:
         "Lightning hook that is called when a training epoch ends."
@@ -148,15 +153,15 @@ class MRI_Direct_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        loss, preds, targets = self.model_step(batch)
+        losses, preds, targets = self.model_step(batch)
 
         # update and log metrics
-        # self.log('loss', loss)
-        self.val_loss(loss)
-        self.val_acc(preds, targets)
-        self.log("val_loss", self.val_loss.compute(), on_step=False, on_epoch=True, prog_bar=True)
-        self.log("val_acc", self.val_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        self.val_acc(preds.unsqueeze(1), targets.unsqueeze(1))
+        self.log(f"val_acc", self.val_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
 
+        for key, loss in losses.items():
+            # self.val_loss(loss)
+            self.log(f"val_loss_{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         acc = self.val_acc.compute()  # get current val acc
@@ -172,14 +177,15 @@ class MRI_Direct_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        loss, preds, targets = self.model_step(batch)
+        losses, preds, targets = self.model_step(batch)
 
+        self.test_acc(preds.unsqueeze(1), targets.unsqueeze(1))
+        self.log(f"test_acc", self.test_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
         # update and log metrics
         # self.log('loss', loss)
-        self.test_loss(loss)
-        self.test_acc(preds, targets)
-        self.log("test_loss", self.test_loss.compute(), on_step=False, on_epoch=True, prog_bar=True)
-        self.log("test_acc", self.test_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        for key, loss in losses.items():
+            # self.test_loss(loss)
+            self.log(f"test_loss_{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -213,7 +219,7 @@ class MRI_Direct_LitModule(LightningModule):
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val_loss",
+                    "monitor": "val_acc",
                     "interval": "epoch",
                     "frequency": 1,
                 },
