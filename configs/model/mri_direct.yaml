@@ -19,6 +19,13 @@ net:
   recurrent_hidden_channels: 8
   recurrent_num_layers: 2
   no_parameter_sharing: False
+  sensitivity_model:
+    _target_: src.models.components.direct.nn.unet.unet_2d.UnetModel2d
+    in_channels: 2
+    out_channels: 2
+    num_filters: 8
+    num_pool_layers: 4
+    dropout_probability: 0.0
 
 
 # compile model for faster training with pytorch 2.0

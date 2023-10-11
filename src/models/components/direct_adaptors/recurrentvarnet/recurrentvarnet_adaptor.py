@@ -4,6 +4,7 @@ from typing import Tuple, Any, Dict, Callable
 import torch
 from torch import nn
 
+from src.models.components.direct.data.mri_transforms import EstimateSensitivityMapModule
 from src.models.components.direct.data.transforms import fft2, ifft2
 from src.models.components.direct.nn.recurrentvarnet.recurrentvarnet import RecurrentVarNet
 import src.models.components.direct.data.transforms as T
@@ -17,8 +18,10 @@ class RecurrentVarNetAdaptor(nn.Module):
         recurrent_hidden_channels= 8,
         recurrent_num_layers= 2,
         no_parameter_sharing= False,
+        sensitivity_model: nn.Module = None,
     ):
         super().__init__()
+        self.sensitivity_model = sensitivity_model
         self.forward_operator = functools.partial(fft2, centered=True)
         self.backward_operator = functools.partial(ifft2, centered=True)
         """Inits :class:`RecurrentVarNetEngine."""
@@ -31,14 +34,15 @@ class RecurrentVarNetAdaptor(nn.Module):
             no_parameter_sharing= no_parameter_sharing,
         )
         self._complex_dim = -1
+        self.sens_model = EstimateSensitivityMapModule()
 
     def forward(self, data: Tuple) -> Tuple[torch.Tensor, torch.Tensor]:
-
-
+        # data is tuple of #1 masked_kspace #2 sampling_mask #3 sensitivity_map
+        data = self.compute_sensitivity(data)
         output_kspace = self.model(
-            masked_kspace=torch.view_as_real(data[0].type(dtype=torch.complex64)),
-            sampling_mask=data[1].unsqueeze(-1).type(dtype=torch.float32),
-            sensitivity_map=self.compute_sensitivity_map(torch.view_as_real(data[2].type(dtype=torch.complex64))),
+            masked_kspace=data[list(data)[0]],
+            sampling_mask=data[list(data)[1]],
+            sensitivity_map=self.compute_sensitivity_map(data[list(data)[2]]),
         )
         # output_kspace = T.apply_padding(output_kspace, data.get("padding", None))
 
@@ -49,6 +53,13 @@ class RecurrentVarNetAdaptor(nn.Module):
 
         return output_image, output_kspace
 
+    def compute_sensitivity(self,data):
+        with torch.no_grad():
+            input = {}
+            input[self.sens_model.kspace_key] = torch.view_as_real(data[0]).type(dtype=torch.float32)
+            input["acs_mask"] = data[1].unsqueeze(-1).data[1].type(dtype=torch.float32)
+            input["sensitivity_map"] = torch.view_as_real(data[2]).type(dtype=torch.float32)
+            return self.sens_model(input)
     def compute_sensitivity_map(self, sensitivity_map: torch.Tensor) -> torch.Tensor:
         r"""Computes sensitivity maps :math:`\{S^k\}_{k=1}^{n_c}` if `sensitivity_model` is available.
 
@@ -69,7 +80,7 @@ class RecurrentVarNetAdaptor(nn.Module):
         """
         # ToDo: add transform per coil
         # Some things can be done with the sensitivity map here, e.g. apply a u-net
-        if False:#"sensitivity_model" in self.models:
+        if True:#"sensitivity_model" in self.models:
             # Move channels to first axis
             sensitivity_map = sensitivity_map.permute(
                 (0, 1, 4, 2, 3)
@@ -106,7 +117,7 @@ class RecurrentVarNetAdaptor(nn.Module):
         """
         output = []
         for idx in range(data.size(self.model._coil_dim)):
-            subselected_data = data.select(self._coil_dim, idx)
-            output.append(self.models[model_name](subselected_data))
+            subselected_data = data.select(self.model._coil_dim, idx)
+            output.append(self.sensitivity_model(subselected_data))
 
-        return torch.stack(output, dim=self._coil_dim)
+        return torch.stack(output, dim=self.model._coil_dim)

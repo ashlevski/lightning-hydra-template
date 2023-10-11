@@ -155,15 +155,12 @@ class MRI_Direct_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
-        images_preds, images_targets  = (wandb.Image(
-            preds[0],
-            caption="Predicted"),
-                        wandb.Image(
-            targets[0],
-            caption="Target"
-        ))
-        wandb.log({"Predicted": images_preds})
-        wandb.log({"Target": images_targets})
+
+        columns = [ 'prediction','ground truth']
+        n = 5
+        data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
+        self.logger.log_table(key='Comparison', columns=columns, data=data)
+
         # update and log metrics
         self.val_acc(preds.unsqueeze(1), targets.unsqueeze(1))
         self.log(f"val_acc", self.val_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
