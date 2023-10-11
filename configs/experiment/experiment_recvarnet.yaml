@@ -7,7 +7,7 @@ defaults:
   - override /data: mri_direct
   - override /model: mri_direct
   - override /callbacks: default
-  - override /trainer: default
+  - override /trainer: ddp
   - override /logger: wandb
 
 # all parameters below will be merged with parameters from default configurations set above
@@ -44,7 +44,7 @@ callbacks:
     monitor: "val_acc"
 
 trainer:
-  max_epochs: 100
+  max_epochs: 200
 
 
 #ckpt_path: /home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2023-10-10_15-07-26/checkpoints/epoch_030.ckpt
