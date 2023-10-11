@@ -14,13 +14,13 @@ scheduler:
   patience: 10
 
 net:
-  _target_: src.models.components.direct_adaptors.recurrentvarnet.recurrentvarnet_adaptor.RecurrentVarNetAdaptor
+  _target_: src.utils.direct_adaptors.recurrentvarnet.recurrentvarnet_adaptor.RecurrentVarNetAdaptor
   num_steps: 10
   recurrent_hidden_channels: 8
   recurrent_num_layers: 2
   no_parameter_sharing: False
   sensitivity_model:
-    _target_: src.models.components.direct.nn.unet.unet_2d.UnetModel2d
+    _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
     in_channels: 2
     out_channels: 2
     num_filters: 8
