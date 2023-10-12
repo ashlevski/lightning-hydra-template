@@ -1,23 +1,33 @@
 import functools
-from typing import Tuple, Any, Dict, Callable
+from typing import Tuple, Any, Dict, Callable, Optional
 
 import torch
 from torch import nn
 
+from src.utils.direct.constants import COMPLEX_SIZE
 from src.utils.direct.data.mri_transforms import EstimateSensitivityMapModule
 from src.utils.direct.data.transforms import fft2, ifft2
 from src.utils.direct.nn.recurrentvarnet.recurrentvarnet import RecurrentVarNet
 import src.utils.direct.data.transforms as T
+from src.utils.direct.nn.types import InitType
+
 
 class RecurrentVarNetAdaptor(nn.Module):
     """Recurrent Variational Network Adaptor. adopted from direct tk"""
 
     def __init__(
         self,
-        num_steps= 10,
-        recurrent_hidden_channels= 8,
-        recurrent_num_layers= 2,
-        no_parameter_sharing= False,
+        in_channels: int = COMPLEX_SIZE,
+        num_steps: int = 15,
+        recurrent_hidden_channels: int = 64,
+        recurrent_num_layers: int = 4,
+        no_parameter_sharing: bool = True,
+        learned_initializer: bool = False,
+        initializer_initialization: Optional[InitType] = None,
+        initializer_channels: Optional[Tuple[int, ...]] = (32, 32, 64, 64),
+        initializer_dilations: Optional[Tuple[int, ...]] = (1, 1, 2, 4),
+        initializer_multiscale: int = 1,
+        normalized: bool = False,
         sensitivity_model: nn.Module = None,
     ):
         super().__init__()
@@ -26,12 +36,19 @@ class RecurrentVarNetAdaptor(nn.Module):
         self.backward_operator = functools.partial(ifft2, centered=True)
         """Inits :class:`RecurrentVarNetEngine."""
         self.model = RecurrentVarNet(
-            forward_operator= self.forward_operator,
-            backward_operator= self.backward_operator,
-            num_steps= num_steps,
-            recurrent_hidden_channels= recurrent_hidden_channels,
-            recurrent_num_layers= recurrent_num_layers,
-            no_parameter_sharing= no_parameter_sharing,
+            forward_operator = self.forward_operator,
+            backward_operator = self.backward_operator,
+            in_channels = in_channels,
+            num_steps = num_steps,
+            recurrent_hidden_channels = recurrent_hidden_channels,
+            recurrent_num_layers = recurrent_num_layers,
+            no_parameter_sharing = no_parameter_sharing,
+            learned_initializer = learned_initializer,
+            initializer_initialization = initializer_initialization,
+            initializer_channels = initializer_channels,
+            initializer_dilations = initializer_dilations,
+            initializer_multiscale = initializer_multiscale,
+            normalized = normalized,
         )
         self._complex_dim = -1
         self.sens_model = EstimateSensitivityMapModule()

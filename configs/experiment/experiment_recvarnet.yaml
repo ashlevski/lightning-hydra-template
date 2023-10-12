@@ -13,7 +13,7 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mri_recon", "cascade"]
+tags: ["mri_recon", "recvarnet"]
 
 seed: 12345
 
@@ -31,9 +31,9 @@ data:
 
 logger:
   wandb:
-    project: 'mri_recon_ddp'
+    project: 'mri_recon_recvarnet'
     tags: ${tags}
-    group: "mri_recon"
+#    group: "mri_recon"
   aim:
     experiment: "mri_recon"
 

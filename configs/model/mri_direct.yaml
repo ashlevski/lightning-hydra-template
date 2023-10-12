@@ -3,7 +3,7 @@ _target_: src.models.mri_direct_module.MRI_Direct_LitModule
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001
+  lr: 0.0005
   weight_decay: 0.0
 
 scheduler:
@@ -15,10 +15,14 @@ scheduler:
 
 net:
   _target_: src.utils.direct_adaptors.recurrentvarnet.recurrentvarnet_adaptor.RecurrentVarNetAdaptor
-  num_steps: 10
-  recurrent_hidden_channels: 8
-  recurrent_num_layers: 2
-  no_parameter_sharing: False
+  num_steps: 12
+  recurrent_hidden_channels: 128
+  recurrent_num_layers: 4
+  initializer_initialization: sense
+  learned_initializer: true
+  initializer_channels: [32, 32, 64, 64]
+  initializer_dilations: [1, 1, 2, 4]
+  initializer_multiscale: 3
   sensitivity_model:
     _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
     in_channels: 2
