@@ -17,17 +17,17 @@ tags: ["mri_recon", "recvarnet"]
 
 seed: 12345
 
-#data:
-#  data_dir: 'D:\Datasets\home\pasala\Data\12-channel\'
-#  smaps_dir: 'D:\Work\MRI_REC_template\data\MRI\sensitivity_maps\218_170'
-#  mask_dir: 'D:\Work\MRI_REC_template\data\MRI\undersampling_masks\218_170'
-#  batch_size: 12
-
 data:
-  data_dir: '/home/amirmohammad.shamaei/home/pasala/Data/12-channel/'
-  smaps_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/sensitivity_maps/218_170'
-  mask_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/undersampling_masks/218_170'
-  batch_size: 32
+  data_dir: 'D:\Datasets\home\pasala\Data\12-channel\'
+  smaps_dir: 'D:\Work\MRI_REC_template\data\MRI\sensitivity_maps\218_170'
+  mask_dir: 'D:\Work\MRI_REC_template\data\MRI\undersampling_masks\218_170'
+  batch_size: 1
+
+#data:
+#  data_dir: '/home/amirmohammad.shamaei/home/pasala/Data/12-channel/'
+#  smaps_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/sensitivity_maps/218_170'
+#  mask_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/undersampling_masks/218_170'
+#  batch_size: 32
 
 logger:
   wandb:

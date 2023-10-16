@@ -112,7 +112,7 @@ class MRI_Direct_LitModule(LightningModule):
         # scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
 
         output_imgs, output_kspace = self.forward((input_kspace, mask, smap))
-        target_img = torch.abs(target_img).squeeze()
+        target_img = torch.abs(target_img).squeeze(1)
         loss = {}
 
         for key, criterion in self.criterions.items():

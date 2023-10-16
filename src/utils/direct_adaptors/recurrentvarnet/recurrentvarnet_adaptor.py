@@ -74,7 +74,7 @@ class RecurrentVarNetAdaptor(nn.Module):
         with torch.no_grad():
             input = {}
             input[self.sens_model.kspace_key] = torch.view_as_real(data[0]).type(dtype=torch.float32)
-            input["acs_mask"] = data[1].unsqueeze(-1).data[1].type(dtype=torch.float32)
+            input["acs_mask"] = data[1].unsqueeze(-1).type(dtype=torch.float32)
             input["sensitivity_map"] = torch.view_as_real(data[2]).type(dtype=torch.float32)
             return self.sens_model(input)
     def compute_sensitivity_map(self, sensitivity_map: torch.Tensor) -> torch.Tensor:
