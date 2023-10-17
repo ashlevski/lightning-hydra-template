@@ -1,0 +1,13 @@
+_target_: src.data.calgary_campinas_datamodule.C2DataModule
+data_dir: /home/ai2lab/datasets/dicom
+metadata_train_dir: /home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/train01.csv
+metadata_val_dir: /home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/val01.csv
+metadata_test_dir: /home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/test01.csv
+mask_dir: /home/amir/PycharmProjects/MRI_REC_template/data/MRI/undersampling_masks/218_170/uniform_mask_R=2.npy
+batch_size: 8
+num_workers: 0
+pin_memory: false
+shuffle: true
+transforms_list:
+- _target_: torchvision.transforms.transforms.ToTensor
+- _target_: torch.view_as_real

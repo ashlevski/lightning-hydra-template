@@ -1,25 +1,20 @@
 import glob
-from typing import Any, Dict, Optional, Tuple, List
+from typing import Any, Dict, Optional, Tuple, List, Callable
 
+import hydra
 import torch
 from lightning import LightningDataModule
+from omegaconf import DictConfig
 from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
 from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 import pandas as pd
-from src.data.components.dataset_mri import ReImgChannels, SliceDataset
+
+from src.data.components.calgary_campinas_dataset import SliceDataset
 
 
-class MRIDataModule(LightningDataModule):
-    """`LightningDataModule` for the MNIST dataset.
-
-    The MNIST database of handwritten digits has a training set of 60,000 examples, and a test set of 10,000 examples.
-    It is a subset of a larger set available from NIST. The digits have been size-normalized and centered in a
-    fixed-size image. The original black and white images from NIST were size normalized to fit in a 20x20 pixel box
-    while preserving their aspect ratio. The resulting images contain grey levels as a result of the anti-aliasing
-    technique used by the normalization algorithm. the images were centered in a 28x28 image by computing the center of
-    mass of the pixels, and translating the image so as to position this point at the center of the 28x28 field.
-
+class C2DataModule(LightningDataModule):
+    """`
     A `LightningDataModule` implements 7 key methods:
 
     ```python
@@ -57,10 +52,14 @@ class MRIDataModule(LightningDataModule):
 
     def __init__(
         self,
-        transforms: List = [transforms.ToTensor(), torch.view_as_real()],
-        data_dir : str = "data/MRI/12-channel",
-        metadata_dir : str = "data/MRI/config.yaml",
-        train_val_test_split: Tuple[int, int, int] = (55_000, 5_000, 10_000),
+        data_dir : str = None,
+        metadata_train_dir : str = None,
+        metadata_val_dir: str = None,
+        metadata_test_dir: str = None,
+        mask_dir: str = None,
+        target_dir: str = None,
+        transforms_input: Optional[Callable] = None,
+        transforms_target: Optional[Callable] = None,
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
@@ -81,10 +80,13 @@ class MRIDataModule(LightningDataModule):
         self.save_hyperparameters(logger=False)
 
         # data transformations
-        self.transforms = transforms.Compose(
-            transforms
+        self.transforms_input = transforms.Compose(
+            transforms_input
         )
 
+        self.transforms_target = transforms.Compose(
+            transforms_target
+        )
 
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
@@ -108,6 +110,7 @@ class MRIDataModule(LightningDataModule):
 
         Do not use it to assign state (self.x = y).
         """
+        # self.metadata = pd.read_csv(self.hparams.metadata_dir)
         # MNIST(self.hparams.data_dir, train=True, download=True)
         # MNIST(self.hparams.data_dir, train=False, download=True)
 
@@ -150,12 +153,24 @@ class MRIDataModule(LightningDataModule):
         # load and split datasets only if not loaded already
         # if not self.data_train and not self.data_val and not self.data_test:
 
-        self.data_train = SliceDataset(self.hparams.data_dir, self.slice_ids, 'train', self.smaps, self.masks, 'nlinv', self.hparams.coils,
-                                  data_transforms=self.transforms, target_transforms=self.transforms)
-        self.data_val = SliceDataset(self.hparams.data_dir, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.hparams.coils,
-                                  data_transforms=self.transforms, target_transforms=self.transforms)
-        self.data_test = SliceDataset(self.hparams.data_dir, self.slice_ids_val, 'val', self.smaps, self.masks, 'nlinv', self.hparams.coils,
-                                  data_transforms=self.transforms, target_transforms=self.transforms)
+        self.data_train = SliceDataset(self.hparams.data_dir,
+                                       self.hparams.metadata_train_dir,
+                                       self.hparams.mask_dir,
+                                       self.hparams.target_dir,
+                                       data_transforms=self.transforms_input,
+                                       target_transforms=self.transforms_target)
+        self.data_val = SliceDataset(self.hparams.data_dir,
+                                       self.hparams.metadata_val_dir,
+                                       self.hparams.mask_dir,
+                                       self.hparams.target_dir,
+                                       data_transforms=self.transforms_input,
+                                       target_transforms=self.transforms_target)
+        self.data_test = SliceDataset(self.hparams.data_dir,
+                                       self.hparams.metadata_test_dir,
+                                       self.hparams.mask_dir,
+                                       self.hparams.target_dir,
+                                       data_transforms=self.transforms_input,
+                                       target_transforms=self.transforms_target)
 
 
 
@@ -222,6 +237,8 @@ class MRIDataModule(LightningDataModule):
         """
         pass
 
-
+@hydra.main(version_base="1.3", config_path="../../configs/data/", config_name="mri_calgary_campinas.yaml")
+def main(cfg: DictConfig):
+    datamodule: LightningDataModule = hydra.utils.instantiate(cfg)
 if __name__ == "__main__":
-    _ = MRIDataModule()
+    main()
