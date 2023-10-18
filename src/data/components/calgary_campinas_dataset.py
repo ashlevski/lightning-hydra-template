@@ -16,7 +16,7 @@ class SliceDataset(Dataset):
                 metadata_dir: str,
                 mask_dir: str,
                 target_dir: str,
-                data_transforms: Optional[Callable],
+                input_transforms: Optional[Callable],
                 target_transforms: Optional[Callable],
     ) -> None:
         super().__init__()
@@ -24,27 +24,36 @@ class SliceDataset(Dataset):
         self.metadata = pd.read_csv(metadata_dir)
         self.mask_file = np.load(mask_dir)
         self.target_dir = target_dir
+        self.len = self.metadata['Slices'].sum()
+        self.metadata_temp = pd.DataFrame(columns=["File name", "Slice Number"])
+        for index, row in self.metadata.iterrows():
+            value = row['Slices']
+            for i in range(value):
+                row_ = [row['File name'], i]
+                self.metadata_temp.loc[len(self.metadata_temp)] = row_
+        self.input_transforms = input_transforms
+        self.target_transforms = target_transforms
 
 
     def __len__(self):
-        return len(self.file_paths)
+        return int(self.len)
 
 
     def __getitem__(self, idx):
-        metadata = self.metadata_files.iloc[idx]
-        path_2_input = os.path.join(self.data_dir,self.metadata)
-        path_2_target = os.path.join(self.data_dir, self.metadata)
+        metadata = self.metadata_temp.iloc[idx]
+        path_2_input = os.path.join(self.data_dir,f'{metadata["File name"]}.h5')
+        path_2_target = os.path.join(self.data_dir,f'{metadata["File name"]}.h5')
 
         with h5py.File(path_2_input, "r") as hf:
-            kspace = hf["kspace"][:]
+            kspace = hf["kspace"][metadata["Slice Number"]]
 
         with h5py.File(path_2_target, "r") as hf:
-            target = hf["kspace"][:]
+            target = hf["kspace"][metadata["Slice Number"]]
 
-        if self.transform is None:
-            sample = (kspace, self.mask_file, target, metadata)
-        else:
-            sample = self.transform(kspace, self.mask_file, target, metadata)
-
+        if self.data_transforms is not None:
+            kspace = self.data_transforms(kspace)
+        if self.target_transforms is not None:
+            target = self.target_transforms(target)
+        sample = kspace, self.mask_file, target, metadata
         return sample
 
