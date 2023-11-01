@@ -31,4 +31,10 @@ trainer:
 
 data:
   batch_size: 8
+  data_dir: "/work/souza_lab/amir/Data/joint"
+  target_dir: "/home/ai2lab/datasets/target_rss"
+  metadata_train_dir: "/data/Calgary_Campinas/train01_170.csv"
+  metadata_val_dir: "/data/Calgary_Campinas/val01_170.csv"
+  metadata_test_dir: "/data/Calgary_Campinas/val01_170.csv"
+  mask_dir: "/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
 
