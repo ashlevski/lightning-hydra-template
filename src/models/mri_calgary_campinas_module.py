@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Callable, List
+from typing import Any, Dict, Tuple, Callable, List, Optional
 
 import torch
 import wandb
@@ -7,7 +7,7 @@ from torch import nn
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.image import StructuralSimilarityIndexMeasure as Accuracy
 from torch.nn import MSELoss
-
+import src.utils.direct.data.transforms as T
 class MRI_Calgary_Campinas_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
@@ -79,6 +79,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
+
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform a forward pass through the model `self.net`.
 
@@ -107,18 +109,18 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        input_img, target_img, smap, input_max, input_kspace, mask = [element for element in batch]
+
         # inputs, img_labels, smap_labels = batch[0].type(dtype=torch.float32), batch[1].type(dtype=torch.float32), batch[2].type(dtype=torch.float32)
         # scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
+        output_image, output_kspace = self.forward(batch)
+        target_img = torch.abs(batch["target"]).squeeze(1)
 
-        output_imgs, output_kspace = self.forward((input_kspace, mask, smap))
-        target_img = torch.abs(target_img).squeeze(1)
         loss = {}
 
         for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_imgs, target_img)
+            loss[key] = criterion(output_image, target_img)
 
-        return loss, output_imgs, target_img
+        return loss, output_image, target_img
 
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -157,7 +159,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         losses, preds, targets = self.model_step(batch)
 
         columns = [ 'prediction','ground truth']
-        n = 5
+        n = 1
         data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
         self.logger.log_table(key='Comparison', columns=columns, data=data)
 

@@ -60,6 +60,7 @@ class C2DataModule(LightningDataModule):
         target_dir: str = None,
         transforms_input: Optional[Callable] = None,
         transforms_target: Optional[Callable] = None,
+        sensitivity = None,
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
@@ -93,6 +94,7 @@ class C2DataModule(LightningDataModule):
         self.data_test: Optional[Dataset] = None
 
         self.batch_size_per_device = batch_size
+        self.sensitivity = sensitivity
 
     @property
     def num_classes(self) -> int:
@@ -156,22 +158,18 @@ class C2DataModule(LightningDataModule):
         self.data_train = SliceDataset(self.hparams.data_dir,
                                        self.hparams.metadata_train_dir,
                                        self.hparams.mask_dir,
-                                       self.hparams.target_dir,
-                                       data_transforms=self.transforms_input,
+                                       input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target)
         self.data_val = SliceDataset(self.hparams.data_dir,
                                        self.hparams.metadata_val_dir,
                                        self.hparams.mask_dir,
-                                       self.hparams.target_dir,
-                                       data_transforms=self.transforms_input,
+                                       input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target)
         self.data_test = SliceDataset(self.hparams.data_dir,
                                        self.hparams.metadata_test_dir,
                                        self.hparams.mask_dir,
-                                       self.hparams.target_dir,
-                                       data_transforms=self.transforms_input,
+                                       input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target)
-
 
 
     def train_dataloader(self) -> DataLoader[Any]:

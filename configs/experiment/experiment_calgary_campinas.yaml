@@ -25,3 +25,10 @@ logger:
     group: "mri_recon"
   aim:
     experiment: "mri_recon"
+
+trainer:
+  max_epochs: 200
+
+data:
+  batch_size: 8
+
