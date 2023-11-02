@@ -68,9 +68,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.criterions = criterions
 
         # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy()
-        self.test_acc = Accuracy()
+        self.train_acc = Accuracy(kernel_size=7)
+        self.val_acc = Accuracy(kernel_size=7)
+        self.test_acc = Accuracy(kernel_size=7)
 
         # for averaging loss across batches
         self.train_loss = MeanMetric()
@@ -158,7 +158,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
-        if (self.current_epoch % 5 == 0):
+        if (self.current_epoch % 5 == 0 and batch_idx == 1):
             # columns = [ 'prediction','ground truth']
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
