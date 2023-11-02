@@ -30,7 +30,7 @@ trainer:
   max_epochs: 200
 
 data:
-  batch_size: 8
+  batch_size: 64
   data_dir: "/work/souza_lab/amir/Data/joint"
   target_dir: "/work/souza_lab/amir/Data/joint/target_rss"
   metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train01_170.csv"

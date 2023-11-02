@@ -6,7 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --time=24:00:00
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --partition=bigmem
 #SBATCH --gpus-per-node=1
 #SBATCH --gres=gpu:1
@@ -14,5 +14,5 @@
 
 
 source myenv/bin/activate
-EXP=experiment_recvarnet
+EXP=experiment_calgary_campinas
 srun python /home/amirmohammad.shamaei/MRI_REC_template/src/train.py experiment=$EXP

@@ -3,14 +3,14 @@ _target_: src.models.mri_calgary_campinas_module.MRI_Calgary_Campinas_LitModule
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.0003
+  lr: 0.001
   weight_decay: 0.0
 
 scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
   mode: min
-  factor: 0.1
+  factor: 0.5
   patience: 10
 
 net:

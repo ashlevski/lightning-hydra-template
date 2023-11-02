@@ -4,8 +4,8 @@ metadata_train_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Ca
 metadata_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/val01_170.csv"
 metadata_test_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/val01_170.csv"
 mask_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
-batch_size: 8 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-num_workers: 0
+batch_size: 40 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+num_workers: 8
 pin_memory: False
 shuffle: True
 transforms_input:
