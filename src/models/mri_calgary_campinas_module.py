@@ -3,6 +3,7 @@ from typing import Any, Dict, Tuple, Callable, List, Optional
 import torch
 import wandb
 from lightning import LightningModule
+from matplotlib import pyplot as plt
 from torch import nn
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.image import StructuralSimilarityIndexMeasure as Accuracy
@@ -157,11 +158,27 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
+        if (self.current_epoch % 5 == 1 and batch_idx == 0):
+            # columns = [ 'prediction','ground truth']
+            n = 1
+            # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
+            # self.logger.log_table(key='Comparison', columns=columns, data=data)
 
-        columns = [ 'prediction','ground truth']
-        n = 1
-        data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
-        self.logger.log_table(key='Comparison', columns=columns, data=data)
+            fig, axs = plt.subplots(1, 2, figsize=(10, 5))  # Adjust figsize as needed
+
+            # Plot prediction
+            axs[0].imshow(preds[n].cpu().detach())  # Assuming preds[i] is a 2D array or an image file
+            axs[0].title.set_text('Prediction')
+            axs[0].axis('off')  # Hide axis
+
+            # Plot ground truth
+            axs[1].imshow(targets[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
+            axs[1].title.set_text('Ground Truth')
+            axs[1].axis('off')
+
+            self.logger.log_image(key="samples", images=[fig])
+
+
 
         # update and log metrics
         self.val_acc(preds.unsqueeze(1), targets.unsqueeze(1))
