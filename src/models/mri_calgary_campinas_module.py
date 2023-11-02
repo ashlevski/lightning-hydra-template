@@ -158,9 +158,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
-        if (self.current_epoch % 5 == 1 and batch_idx == 0):
+        if (self.current_epoch % 5 == 0):
             # columns = [ 'prediction','ground truth']
-            n = 1
+            n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
 
@@ -247,6 +247,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
                     "monitor": "val_acc",
                     "interval": "epoch",
                     "frequency": 1,
+                    "name" : "my scheduler",
                 },
             }
         return {"optimizer": optimizer}
