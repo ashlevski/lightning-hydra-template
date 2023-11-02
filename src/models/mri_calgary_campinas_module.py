@@ -158,7 +158,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
-        if (self.current_epoch % 5 == 0 and batch_idx == 1):
+        if (self.current_epoch % 5 == 0 and batch_idx == 10):
             # columns = [ 'prediction','ground truth']
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
