@@ -44,6 +44,13 @@ net:
       _partial_: true
       _target_: src.utils.direct.data.transforms.ifft2
       centered: False
+  sensitivity_model:
+    _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
+    in_channels: 2
+    out_channels: 2
+    num_filters: 8
+    num_pool_layers: 4
+    dropout_probability: 0.0
 
 
 # compile model for faster training with pytorch 2.0
