@@ -15,4 +15,4 @@
 
 source myenv/bin/activate
 EXP=experiment_calgary_campinas
-srun python /home/amirmohammad.shamaei/MRI_REC_template/src/train.py experiment=$EXP
+srun python /home/amirmohammad.shamaei/MRI_REC_template/src/train.py
