@@ -17,18 +17,22 @@ class SliceDataset(Dataset):
                 mask_dir: str,
                 input_transforms: Optional[Callable],
                 target_transforms: Optional[Callable],
+                crop_slice_idx = 0,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
         self.metadata = pd.read_csv(metadata_dir)
         self.mask_file = np.load(mask_dir)
-        self.len = self.metadata['k space X res'].sum()
+        self.len = 0#self.metadata['k space X res'].sum()
         self.metadata_temp = pd.DataFrame(columns=["File name", "Slice Number"])
         for index, row in self.metadata.iterrows():
             value = row['k space X res']
-            for i in range(value):
+            start = crop_slice_idx
+            end = value-crop_slice_idx
+            for i in range(start,end):
                 row_ = [row['File name'], i]
                 self.metadata_temp.loc[len(self.metadata_temp)] = row_
+                self.len += 1
         self.input_transforms = input_transforms
         self.target_transforms = target_transforms
 

@@ -30,7 +30,7 @@ trainer:
   max_epochs: 200
 
 data:
-  num_workers: 0
+  num_workers: 8
   batch_size: 8
   data_dir: "/work/souza_lab/amir/Data/joint"
   target_dir: "/work/souza_lab/amir/Data/joint/target_rss"

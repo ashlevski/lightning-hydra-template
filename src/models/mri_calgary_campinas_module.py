@@ -111,8 +111,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             - A tensor of target labels.
         """
 
-        # inputs, img_labels, smap_labels = batch[0].type(dtype=torch.float32), batch[1].type(dtype=torch.float32), batch[2].type(dtype=torch.float32)
-        # scale_values, input_kspaces, masks = batch[3].type(dtype=torch.float32), batch[4].type(dtype=torch.complex64), batch[5].type(dtype=torch.float32)
+
         output_image, output_kspace = self.forward(batch)
         target_img = torch.abs(batch["target"]).squeeze(1)
 
