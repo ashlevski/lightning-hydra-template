@@ -15,7 +15,7 @@ class SSIMLoss(nn.Module):
     SSIM loss module. Adopted from fastMRI but the default mode when data range isn't specified has been added.
     """
 
-    def __init__(self, win_size: int = 7, k1: float = 0.01, k2: float = 0.03):
+    def __init__(self, win_size: int = 7, k1: float = 0.01, k2: float = 0.03,weight=1):
         """
         Args:
             win_size: Window size for SSIM calculation.
@@ -23,6 +23,7 @@ class SSIMLoss(nn.Module):
             k2: k2 parameter for SSIM calculation.
         """
         super().__init__()
+        self.weight = weight
         self.win_size = win_size
         self.k1, self.k2 = k1, k2
         self.register_buffer("w", (torch.ones(1, 1, win_size, win_size) / win_size**2))
@@ -65,6 +66,21 @@ class SSIMLoss(nn.Module):
         S = (A1 * A2) / D
 
         if reduced:
-            return 1 - S.mean()
+            return self.weight*(1 - S.mean())
         else:
-            return 1 - S
+            return self.weight*(1 - S)
+
+
+import torch
+
+class R2ScoreLoss(torch.nn.Module):
+    def __init__(self, weight=1):
+        super().__init__()
+        self.weight = weight
+
+    def forward(self, input, target):
+        target_mean = torch.mean(target)
+        ss_tot = torch.sum((target - target_mean) ** 2)
+        ss_res = torch.sum((target - input) ** 2)
+        r2_score = 1 - ss_res / ss_tot
+        return self.weight*(1 - r2_score)  # Return the loss to be minimized
