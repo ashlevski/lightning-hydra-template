@@ -7,7 +7,7 @@ defaults:
   - override /data: mri_calgary_campinas
   - override /model: mri_calgary_campinas
   - override /callbacks: default
-  - override /trainer: ddp
+  - override /trainer: default
   - override /logger: wandb
 
 # all parameters below will be merged with parameters from default configurations set above

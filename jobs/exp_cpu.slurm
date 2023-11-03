@@ -6,10 +6,10 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --time=24:00:00
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --partition=bigmem
-#SBATCH --gpus-per-node=2
-#SBATCH --gres=gpu:2
+#SBATCH --gpus-per-node=1
+#SBATCH --gres=gpu:1
 
 
 
