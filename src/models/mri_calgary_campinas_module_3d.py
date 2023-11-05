@@ -112,8 +112,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
 
 
-        output_image, output_kspace,target_img = self.forward(batch)
-        # target_img = torch.abs(batch["target"]).squeeze(1)
+        output_image, output_kspace = self.forward(batch)
+        target_img = torch.abs(batch["target"]).squeeze(1)
 
         loss = {}
 

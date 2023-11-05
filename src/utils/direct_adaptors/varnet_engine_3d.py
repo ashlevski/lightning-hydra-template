@@ -20,6 +20,7 @@ class EndToEndVarNetEngine(nn.Module):
         backward_operator: Optional[Callable] = None,
         sensitivity: Optional[Callable] = None,
         sensitivity_model: nn.Module = None,
+        dim_reduction = None,
         **kwargs,
     ):
         super().__init__()
@@ -29,18 +30,22 @@ class EndToEndVarNetEngine(nn.Module):
         self.backward_operator = backward_operator
         self.sensitivity = sensitivity
         self.sensitivity_model = sensitivity_model
+        self.dim_reduction = dim_reduction
         self._coil_dim = 1
         self._complex_dim = -1
         self._spatial_dim = (2,3)
 
     def forward(self, data: Dict[str, Any]) -> Tuple[torch.Tensor, torch.Tensor]:
+        data['kspace'] = (data["kspace"]*data["acs_mask"].unsqueeze(2))
+        batch_size,coil_count,z_dim ,x_dim ,y_dim ,channel = data['kspace'].shape
+        data['kspace'] = self.dim_reduction(data['kspace'].permute(0, 2, 3, 4, 1, 5).contiguous().view(batch_size, z_dim, x_dim, y_dim, coil_count * channel))
+        data['kspace'] = data['kspace'].view(batch_size,x_dim,y_dim,channel,coil_count).permute(0, 4, 1,2, 3).contiguous()
         with torch.no_grad():
             data = self.sensitivity(data)
-            target_img = T.root_sum_of_squares(
-                self.backward_operator(data["kspace"], dim=(2, 3)),
-                dim=1,
-            )  # shape (batch, height,  width)
-        data['kspace'] = (data["kspace"]*data["acs_mask"])
+            # target_image = T.root_sum_of_squares(
+            #     self.backward_operator(data["kspace"], dim=(2, 3)),
+            #     dim=1,
+            # )  # shape (batch, height,  width)
         output_kspace = self.model(
             masked_kspace=data["kspace"],
             sampling_mask=data["acs_mask"],
@@ -51,7 +56,7 @@ class EndToEndVarNetEngine(nn.Module):
             dim=self._coil_dim,
         )  # shape (batch, height,  width)
 
-        return output_image, output_kspace, target_img
+        return output_image, output_kspace
 
     def compute_sensitivity_map(self, sensitivity_map: torch.Tensor) -> torch.Tensor:
         r"""Computes sensitivity maps :math:`\{S^k\}_{k=1}^{n_c}` if `sensitivity_model` is available.

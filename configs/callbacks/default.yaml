@@ -20,6 +20,3 @@ early_stopping:
 
 model_summary:
   max_depth: -1
-
-learning_rate_logger:
-  logging_interval: 'step'
