@@ -51,7 +51,7 @@ class SliceDataset(Dataset):
             kspace = hf["kspace"][metadata["Slice Number"]]
             # target = hf["target"][metadata["Slice Number"]]
 
-        kspace = (kspace/np.abs(kspace).max((0,1),keepdims=True))*218#*np.abs(kspace).max()
+        # kspace = (kspace/np.abs(kspace).max((0,1),keepdims=True))*218#*np.abs(kspace).max()
         if self.input_transforms is not None:
             kspace = self.input_transforms(kspace)
         # if self.target_transforms is not None:
