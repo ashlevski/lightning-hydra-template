@@ -51,22 +51,22 @@ class SliceDataset(Dataset):
             kspace = hf["kspace"][metadata["Slice Number"]-1:metadata["Slice Number"]+2]
             z, x, y, c = kspace.shape
             kspace = kspace.transpose(1, 2, 3, 0).reshape(x, y, -1)
-            target = hf["target"][metadata["Slice Number"]]
+            # target = hf["target"][metadata["Slice Number"]]
 
-
+        kspace = (kspace/np.abs(kspace).max())*(170*218)# np.abs(kspace).max((0,1),keepdims=True))*218#*np.abs(kspace).max()
         if self.input_transforms is not None:
             kspace = self.input_transforms(kspace)
-        if self.target_transforms is not None:
-            target = self.target_transforms(target)
+        # if self.target_transforms is not None:
+        #     target = self.target_transforms(target)
         # if self.target_transforms is not None:
         #     target = self.target_transforms(target)
 
         sample = {}
-
+        y = 170
         sample["acs_mask"] = torch.from_numpy(self.mask_file[0]).type(dtype=torch.float32).unsqueeze(-1).unsqueeze(0)
         sample["kspace"] = kspace.type(dtype=torch.float32).view(c, z, x, y, 2)
         sample["metadata"] = metadata.to_dict()
-        sample["target"] = target.type(dtype=torch.float32)
+        # sample["target"] = target.type(dtype=torch.float32)
         # sample = kspace, sample["acs_mask"].squeeze(), target, sample['sensitivity_map'].squeeze(), metadata.to_dict()
         return sample
 

@@ -10,7 +10,7 @@ scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
   mode: min
-  factor: 0.5
+  factor: 0.1
   patience: 10
 
 net:
@@ -65,6 +65,8 @@ compile: false
 criterions:
 #  mse:
 #    _target_: torch.nn.MSELoss
+#  l1:
+#    _target_: torch.nn.L1Loss
   ssim:
     _target_: src.models.components.losses.SSIMLoss
 #  r2:

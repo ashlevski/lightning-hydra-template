@@ -7,7 +7,9 @@ import torch
 from torch import nn
 
 import src.utils.direct.data.transforms as T
+from src.models.components.attention_adjacent import MRIReconstructionModel
 from src.utils.transforms import NormalizeSampleTransform, normalizeSampleTransform
+
 
 
 class EndToEndVarNetEngine(nn.Module):
@@ -30,22 +32,34 @@ class EndToEndVarNetEngine(nn.Module):
         self.backward_operator = backward_operator
         self.sensitivity = sensitivity
         self.sensitivity_model = sensitivity_model
-        self.dim_reduction = dim_reduction
+        self.dim_reduction = MRIReconstructionModel()
         self._coil_dim = 1
         self._complex_dim = -1
         self._spatial_dim = (2,3)
 
     def forward(self, data: Dict[str, Any]) -> Tuple[torch.Tensor, torch.Tensor]:
-        data['kspace'] = (data["kspace"]*data["acs_mask"].unsqueeze(2))
-        batch_size,coil_count,z_dim ,x_dim ,y_dim ,channel = data['kspace'].shape
-        data['kspace'] = self.dim_reduction(data['kspace'].permute(0, 2, 3, 4, 1, 5).contiguous().view(batch_size, z_dim, x_dim, y_dim, coil_count * channel))
-        data['kspace'] = data['kspace'].view(batch_size,x_dim,y_dim,channel,coil_count).permute(0, 4, 1,2, 3).contiguous()
         with torch.no_grad():
+            target_img = T.root_sum_of_squares(
+                self.backward_operator(data["kspace"][:, :, 1].squeeze(), dim=(2, 3)),
+                dim=1,
+            )  # shape (batch, height,  width)
+
+        data['kspace'] = (data["kspace"]*data["acs_mask"].unsqueeze(2))
+
+        with torch.no_grad():
+            before_img,_ = self.do(data.copy(),0)
+            after_img,_ = self.do(data.copy(),2)
+        output_image, output_kspace = self.do(data,1)
+
+        output_image = self.dim_reduction(output_image,torch.stack((before_img,after_img),dim=1))
+        return output_image, output_kspace, target_img
+
+    def do(self,data,i):
+
+        with torch.no_grad():
+            data['kspace'] = data['kspace'][:, :, i]
             data = self.sensitivity(data)
-            # target_image = T.root_sum_of_squares(
-            #     self.backward_operator(data["kspace"], dim=(2, 3)),
-            #     dim=1,
-            # )  # shape (batch, height,  width)
+
         output_kspace = self.model(
             masked_kspace=data["kspace"],
             sampling_mask=data["acs_mask"],
@@ -55,9 +69,7 @@ class EndToEndVarNetEngine(nn.Module):
             self.backward_operator(output_kspace, dim=self._spatial_dim),
             dim=self._coil_dim,
         )  # shape (batch, height,  width)
-
         return output_image, output_kspace
-
     def compute_sensitivity_map(self, sensitivity_map: torch.Tensor) -> torch.Tensor:
         r"""Computes sensitivity maps :math:`\{S^k\}_{k=1}^{n_c}` if `sensitivity_model` is available.
 
