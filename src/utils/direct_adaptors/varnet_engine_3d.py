@@ -7,7 +7,7 @@ import torch
 from torch import nn
 
 import src.utils.direct.data.transforms as T
-from src.models.components.attention_adjacent import MRIReconstructionModel
+from src.models.components.attention_adjacent import Attention
 from src.utils.transforms import NormalizeSampleTransform, normalizeSampleTransform
 
 
@@ -32,7 +32,7 @@ class EndToEndVarNetEngine(nn.Module):
         self.backward_operator = backward_operator
         self.sensitivity = sensitivity
         self.sensitivity_model = sensitivity_model
-        self.dim_reduction = MRIReconstructionModel()
+        self.attention = Attention()
         self._coil_dim = 1
         self._complex_dim = -1
         self._spatial_dim = (2,3)
@@ -51,8 +51,8 @@ class EndToEndVarNetEngine(nn.Module):
             after_img,_ = self.do(data.copy(),2)
         output_image, output_kspace = self.do(data,1)
 
-        output_image = self.dim_reduction(output_image,torch.stack((before_img,after_img),dim=1))
-        return output_image, output_kspace, target_img
+        att_image = self.attention(output_image,torch.stack((before_img,after_img),dim=1))
+        return output_image+att_image, output_kspace, target_img
 
     def do(self,data,i):
 
