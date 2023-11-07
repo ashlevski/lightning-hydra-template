@@ -35,7 +35,7 @@ class EfficientCrossAttention(nn.Module):
 
 class Attention(nn.Module):
     def __init__(self, feature_dim=16):
-        super(MRIReconstructionModel, self).__init__()
+        super(Attention, self).__init__()
         self.feature_dim = feature_dim
         # self.conv1 = nn.Conv2d(1, feature_dim, kernel_size=3, padding=1)
         self.efficient_cross_attention = EfficientCrossAttention(feature_dim)
