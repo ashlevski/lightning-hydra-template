@@ -27,17 +27,17 @@ logger:
     experiment: "mri_recon"
 
 trainer:
-  max_epochs: 400
+  max_epochs: 200
 
-#data:
-#  num_workers: 8
-#  batch_size: 32
-#  data_dir: "/work/souza_lab/amir/Data/h5"
-#  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_chal.csv"
-#  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_chal.csv"
-#  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_chal.csv"
-#  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
-ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-04_01-32-17/checkpoints/epoch_201.ckpt"
+data:
+  num_workers: 8
+  batch_size: 32
+  data_dir: "/work/souza_lab/amir/Data/h5"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_sv1.csv"
+  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
+#ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-04_01-32-17/checkpoints/epoch_201.ckpt"
 #ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2023-11-05_17-43-01/checkpoints/epoch_305.ckpt"
 #model:
 #  net:

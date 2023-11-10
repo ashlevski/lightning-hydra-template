@@ -1,14 +1,19 @@
+import json
+import os
+from os.path import isfile, join
 from typing import Any, Dict, Tuple, Callable, List, Optional
 
 import torch
+import torchmetrics
 import wandb
 from lightning import LightningModule
 from matplotlib import pyplot as plt
 from torch import nn
 from torchmetrics import MaxMetric, MeanMetric
-from torchmetrics.image import StructuralSimilarityIndexMeasure as Accuracy
-from torch.nn import MSELoss
-import src.utils.direct.data.transforms as T
+
+from src.utils.io_utils import save_tensor_to_nifti
+
+
 class MRI_Calgary_Campinas_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
@@ -48,6 +53,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
+        train_acc: Dict = {'ssim': torchmetrics.image.StructuralSimilarityIndexMeasure},
+        val_acc: Dict = {'ssim': torchmetrics.image.StructuralSimilarityIndexMeasure},
+        test_acc: Dict = {'ssim': torchmetrics.image.StructuralSimilarityIndexMeasure},
         criterions: Dict = {'mse': torch.nn.MSELoss},
     ) -> None:
         """Initialize a `MNISTLitModule`.
@@ -68,10 +76,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.criterions = criterions
 
         # metric objects for calculating and averaging accuracy across batches
-        self.train_acc = Accuracy(kernel_size=7)
-        self.val_acc = Accuracy(kernel_size=7)
-        self.test_acc = Accuracy(kernel_size=7)
-
+        self.train_acc = nn.ModuleDict(train_acc)
+        self.val_acc = nn.ModuleDict(val_acc)
+        self.test_acc = nn.ModuleDict(test_acc)
         # for averaging loss across batches
         self.train_loss = MeanMetric()
         self.val_loss = MeanMetric()
@@ -95,7 +102,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # by default lightning executes validation step sanity checks before training starts,
         # so it's worth to make sure validation metrics don't store results from these checks
         self.val_loss.reset()
-        self.val_acc.reset()
+        for key ,acc in self.val_acc.items():
+            acc.reset()
         self.val_acc_best.reset()
 
     def model_step(
@@ -134,12 +142,13 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
         losses , preds, targets = self.model_step(batch)
 
-        self.train_acc(preds.unsqueeze(1), targets.unsqueeze(1))
-        self.log(f"train_acc", self.train_acc, on_step=True, on_epoch=True, prog_bar=True)
+        for key, acc in self.train_acc.items():
+            acc(preds.unsqueeze(1), targets.unsqueeze(1))
+            self.log(f"train_acc/{key}", acc.compute(), on_step=True, on_epoch=True, prog_bar=True)
 
         for key, loss in losses.items():
             # self.train_loss(loss)
-            self.log(f"train_loss_{key}", loss, on_step=True, on_epoch=True, prog_bar=True)
+            self.log(f"train_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=True)
 
 
         # return loss or backpropagation will fail
@@ -162,38 +171,44 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
+            for n in range(2):
+                fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
 
-            fig, axs = plt.subplots(1, 2, figsize=(10, 5))  # Adjust figsize as needed
+                # Plot prediction
+                axs[0].imshow(preds[n].cpu().detach())  # Assuming preds[i] is a 2D array or an image file
+                axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
+                axs[0].axis('off')  # Hide axis
 
-            # Plot prediction
-            axs[0].imshow(preds[n].cpu().detach())  # Assuming preds[i] is a 2D array or an image file
-            axs[0].title.set_text('Prediction')
-            axs[0].axis('off')  # Hide axis
+                # Plot ground truth
+                axs[1].imshow(targets[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
+                axs[1].title.set_text('Ground Truth')
+                axs[1].axis('off')
 
-            # Plot ground truth
-            axs[1].imshow(targets[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
-            axs[1].title.set_text('Ground Truth')
-            axs[1].axis('off')
+                axs[1].imshow((preds-targets)[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
+                axs[1].title.set_text('Diff')
+                axs[1].axis('off')
 
-            self.logger.log_image(key="samples", images=[fig])
+                self.logger.log_image(key="samples", images=[fig])
 
 
 
         # update and log metrics
-        self.val_acc(preds.unsqueeze(1), targets.unsqueeze(1))
-        self.log(f"val_acc", self.val_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        for key, acc in self.val_acc.items():
+            acc(preds.unsqueeze(1), targets.unsqueeze(1))
+            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
 
         for key, loss in losses.items():
             # self.val_loss(loss)
-            self.log(f"val_loss_{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"val_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
-        acc = self.val_acc.compute()  # get current val acc
-        self.val_acc_best(acc)  # update best so far val acc
+        for key, acc in self.val_acc.items():
+            acc = acc.compute()  # get current val acc
+            self.val_acc_best(acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-        self.log("val_acc_best", self.val_acc_best.compute(), sync_dist=True, prog_bar=True)
-
+            self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=True)
+            self.val_acc_best.reset()
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
 
@@ -203,13 +218,45 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
         losses, preds, targets = self.model_step(batch)
 
-        self.test_acc(preds.unsqueeze(1), targets.unsqueeze(1))
-        self.log(f"test_acc", self.test_acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+        save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
+        save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
+        accuracies = {}
+        for key, acc in self.test_acc.items():
+            acc_ = []
+            for i in range(preds.shape[0]):
+                acc(preds[i, None, None, ...], targets[i, None, None, ...])
+                acc_.append(acc.compute())
+
+            if key not in accuracies:
+                accuracies[key] = []
+            accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
+            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=False, on_epoch=True, prog_bar=True)
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():
             # self.test_loss(loss)
-            self.log(f"test_loss_{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"test_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
+
+
+        # Define JSON file path
+        json_file_path = join(self.logger.save_dir, 'accuracies.json')
+
+        # Load existing data if file exists
+        if isfile(json_file_path):
+            with open(json_file_path, 'r') as f:
+                data = json.load(f)
+        else:
+            data = {}
+
+        # Update the JSON data with the new accuracies
+        # The key is batch['metadata']['File name'][0]
+        batch_key = batch['metadata']['File name'][0]
+        data[batch_key] = accuracies
+
+        # Write the updated dictionary back to the file
+        with open(json_file_path, 'w') as f:
+            json.dump(data, f, indent=4)
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
@@ -243,7 +290,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val_acc",
+                    "monitor": "val_acc/SSIM",
                     "interval": "epoch",
                     "frequency": 1,
                     "name" : "my scheduler",
@@ -253,4 +300,4 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
 
 if __name__ == "__main__":
-    _ = MRI_Direct_LitModule(None, None, None, None)
+    _ = MRI_Calgary_Campinas_LitModule(None, None, None, None)

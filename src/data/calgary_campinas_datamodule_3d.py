@@ -209,7 +209,7 @@ class C2DataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.data_test,
-            batch_size=self.batch_size_per_device,
+            batch_size=self.batch_size_per_device,#256-self.hparams.crop_slice_idx,#self.batch_size_per_device, # TODO: make 256 felixible,
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,

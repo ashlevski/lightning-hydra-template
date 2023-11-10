@@ -39,9 +39,9 @@ logger:
 
 callbacks:
   model_checkpoint:
-    monitor: "val_acc"
+    monitor: "val_acc/SSIM"
   early_stopping:
-    monitor: "val_acc"
+    monitor: "val_acc/SSIM"
 
 trainer:
   max_epochs: 200

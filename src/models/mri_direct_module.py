@@ -225,7 +225,7 @@ class MRI_Direct_LitModule(LightningModule):
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val_acc",
+                    "monitor": "val/acc",
                     "interval": "epoch",
                     "frequency": 1,
                 },

@@ -62,6 +62,34 @@ net:
 # compile model for faster training with pytorch 2.0
 compile: false
 
+train_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  VIF:
+    _target_: torchmetrics.image.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
+val_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  VIF:
+    _target_: torchmetrics.image.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
+
+test_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  VIF:
+    _target_: src.utils.metrics.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
 criterions:
 #  mse:
 #    _target_: torch.nn.MSELoss

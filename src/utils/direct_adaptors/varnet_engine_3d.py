@@ -8,6 +8,7 @@ from torch import nn
 
 import src.utils.direct.data.transforms as T
 from src.models.components.attention_adjacent import Attention
+from src.utils.direct.nn.unet import UnetModel2d
 from src.utils.transforms import NormalizeSampleTransform, normalizeSampleTransform
 
 
@@ -36,6 +37,7 @@ class EndToEndVarNetEngine(nn.Module):
         self._coil_dim = 1
         self._complex_dim = -1
         self._spatial_dim = (2,3)
+        self.u_net = UnetModel2d(in_channels=3,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0.0)
 
     def forward(self, data: Dict[str, Any]) -> Tuple[torch.Tensor, torch.Tensor]:
         with torch.no_grad():
@@ -50,12 +52,11 @@ class EndToEndVarNetEngine(nn.Module):
             before_img,_ = self.do(data.copy(),0)
             after_img,_ = self.do(data.copy(),2)
         output_image, output_kspace = self.do(data,1)
-
-        att_image = self.attention(output_image,torch.stack((before_img,after_img),dim=1))
-        return output_image+att_image, output_kspace, target_img
+        res = self.u_net(torch.stack((before_img,output_image,after_img),dim=1)).squeeze()
+        # output_imag = self.attention(output_image,torch.stack((before_img,after_img),dim=1))
+        return output_image+0.01*res, output_kspace, target_img
 
     def do(self,data,i):
-
         with torch.no_grad():
             data['kspace'] = data['kspace'][:, :, i]
             data = self.sensitivity(data)

@@ -30,7 +30,7 @@ class EfficientCrossAttention(nn.Module):
         # Sum features from the adjacent slices
         # attended_features = torch.sum(attended_features, dim=1, keepdim=True)
         # Combine attended features with target features
-        combined_features = attended_features #+ query
+        combined_features = attended_features + query
         return combined_features
 
 class Attention(nn.Module):
