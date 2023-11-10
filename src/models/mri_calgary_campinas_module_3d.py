@@ -173,21 +173,24 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
             for n in range(2):
                 fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
-
+                pred =(preds[n]/preds[n].max()).cpu().detach()
                 # Plot prediction
-                axs[0].imshow(preds[n].cpu().detach())  # Assuming preds[i] is a 2D array or an image file
+                im0 = axs[0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
                 axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
+                fig.colorbar(im0, ax=axs[0])
                 axs[0].axis('off')  # Hide axis
 
+                target = (targets[n]/targets[n].max()).cpu().detach()
                 # Plot ground truth
-                axs[1].imshow(targets[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
+                im1 = axs[1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
                 axs[1].title.set_text('Ground Truth')
+                fig.colorbar(im1, ax=axs[1])
                 axs[1].axis('off')
 
-                axs[1].imshow((preds-targets)[n].cpu().detach())  # Assuming targets[i] is a 2D array or an image file
-                axs[1].title.set_text('Diff')
-                axs[1].axis('off')
-
+                im2 = axs[2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
+                axs[2].title.set_text('Diff')
+                axs[2].axis('off')
+                fig.colorbar(im2, ax=axs[2])
                 self.logger.log_image(key="samples", images=[fig])
 
 
@@ -217,6 +220,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets = self.model_step(batch)
+
+
 
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
@@ -260,7 +265,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
-        pass
+        torch.save(self.net.state_dict(), join(self.logger.save_dir,'model_weights.pth'))
 
     def setup(self, stage: str) -> None:
         """Lightning hook that is called at the beginning of fit (train + validate), validate,
