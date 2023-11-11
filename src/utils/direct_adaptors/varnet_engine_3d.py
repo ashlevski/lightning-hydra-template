@@ -48,9 +48,17 @@ class EndToEndVarNetEngine(nn.Module):
 
         data['kspace'] = (data["kspace"]*data["acs_mask"].unsqueeze(2))
 
-        with torch.no_grad():
-            before_img,_ = self.do(data.copy(),0)
-            after_img,_ = self.do(data.copy(),2)
+        # with torch.no_grad():
+        #     before_img,_ = self.do(data.copy(),0)
+        #     after_img,_ = self.do(data.copy(),2)
+        before_img = T.root_sum_of_squares(
+            self.backward_operator(data["kspace"][:, :, 0].squeeze(), dim=(2, 3)),
+            dim=1,
+        )  # shape (batch, height,  width)
+        after_img = T.root_sum_of_squares(
+            self.backward_operator(data["kspace"][:, :, 2].squeeze(), dim=(2, 3)),
+            dim=1,
+        )  # shape (batch, height,  width)
         output_image, output_kspace = self.do(data,1)
         res = self.u_net(torch.stack((before_img,output_image,after_img),dim=1)).squeeze()
         # output_imag = self.attention(output_image,torch.stack((before_img,after_img),dim=1))
