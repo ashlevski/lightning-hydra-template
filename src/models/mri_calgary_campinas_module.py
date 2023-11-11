@@ -221,10 +221,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
         losses, preds, targets = self.model_step(batch)
 
-        torch.save(self.net.state_dict(), join(self.logger.save_dir,'model_weights.pth'))
-
-        save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
-        save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
+        # save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
+        # save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
         for key, acc in self.test_acc.items():
             acc_ = []
@@ -265,7 +263,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
-        pass
+        torch.save(self.net.state_dict(), join(self.logger.save_dir,'model_weights.pth'))
 
     def setup(self, stage: str) -> None:
         """Lightning hook that is called at the beginning of fit (train + validate), validate,
