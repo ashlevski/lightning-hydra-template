@@ -233,8 +233,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             if key not in accuracies:
                 accuracies[key] = []
             accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
-            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=False, on_epoch=True, prog_bar=True)
-            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=True)
+            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=True)
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():
