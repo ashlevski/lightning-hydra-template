@@ -221,8 +221,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
         losses, preds, targets = self.model_step(batch)
 
-        # save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
-        # save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
+        save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
+        save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
         for key, acc in self.test_acc.items():
             acc_ = []
