@@ -53,7 +53,6 @@ class SliceDataset(Dataset):
             kspace = kspace.transpose(1, 2, 3, 0).reshape(x, y, -1)
             # target = hf["target"][metadata["Slice Number"]]
 
-        kspace = (kspace/np.abs(kspace).max())*(170*218)# np.abs(kspace).max((0,1),keepdims=True))*218#*np.abs(kspace).max()
         if self.input_transforms is not None:
             kspace = self.input_transforms(kspace)
         # if self.target_transforms is not None:

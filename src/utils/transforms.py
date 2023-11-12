@@ -1,17 +1,14 @@
 import torch.nn as nn
 import torch
 class NormalizeSampleTransform(nn.Module):
-    def __init__(self):
+    def __init__(self, scale = 37060):
         super(NormalizeSampleTransform, self).__init__()
+        self.scale = scale
 
     def forward(self, x):
         # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
-        max_values = x.max(dim=-1, keepdim=True)[0].max(dim=-2, keepdim=True)[0].max(dim=-3, keepdim=True)[0]
-        # Expand the max_values tensor to match the input dimensions
-        max_values = max_values.expand_as(x)
-        # Normalize the input tensor by the max_values tensor
-        normalized_x = x / max_values
-        return normalized_x
+
+        return (x / torch.abs(x).max()) * self.scale
 
 
 def normalizeSampleTransform(x):
