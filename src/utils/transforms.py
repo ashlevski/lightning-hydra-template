@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import src.utils.direct.data.transforms as T
 class NormalizeSampleTransform(nn.Module):
     def __init__(self, scale = 37060):
         super(NormalizeSampleTransform, self).__init__()
@@ -30,3 +31,15 @@ def test_NormalizeSampleTransform():
 
     # Apply the transform to the dummy data
     normalized_data = normalize_transform(dummy_data)
+
+class rssTransform(nn.Module):
+    def __init__(self, fourier_dim = (2,3), channel_dim= 1):
+        super(rssTransform, self).__init__()
+
+    def forward(self, x):
+        #
+        prev_img = T.root_sum_of_squares(
+            self.backward_operator(x["kspace_pre"], dim=(2, 3)),
+            dim=1,
+        )  # shape (batch, height,  width)
+        return prev_img

@@ -171,7 +171,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            for n in range(2):
+            for n in range(preds.shape[0]):
                 fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
                 pred =(preds[n]/preds[n].max()).cpu().detach()
                 # Plot prediction
