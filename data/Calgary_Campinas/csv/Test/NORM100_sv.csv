@@ -1,0 +1,5 @@
+Relative path,File name,Image X res,Image Y res,k space X res,k space Y res,Phases,Slices,Echos,Channels,Scan date,TE,TI,TR,Flip angle,Type,Patient ID,Relative scan date,Number of scan
+datasets/Dataset_C2/12_channel/Test,e16650s3_P47104,256,256,256,218,1,180,1,12,2019-07-19,3056.0,400000.0,7376.0,10.0,healthy,NORM100,0.0,1.0
+datasets/Dataset_C2/12_channel/Test,e16649s3_P37376,256,256,256,218,1,180,1,12,2019-07-19,3056.0,400000.0,7376.0,10.0,healthy,NORM100,0.0,1.0
+datasets/Dataset_C2/12_channel/Test,e16650s13_P54272,256,256,256,218,1,170,1,12,2019-07-19,2568.0,650000.0,6344.0,8.0,healthy,NORM100,0.0,1.0
+datasets/Dataset_C2/12_channel/Test,e16649s13_P44544,256,256,256,218,1,170,1,12,2019-07-19,2568.0,650000.0,6344.0,8.0,healthy,NORM100,0.0,1.0

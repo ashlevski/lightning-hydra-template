@@ -30,9 +30,9 @@ class SliceDataset(Dataset):
         self.metadata_temp = pd.DataFrame(columns=["File name", "Slice Number", "Patient ID"])
         for index, row in self.metadata.iterrows():
             value = row['k space X res']
-            start = crop_slice_idx
-            end = value-crop_slice_idx
-            for i in range(start,end):
+            self.start = crop_slice_idx
+            self.end = value-crop_slice_idx
+            for i in range(self.start,self.end):
                 row_ = [row['File name'], i, row['Patient ID']]
                 self.metadata_temp.loc[len(self.metadata_temp)] = row_
                 self.len += 1
@@ -75,7 +75,7 @@ class SliceDataset(Dataset):
 
         sample["acs_mask"] = torch.from_numpy(self.mask_file[0]).type(dtype=torch.float32).unsqueeze(-1).unsqueeze(0)
         sample["kspace"] = kspace.type(dtype=torch.float32)
-        sample["img_pre"] = img_pred.type(dtype=torch.float32)
+        sample["img_pre"] = img_pred[self.start:self.end].type(dtype=torch.float32)
         sample["metadata"] = metadata.to_dict()
         # sample["target"] = target.type(dtype=torch.float32)
         # sample = kspace, sample["acs_mask"].squeeze(), target, sample['sensitivity_map'].squeeze(), metadata.to_dict()
