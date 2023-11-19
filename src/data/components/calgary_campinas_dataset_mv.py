@@ -75,7 +75,7 @@ class SliceDataset(Dataset):
 
         sample["acs_mask"] = torch.from_numpy(self.mask_file[0]).type(dtype=torch.float32).unsqueeze(-1).unsqueeze(0)
         sample["kspace"] = kspace.type(dtype=torch.float32)
-        sample["img_pre"] = img_pred[self.start:self.end].type(dtype=torch.float32)
+        sample["img_pre"] = img_pred.type(dtype=torch.float32)
         sample["metadata"] = metadata.to_dict()
         # sample["target"] = target.type(dtype=torch.float32)
         # sample = kspace, sample["acs_mask"].squeeze(), target, sample['sensitivity_map'].squeeze(), metadata.to_dict()
