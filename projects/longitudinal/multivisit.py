@@ -38,53 +38,53 @@ class CrossAttentionLayer(nn.Module):
 
 
 class MRINet(nn.Module):
-    def __init__(self, dim=4):
+    def __init__(self, dim=8):
         super(MRINet, self).__init__()
         self.attention = nn.ModuleList()
-        # self.layers2 = nn.Sequential(
-        #     # First Convolution Block
-        #     nn.Conv2d(1, 4, kernel_size=3, stride=2, padding=1),  # Output: (batch, 8, 128, 109, 85)
-        #     nn.BatchNorm2d(4),
-        #     nn.LeakyReLU(),
-        #
-        #     # Second Convolution Block
-        #     nn.Conv2d(4, 8, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
-        #     nn.BatchNorm2d(8),
-        #     nn.LeakyReLU(),
-        #
-        #     nn.Conv2d(8, dim, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
-        #     nn.BatchNorm2d(8),
-        #     nn.LeakyReLU(),
-        # )
-        #
-        # self.layers3 = nn.Sequential(
-        #     # First Convolution Block
-        #     nn.Conv3d(1, 4, kernel_size=3, stride=2, padding=1),  # Output: (batch, 8, 128, 109, 85)
-        #     nn.BatchNorm3d(4),
-        #     nn.LeakyReLU(),
-        #
-        #     # Second Convolution Block
-        #     nn.Conv3d(4, 8, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
-        #     nn.BatchNorm3d(8),
-        #     nn.LeakyReLU(),
-        #
-        #     # Second Convolution Block
-        #     nn.Conv3d(8, dim, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
-        #     nn.BatchNorm3d(dim),
-        #     nn.LeakyReLU(),
-        # )
+        self.layers2 = nn.Sequential(
+            # First Convolution Block
+            nn.Conv2d(1, 4, kernel_size=3, stride=2, padding=1),  # Output: (batch, 8, 128, 109, 85)
+            nn.BatchNorm2d(4),
+            nn.LeakyReLU(),
 
-        for i in range(1):
-            self.attention.append(MultiheadAttention(embed_dim=dim, num_heads=4, batch_first=True))
+            # Second Convolution Block
+            nn.Conv2d(4, 8, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
+            nn.BatchNorm2d(8),
+            nn.LeakyReLU(),
 
-        kernel = 16
+            nn.Conv2d(8, dim, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
+            nn.BatchNorm2d(8),
+            nn.LeakyReLU(),
+        )
+
+        self.layers3 = nn.Sequential(
+            # First Convolution Block
+            nn.Conv3d(1, 4, kernel_size=3, stride=2, padding=1),  # Output: (batch, 8, 128, 109, 85)
+            nn.BatchNorm3d(4),
+            nn.LeakyReLU(),
+
+            # Second Convolution Block
+            nn.Conv3d(4, 8, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
+            nn.BatchNorm3d(8),
+            nn.LeakyReLU(),
+
+            # Second Convolution Block
+            nn.Conv3d(8, dim, kernel_size=3, stride=2, padding=1),  # Output: (batch, 16, 64, 55, 43)
+            nn.BatchNorm3d(dim),
+            nn.LeakyReLU(),
+        )
+
+        for i in range(2):
+            self.attention.append(MultiheadAttention(embed_dim=dim, num_heads=8, batch_first=True))
+
+        kernel = 8
         # Feature extraction layers for current slice
-        self.slice_conv1 = nn.Conv2d(1, dim, kernel_size=1, stride=1,padding=0)
+        self.slice_conv1 = nn.Conv2d(1, dim, kernel_size=kernel, stride=kernel,padding=3)
         # self.slice_conv2 = nn.Conv2d(dim, dim*2, kernel_size=1, padding=0)
 
         # Feature extraction layers for past scan
         self.volume_conv1 = nn.Conv3d(1, dim, kernel_size=kernel, stride=kernel,padding=(0,3,3))
-        # self.volume_conv2 = nn.Conv3d(1, dim, kernel_size=kernel, stride=kernel,padding=(0,3,3))
+        self.volume_conv2 = nn.Conv3d(1, dim, kernel_size=kernel, stride=kernel,padding=(0,3,3))
 
         # Cross-attention layer
         # self.cross_attention = CrossAttentionLayer(dim*2)
@@ -95,15 +95,15 @@ class MRINet(nn.Module):
         # self.recon_conv2 = nn.Conv3d(dim*2, 1, kernel_size=1, padding=0)
         # self.recon_conv3 = nn.Conv2d(256, 1, kernel_size=1, padding=0)
         # self.deconv1 = nn.ConvTranspose3d(dim,1, kernel_size=kernel, stride=kernel,padding=(0,3,3))
-        # self.deconv2 = nn.ConvTranspose2d(dim, 4, kernel_size=kernel, stride=kernel, padding=(3,3))
+        self.deconv2 = nn.ConvTranspose2d(dim, 4, kernel_size=kernel, stride=kernel, padding=(3,3))
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
-        # self.unet = UnetModel2d(in_channels=4,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0)
+        self.unet = UnetModel2d(in_channels=4,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0)
         self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
         # self.norm3 = torch.nn.LayerNorm(dim)
-        self.deconv2 = nn.ConvTranspose2d(dim, 1, kernel_size=1, stride=1, padding=0)
+        # self.deconv2 = nn.ConvTranspose2d(dim, 1, kernel_size=7, stride=1, padding=3)
         # self.lin1 = nn.Linear(dim,4*dim)
         # self.lin2 = nn.Linear(4*dim, dim)
         # self.gelu = nn.GELU()
@@ -112,8 +112,8 @@ class MRINet(nn.Module):
         self.act = nn.LeakyReLU()
     def forward(self, x_slice, x_volume):
         # with torch.no_grad():
-        key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
-        query = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
+        key = self.layers2(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
+        query = self.layers3(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
         # value = self.volume_conv2(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
         # key, query = self.norm1(key),self.norm2(query)
@@ -126,11 +126,11 @@ class MRINet(nn.Module):
         # attn_output = self.lin2(self.gelu(self.lin1(self.norm3(attn_output))))
         # attn_output = attn_output
         # z = self.proj(attn_output).reshape(-1, 1, 14*16, 11*16)[:,:,:-6,:-6]
-        z = attn_output.transpose(1, 2).reshape(-1, self.dim,  218, 170)
+        z = attn_output.transpose(1, 2).reshape(-1, self.dim,  28, 22)
         z = self.act(z)
         z = self.deconv2(z)
-        # z = self.act(z)
-        # z = self.unet(z)
+        z = self.act(z)
+        z = self.unet(z)
         # z = self.softmax(z)
 
         # z = z.repeat_interleave(16, dim=-1).repeat_interleave(16, dim=-2).repeat_interleave(16, dim=-3)
@@ -185,11 +185,11 @@ class MultiVisitNet(nn.Module):
         output_image, output_kspace, target_img = self.single_visit_net(x)
         # Forward pass through the multi-visit network
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
-        multi_visit_output = self.multi_visit_net(output_image,x['img_pre'])
+        multi_visit_output = self.multi_visit_net(output_image,x)
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
-        return multi_visit_output, output_kspace, target_img
+        return output_image+multi_visit_output, output_kspace, target_img
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

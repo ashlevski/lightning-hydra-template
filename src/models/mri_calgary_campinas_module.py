@@ -192,6 +192,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
                 axs[2].axis('off')
                 fig.colorbar(im2, ax=axs[2])
                 self.logger.log_image(key="samples", images=[fig])
+                plt.close()
 
 
 
