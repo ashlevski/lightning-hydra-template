@@ -122,12 +122,12 @@ class MRINet(nn.Module):
         for attend in self.attention:
             attn_output += key
             attn_output, _ = attend(attn_output, query, query)
-            attn_output = self.act(attn_output)
+            # attn_output = self.act(attn_output)
         # attn_output = self.lin2(self.gelu(self.lin1(self.norm3(attn_output))))
         # attn_output = attn_output
         # z = self.proj(attn_output).reshape(-1, 1, 14*16, 11*16)[:,:,:-6,:-6]
         z = attn_output.transpose(1, 2).reshape(-1, self.dim,  218, 170)
-        z = self.act(z)
+        # z = self.act(z)
         z = self.deconv2(z)
         # z = self.act(z)
         # z = self.unet(z)
@@ -155,7 +155,7 @@ class MRINet(nn.Module):
         # # x_volume = F.relu(self.recon_conv1(x_volume))
         # x_volume = self.recon_conv2(x_volume)
         # x_volume = self.recon_conv3(x_volume.squeeze(1))
-        return z.squeeze(1)
+        return z.squeeze(1) + x_slice
 
 # Example usage
 # Assuming x_slice is a 2D slice (e.g., [batch_size, channels, height, width])

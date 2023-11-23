@@ -99,8 +99,8 @@ criterions:
 #    _target_: torch.nn.L1Loss
   ssim:
     _target_: src.models.components.losses.SSIMLoss
-  r2:
-    _target_: src.models.components.losses.R2ScoreLoss
+#  r2:
+#    _target_: src.models.components.losses.R2ScoreLoss
 #
 #criterion_2:
 #    _target_: torch.nn.L1Loss
