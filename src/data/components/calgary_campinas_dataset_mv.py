@@ -55,7 +55,7 @@ class SliceDataset(Dataset):
             kspace = hf["kspace"][metadata["Slice Number"]]
             # target = hf["target"][metadata["Slice Number"]]
         with h5py.File(path_2_prev_data, "r") as hf:
-            kspace_pre = hf["kspace"][:]
+            kspace_pre = hf["kspace"][metadata["Slice Number"]-8:metadata["Slice Number"]+8]
             z, x, y, c = kspace_pre.shape
             kspace_pre = kspace_pre.transpose(1, 2, 3, 0).reshape(x, y, -1)
         if self.input_transforms is not None:
