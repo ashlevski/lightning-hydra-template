@@ -13,24 +13,24 @@ from src.utils.direct.data import transforms as T
 class MHA_2d(nn.Module):
     def __init__(self,embed_dim=4, num_heads=4, batch_first=True,kernel=8):
         super(MHA_2d, self).__init__()
-        self.embed_dim=embed_dim
+        self.embed_dim=embed_dim*8
         self.kernel = kernel
-        self.slice_conv1 = nn.Conv2d(embed_dim, embed_dim*8, kernel_size=kernel, stride=kernel, padding=0)
-        self.slice_conv2 = nn.Conv2d(1, embed_dim*8, kernel_size=kernel, stride=kernel, padding=0)
-        self.att = MultiheadAttention(embed_dim=embed_dim*8, num_heads=num_heads, batch_first=batch_first)
-        self.proj = nn.ConvTranspose2d(embed_dim*8, embed_dim, kernel_size=kernel, stride=kernel, padding=0)
-        self.pos = PositionalEncoding(d_model=embed_dim*8)
+        self.slice_conv1 = nn.Conv2d(embed_dim, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
+        self.slice_conv2 = nn.Conv2d(1, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
+        self.att = MultiheadAttention(embed_dim=self.embed_dim, num_heads=num_heads, batch_first=batch_first)
+        self.proj = nn.ConvTranspose2d(self.embed_dim, embed_dim, kernel_size=kernel, stride=kernel, padding=0)
+        self.pos = PositionalEncoding(d_model=self.embed_dim)
     def forward(self,x,y):
         x, pad = pad_to_nearest_multiple(x,self.kernel)
         y , _= pad_to_nearest_multiple(y,self.kernel)
         x = self.slice_conv1(x)
         b,c, h,w = x.shape
-        x = x.view(x.shape[0], self.embed_dim*8, -1).transpose(1, 2)
-        y = self.slice_conv2(y).view(y.shape[0], self.embed_dim*8, -1).transpose(1, 2)
+        x = x.view(x.shape[0], self.embed_dim, -1).transpose(1, 2)
+        y = self.slice_conv2(y).view(y.shape[0], self.embed_dim, -1).transpose(1, 2)
         x = self.pos(x)
         y = self.pos(y)
         x, _ = self.att(x,y,y)
-        x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim*8,  h, w))
+        x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim,  h, w))
         return x[:,:,:-pad[0],:-pad[1]]
 
 
@@ -202,7 +202,7 @@ class UnetModel2d_att(nn.Module):
             self.down_sample_layers += [ConvBlock(ch, ch * 2, dropout_probability)]
             ch *= 2
         self.conv = ConvBlock(ch, ch * 2, dropout_probability)
-
+        ch_ =2*ch
         self.up_conv = nn.ModuleList()
         self.up_transpose_conv = nn.ModuleList()
         for _ in range(num_pool_layers - 1):
@@ -218,13 +218,19 @@ class UnetModel2d_att(nn.Module):
             )
         ]
 
-        self.att_layers = nn.ModuleList([])
+        # self.att_layers = nn.ModuleList([])
+        # ch = num_filters
+        # for _ in range(num_pool_layers):
+        #     self.att_layers += [MHA_2d(embed_dim=ch, num_heads=8, batch_first=True,kernel=16)]
+        #     ch*=2
 
-        ch = num_filters
+        self.att_layers_up = nn.ModuleList([])
+
         for _ in range(num_pool_layers):
-            self.att_layers += [MHA_2d(embed_dim=ch, num_heads=8, batch_first=True,kernel=16)]
-            ch*=2
+            self.att_layers_up += [MHA_2d(embed_dim=ch_, num_heads=4, batch_first=True,kernel=16)]
+            ch_ //= 2
 
+        # self.att_layers_up += [MHA_2d(embed_dim=1, num_heads=4, batch_first=True, kernel=16)]
 
 
     def forward(self, input_data: torch.Tensor, att_data: torch.Tensor) -> torch.Tensor:
@@ -242,17 +248,17 @@ class UnetModel2d_att(nn.Module):
         output = input_data
 
         # Apply down-sampling layers
-        for layer,att in zip(self.down_sample_layers,self.att_layers):
+        for layer in self.down_sample_layers:
             output = layer(output)
-            att_output = att(output,att_data)
-            att_output = output+att_output
-            stack.append(att_output)
-            output = F.avg_pool2d(att_output, kernel_size=2, stride=2, padding=0)
+            # output = att(output,att_data)
+            # att_output = output+att_output
+            stack.append(output)
+            output = F.avg_pool2d(output, kernel_size=2, stride=2, padding=0)
 
         output = self.conv(output)
 
         # Apply up-sampling layers
-        for transpose_conv, conv in zip(self.up_transpose_conv, self.up_conv):
+        for transpose_conv, conv, att_up in zip(self.up_transpose_conv, self.up_conv,self.att_layers_up):
             downsample_layer = stack.pop()
             output = transpose_conv(output)
 
@@ -266,7 +272,9 @@ class UnetModel2d_att(nn.Module):
                 output = F.pad(output, padding, "reflect")
 
             output = torch.cat([output, downsample_layer], dim=1)
+            output = output + att_up(output, att_data)
             output = conv(output)
+
 
         return output
 

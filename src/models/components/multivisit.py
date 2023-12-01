@@ -84,7 +84,7 @@ class MV(nn.Module):
         # self.gelu = nn.GELU()
         # self.proj = nn.Linear(dim, 16*16)
         # self.transformers = nn.Transformer(batch_first=True,num_encoder_layers=1,num_decoder_layers=1)
-        self.act = nn.LeakyReLU()
+        # self.act = nn.LeakyReLU()
     def forward(self, x_slice, x_volume):
         # with torch.no_grad():
         # key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
