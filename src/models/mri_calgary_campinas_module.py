@@ -144,11 +144,11 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"train_acc/{key}", acc.compute(), on_step=True, on_epoch=True, prog_bar=True)
+            self.log(f"train_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
 
         for key, loss in losses.items():
             # self.train_loss(loss)
-            self.log(f"train_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=True)
+            self.log(f"train_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
 
 
         # return loss or backpropagation will fail
@@ -203,7 +203,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, loss in losses.items():
             # self.val_loss(loss)
-            self.log(f"val_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"val_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         for key, acc in self.val_acc.items():

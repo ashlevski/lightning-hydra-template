@@ -72,8 +72,8 @@ train_acc:
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
-  RMSE:
-    _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
+  # RMSE:
+  #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
 
 val_acc:
   PSNR:
@@ -83,8 +83,8 @@ val_acc:
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
-  RMSE:
-    _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
+  # RMSE:
+  #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
 
 test_acc:
   PSNR:
@@ -94,8 +94,8 @@ test_acc:
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
-  RMSE:
-    _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
+  # RMSE:
+  #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
 
 criterions:
 #  mse:
