@@ -13,7 +13,7 @@ from src.utils.direct.data import transforms as T
 class MHA_2d(nn.Module):
     def __init__(self,embed_dim=4, num_heads=4, batch_first=True,kernel=8):
         super(MHA_2d, self).__init__()
-        self.embed_dim=embed_dim*16
+        self.embed_dim=embed_dim*8
         self.kernel = kernel
         self.slice_conv1 = nn.Conv2d(embed_dim, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
         self.slice_conv2 = nn.Conv2d(1, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
@@ -22,18 +22,23 @@ class MHA_2d(nn.Module):
         self.pos = PositionalEncoding(d_model=self.embed_dim)
         self.layernorm1 =  nn.LayerNorm(self.embed_dim)
         self.layernorm2 =  nn.LayerNorm(self.embed_dim)
+        self.layernorm3 =  nn.LayerNorm(self.embed_dim)
+        self.ff = nn.Sequential(nn.Linear(self.embed_dim,self.embed_dim),nn.LeakyReLU())
     def forward(self,x,y):
         x, pad = pad_to_nearest_multiple(x,self.kernel)
         y , _= pad_to_nearest_multiple(y,self.kernel)
         x = self.slice_conv1(x)
-        x = self.layernorm1(x)
+        
         b, c, h, w = x.shape
         x = x.view(x.shape[0], self.embed_dim, -1).transpose(1, 2)
+        x = self.layernorm1(x)
         y = self.slice_conv2(y).view(y.shape[0], self.embed_dim, -1).transpose(1, 2)
+        y = self.layernorm3(y)
         x = self.pos(x)
         y = self.pos(y)
-        x, _ = self.att(x,y,y)
-        x = self.layernorm2(x)
+        x = self.att(x,y,y)[0] +x
+        x = self.layernorm2(x) + x
+        x = self.ff(x)
         x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim,  h, w))
         return x[:,:,:-pad[0],:-pad[1]]
 
@@ -231,7 +236,7 @@ class UnetModel2d_att(nn.Module):
         self.att_layers_up = nn.ModuleList([])
 
         for _ in range(num_pool_layers):
-            self.att_layers_up += [MHA_2d(embed_dim=ch_, num_heads=4, batch_first=True,kernel=16)]
+            self.att_layers_up += [MHA_2d(embed_dim=ch_, num_heads=8, batch_first=True,kernel=16)]
             ch_ //= 2
 
 
@@ -254,7 +259,7 @@ class UnetModel2d_att(nn.Module):
         # Apply down-sampling layers
         for layer,att in zip(self.down_sample_layers,self.att_layers):
             output = layer(output)
-            output = output + att(self.layernorm1(output,att_data))
+            output = output + att(output, att_data)
             stack.append(output)
             output = F.avg_pool2d(output, kernel_size=2, stride=2, padding=0)
 
