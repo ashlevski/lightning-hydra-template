@@ -4,9 +4,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
+from monai.networks.nets import AutoEncoder
 from torch.nn import MultiheadAttention
 
 import src.utils.direct.data.transforms as T
+from projects.longitudinal.stable_diff import pad_to_nearest_multiple, UNet2DConditionModel
 from projects.longitudinal.unet_cross_att import UnetModel2d_att
 from src.utils.direct.nn.unet import UnetModel2d
 
@@ -72,9 +74,9 @@ class MV(nn.Module):
         # self.deconv2 = nn.ConvTranspose2d(dim, 4, kernel_size=kernel, stride=kernel, padding=(3,3))
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
-        self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
+        # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
         # self.unet = UnetModel2d(in_channels=1, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
-        self.dim = dim
+        # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
         # self.norm3 = torch.nn.LayerNorm(dim)
@@ -85,12 +87,22 @@ class MV(nn.Module):
         # self.proj = nn.Linear(dim, 16*16)
         # self.transformers = nn.Transformer(batch_first=True,num_encoder_layers=1,num_decoder_layers=1)
         # self.act = nn.LeakyReLU()
+        self.vae_2d = AutoEncoder(spatial_dims=2, in_channels=1, out_channels=1, channels=(4, 4, 4), strides=(2, 2, 2))
+        self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=3 * 256, channels=(32, 128, 256, 3 * 256),
+                             strides=(2, 2, 2, 4))
+        self.unet = UNet2DConditionModel(in_channels=4, out_channels=4)
     def forward(self, x_slice, x_volume):
+        x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
+        latent_2d = self.vae_2d.encode(x_slice)
+        latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))
+        latent_3d = latent_3d.view(latent_3d.shape[0], latent_3d.shape[1], 1, -1)
+        latent_2d = self.unet(latent_2d, latent_3d)
+        z = self.vae_2d.decode(latent_2d[0])
         # with torch.no_grad():
         # key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
         # patch_3d = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
-        z = self.unet(x_slice.unsqueeze(1),x_volume.view(x_slice.shape[0],x_slice.shape[1],-1).unsqueeze(1))
+        # z = self.unet(x_slice.unsqueeze(1),x_volume.view(x_slice.shape[0],x_slice.shape[1],-1).unsqueeze(1))
         # z = self.unet(x_slice.unsqueeze(1))
         # value = self.volume_conv2(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
@@ -133,7 +145,7 @@ class MV(nn.Module):
         # # x_volume = F.relu(self.recon_conv1(x_volume))
         # x_volume = self.recon_conv2(x_volume)
         # x_volume = self.recon_conv3(x_volume.squeeze(1))
-        return z.squeeze(1)
+        return z[:,:,:-pad[0],:-pad[1]].squeeze(1)
 
 # Example usage
 # Assuming x_slice is a 2D slice (e.g., [batch_size, channels, height, width])
