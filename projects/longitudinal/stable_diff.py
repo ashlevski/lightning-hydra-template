@@ -1270,36 +1270,36 @@ def create_tensors(B):
     tensor1 = torch.rand(B, 1, 217, 170)
 
     # Create the second tensor with size B, 1, 16, 218, 170
-    tensor2 = torch.rand(B, 1, 256, 217,170)
+    tensor2 = torch.rand(B, 1, 16, 217,170)
 
     return tensor1, tensor2
 
-from monai.networks.nets import AutoEncoder
-def main():
-    # Set the value of B (you can change this as needed)
-    B = 2
-    torch_device = 'cuda:0'
-    # Create tensors using the create_tensors function
-    tensor1, tensor2 = create_tensors(B)
-    tensor1,_ = pad_to_nearest_multiple(tensor1, 256)
-    vae_2d = AutoEncoder(spatial_dims=2,in_channels=1,out_channels=1, channels=(4,4,4),strides=(2,2,2)).to(torch_device)
-    vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=3*256, channels=(32, 128, 256, 3*256), strides=(2, 2, 2, 4)).to(torch_device)
-    # vae = AutoencoderKL.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="vae").to(torch_device)
-    latent_2d = vae_2d.encode(tensor1.to(torch_device))
-    latent_3d = vae_3d.encode(tensor2.to(torch_device))
-
-
-    latent_3d = latent_3d.view(latent_3d.shape[0], latent_3d.shape[1], 1, -1)
-    # Print the shapes of the created tensors
-    print("Tensor 1 shape:", latent_2d.shape)
-    print("Tensor 2 shape:", latent_3d.shape)
-
-    unet = UNet2DConditionModel(in_channels=4,out_channels=4).to(torch_device)
-    x = unet(latent_2d,latent_3d)
-    tensor1_ = vae_2d.decode(x[0])
-    print("Tensor 2 shape:", x[0].shape)
-
-
-
-if __name__ == "__main__":
-    main()
+# from monai.networks.nets import AutoEncoder
+# def main():
+#     # Set the value of B (you can change this as needed)
+#     B = 2
+#     torch_device = 'cuda:0'
+#     # Create tensors using the create_tensors function
+#     tensor1, tensor2 = create_tensors(B)
+#     tensor1,_ = pad_to_nearest_multiple(tensor1, 256)
+#     vae_2d = AutoEncoder(spatial_dims=2,in_channels=1,out_channels=1, channels=(4,4,4),strides=(2,2,2)).to(torch_device)
+#     vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=3*256, channels=(32, 128, 256, 3*256), strides=(2, 2, 2, 4)).to(torch_device)
+#     # vae = AutoencoderKL.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="vae").to(torch_device)
+#     latent_2d = vae_2d.encode(tensor1.to(torch_device))
+#     latent_3d = vae_3d.encode(tensor2.to(torch_device))
+#
+#
+#     latent_3d = latent_3d.view(latent_3d.shape[0], latent_3d.shape[1], 1, -1)
+#     # Print the shapes of the created tensors
+#     print("Tensor 1 shape:", latent_2d.shape)
+#     print("Tensor 2 shape:", latent_3d.shape)
+#
+#     unet = UNet2DConditionModel(in_channels=4,out_channels=4).to(torch_device)
+#     x = unet(latent_2d,latent_3d)
+#     tensor1_ = vae_2d.decode(x[0])
+#     print("Tensor 2 shape:", x[0].shape)
+#
+#
+#
+# if __name__ == "__main__":
+#     main()

@@ -88,9 +88,9 @@ class MV(nn.Module):
         # self.transformers = nn.Transformer(batch_first=True,num_encoder_layers=1,num_decoder_layers=1)
         # self.act = nn.LeakyReLU()
         self.vae_2d = AutoEncoder(spatial_dims=2, in_channels=1, out_channels=1, channels=(4, 4, 4), strides=(2, 2, 2))
-        self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=3 * 256, channels=(32, 128, 256, 3 * 256),
-                             strides=(2, 2, 2, 4))
-        self.unet = UNet2DConditionModel(in_channels=4, out_channels=4)
+        self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=64, channels=(32, 128, 128, 256),
+                             strides=(2, 2, 4, 4))
+        self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=64,layers_per_block=1)
     def forward(self, x_slice, x_volume):
         x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         latent_2d = self.vae_2d.encode(x_slice)
