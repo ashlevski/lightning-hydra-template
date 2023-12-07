@@ -75,7 +75,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
-        # self.unet = UnetModel2d(in_channels=1, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -87,23 +87,25 @@ class MV(nn.Module):
         # self.proj = nn.Linear(dim, 16*16)
         # self.transformers = nn.Transformer(batch_first=True,num_encoder_layers=1,num_decoder_layers=1)
         # self.act = nn.LeakyReLU()
-        self.vae_2d = AutoEncoder(spatial_dims=2, in_channels=1, out_channels=1, channels=(4, 4, 4), strides=(2, 2, 2))
-        self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=256, channels=(32, 256, 512),
-                             strides=(2, 2, 2))
-        self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
+        # self.vae_2d = AutoEncoder(spatial_dims=2, in_channels=1, out_channels=1, channels=(4, 4, 4), strides=(2, 2, 2))
+        # self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=256, channels=(32, 256, 512),
+        #                      strides=(2, 2, 2))
+        # self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
     def forward(self, x_slice, x_volume):
-        x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
-        latent_2d = self.vae_2d.encode(x_slice)
-        latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))
-        latent_3d = latent_3d.view(latent_3d.shape[0], latent_3d.shape[1], 1, -1)
-        latent_2d = self.unet(latent_2d, latent_3d)
-        z = self.vae_2d.decode(latent_2d[0])
+        # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
+        # latent_2d = self.vae_2d.encode(x_slice)
+        # latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))
+        # latent_3d = latent_3d.view(latent_3d.shape[0], latent_3d.shape[1], 1, -1)
+        # latent_2d = self.unet(latent_2d, latent_3d)
+        # z = self.vae_2d.decode(latent_2d[0])
         # with torch.no_grad():
         # key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
         # patch_3d = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
+        x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)
+        x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
         # z = self.unet(x_slice.unsqueeze(1),x_volume.view(x_slice.shape[0],x_slice.shape[1],-1).unsqueeze(1))
-        # z = self.unet(x_slice.unsqueeze(1))
+        z = self.unet(torch.cat((x_slice,x_volume),dim=1))
         # value = self.volume_conv2(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
         # key, query = self.norm1(key),self.norm2(query)
@@ -145,7 +147,7 @@ class MV(nn.Module):
         # # x_volume = F.relu(self.recon_conv1(x_volume))
         # x_volume = self.recon_conv2(x_volume)
         # x_volume = self.recon_conv3(x_volume.squeeze(1))
-        return z[:,:,:-pad[0],:-pad[1]].squeeze(1)
+        return z.squeeze(1)
 
 # Example usage
 # Assuming x_slice is a 2D slice (e.g., [batch_size, channels, height, width])
@@ -176,12 +178,14 @@ class MultiVisitNet(nn.Module):
             output_image, output_kspace, target_img = self.single_visit_net(x)
         # Forward pass through the multi-visit network
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
-        output_image = output_image+self.multi_visit_net(output_image,x['img_pre'])
+        output_image_mv = self.multi_visit_net(output_image,x['img_pre'])
+        output_image = output_image_mv
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         del output_kspace
-        return output_image, 0 , target_img
+        # target_img = (target_img / torch.amax(target_img,dim=(1,2),keepdim=True))
+        return output_image, 0 , target_img, output_image_mv
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

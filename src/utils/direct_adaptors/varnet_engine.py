@@ -33,13 +33,16 @@ class EndToEndVarNetEngine(nn.Module):
         self._complex_dim = -1
         self._spatial_dim = (2,3)
 
-    def forward(self, data: Dict[str, Any]) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, data: Dict[str, Any], compute_target = True) -> Tuple[torch.Tensor, torch.Tensor]:
         with torch.no_grad():
             data = self.sensitivity(data)
-            target_img = T.root_sum_of_squares(
-                self.backward_operator(data["kspace"], dim=(2, 3)),
-                dim=1,
-            )  # shape (batch, height,  width)
+            if compute_target:
+                target_img = T.root_sum_of_squares(
+                    self.backward_operator(data["kspace"], dim=(2, 3)),
+                    dim=1,
+                )  # shape (batch, height,  width)
+            else:
+                target_img = 0
         data['kspace'] = (data["kspace"]*data["acs_mask"])
         output_kspace = self.model(
             masked_kspace=data["kspace"],
