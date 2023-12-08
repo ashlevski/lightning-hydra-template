@@ -192,12 +192,13 @@ class MultiVisitNet(nn.Module):
             output_image, output_kspace, target_img = self.single_visit_net(x)
         # Forward pass through the multi-visit network
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
-        output_image = output_image+self.multi_visit_net(output_image,x['img_pre'])
+        output_image_mv  = output_image+self.multi_visit_net(output_image,x['img_pre'])
+        output_image = output_image + output_image_mv
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         del output_kspace
-        return output_image, 0 , target_img
+        return output_image, 0 , target_img, output_image_mv
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

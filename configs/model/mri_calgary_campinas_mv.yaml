@@ -1,4 +1,4 @@
-_target_: src.models.mri_calgary_campinas_module.MRI_Calgary_Campinas_LitModule
+_target_: src.models.mri_calgary_campinas_module_mv.MRI_Calgary_Campinas_LitModule
 
 optimizer:
   _target_: torch.optim.Adam

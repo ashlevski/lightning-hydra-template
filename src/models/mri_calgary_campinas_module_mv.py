@@ -171,7 +171,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            for n in range(preds.shape[0]):
+            for n in range(2):
                 fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize as needed
                 pred =(preds[n]/preds[n].max()).cpu().detach()
                 # Plot prediction
@@ -194,7 +194,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
                 output_image_sv = (output_image_svs[n] / output_image_svs[n].max()).cpu().detach()
                 im3 = axs[3].imshow(output_image_sv)  # Assuming output_image_sv[i] is a 2D array or an image file
-                axs[3].title.set_text('Diff')
+                axs[3].title.set_text('Res')
                 axs[3].axis('off')
                 fig.colorbar(im3, ax=axs[3])
 
@@ -206,7 +206,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # update and log metrics
         for key, acc in self.val_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
 
         for key, loss in losses.items():
             # self.val_loss(loss)
