@@ -160,6 +160,7 @@ class C2DataModule(LightningDataModule):
         # if not self.data_train and not self.data_val and not self.data_test:
 
         self.data_train = SliceDataset(self.hparams.data_dir,
+                                       self.hparams.target_dir,
                                        self.hparams.metadata_train_dir,
                                        self.hparams.metadata_prev_train_dir,
                                        self.hparams.mask_dir,
@@ -167,6 +168,7 @@ class C2DataModule(LightningDataModule):
                                        target_transforms=self.transforms_target,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_val = SliceDataset(self.hparams.data_dir,
+                                     self.hparams.target_dir,
                                        self.hparams.metadata_val_dir,
                                        self.hparams.metadata_prev_val_dir,
                                        self.hparams.mask_dir,
@@ -174,6 +176,7 @@ class C2DataModule(LightningDataModule):
                                        target_transforms=self.transforms_target,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_test = SliceDataset(self.hparams.data_dir,
+                                      self.hparams.target_dir,
                                        self.hparams.metadata_test_dir,
                                        self.hparams.metadata_prev_test_dir,
                                        self.hparams.mask_dir,
