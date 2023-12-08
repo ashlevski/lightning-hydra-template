@@ -75,7 +75,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=4,dropout_probability=0)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -94,13 +94,13 @@ class MV(nn.Module):
     def forward(self, x_slice, x_volume):
         max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)),
                                dim=1).argmax(dim=1)
-        result_tensors = []
-        # Index the original tensor for each batch
-        for batch_idx, index in enumerate(max_id):
-            result_tensors.append(x_volume[batch_idx, index, :, :].unsqueeze(0))
-
+        # result_tensors = []
+        # # Index the original tensor for each batch
+        # for batch_idx, index in enumerate(max_id):
+        #     result_tensors.append(x_volume[batch_idx, index, :, :].unsqueeze(0))
+        x_volume = x_volume[torch.arange(x_volume.size(0)), max_id]
         # Stack the individual tensors along a new batch dimension
-        x_volume = torch.cat(result_tensors, dim=0)
+        # x_volume = torch.cat(result_tensors, dim=0)
         z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
