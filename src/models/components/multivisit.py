@@ -92,10 +92,10 @@ class MV(nn.Module):
         # self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=256, channels=(32, 256, 512),
         #                      strides=(2, 2, 2))
         # self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
-        self.ssim_vmap = torch.vmap(self.cal_ssim, in_dims=(None,1))
-        self.ssim = StructuralSimilarityIndexMeasure(data_range=1,reduction=None)
-    def cal_ssim(self,input,target):
-        return self.ssim(input.unsqueeze(1), target.unsqueeze(1))
+        # self.ssim_vmap = torch.vmap(self.cal_ssim, in_dims=(None,1))
+        # self.ssim = StructuralSimilarityIndexMeasure(data_range=1,reduction=None)
+    # def cal_ssim(self,input,target):
+    #     return self.ssim(input.unsqueeze(1), target.unsqueeze(1))
     def forward(self, x_slice, x_volume):
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
