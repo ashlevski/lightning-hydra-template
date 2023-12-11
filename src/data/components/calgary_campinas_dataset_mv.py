@@ -71,7 +71,7 @@ class SliceDataset(Dataset):
         #     kspace = self.input_transforms(kspace)
         #     kspace_pre = self.input_transforms(kspace_pre)
         with h5py.File(path_2_prev_data, "r") as hf:
-            img_pred = hf["image"][metadata["Slice Number"]-24:metadata["Slice Number"]+24]
+            img_pred = hf["image"][metadata["Slice Number"]-16:metadata["Slice Number"]+16]
 
         if self.input_transforms is not None:
             kspace = self.input_transforms(kspace)

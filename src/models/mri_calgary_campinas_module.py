@@ -144,7 +144,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"train_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"train_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.train_loss(loss)
@@ -199,7 +199,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # update and log metrics
         for key, acc in self.val_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.val_loss(loss)
@@ -211,7 +211,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             self.val_acc_best(acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-            self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=True)
+            self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=False)
             self.val_acc_best.reset()
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
@@ -234,13 +234,13 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             if key not in accuracies:
                 accuracies[key] = []
             accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
-            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=True)
-            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=True)
+            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():
             # self.test_loss(loss)
-            self.log(f"test_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"test_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
 
 
         # Define JSON file path

@@ -54,6 +54,7 @@ net:
       num_pool_layers: 4
       dropout_probability: 0.0
   weights_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-10_00-53-25/model_weights.pth"
+#  weights_path: "/home/amir/PycharmProjects/MRI_REC_template/weights/model_weights.pth"
   multi_visit_net:
     _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
     in_channels: 2

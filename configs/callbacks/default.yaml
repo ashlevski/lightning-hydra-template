@@ -3,7 +3,7 @@ defaults:
   - early_stopping
   - model_summary
   - learning_rate_logger
-  - tqdm_progress_bar
+  - rich_progress_bar
   - _self_
 
 model_checkpoint:

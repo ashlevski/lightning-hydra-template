@@ -206,7 +206,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # update and log metrics
         for key, acc in self.val_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=True)
+            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.val_loss(loss)

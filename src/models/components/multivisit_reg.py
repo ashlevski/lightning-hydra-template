@@ -75,7 +75,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=1, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=8, num_pool_layers=4,dropout_probability=0)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -90,7 +90,12 @@ class MV(nn.Module):
         # self.vae_2d = AutoEncoder(spatial_dims=2, in_channels=1, out_channels=1, channels=(4, 4, 4), strides=(2, 2, 2))
         # self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=256, channels=(32, 256, 512),
         #                      strides=(2, 2, 2))
-        # self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
+        # self.unet = UNet2DConditionModel(in_channels=1,
+        #                                  out_channels=1,
+        #                                  cross_attention_dim=512,
+        #                                  layers_per_block=1,
+        #                                  block_out_channels=(8, 8, 8),
+        #                                  norm_num_groups=4)
     def forward(self, x_slice, x_volume):
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
@@ -104,9 +109,9 @@ class MV(nn.Module):
 
         x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)
         x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
-        # z = self.unet(x_slice.unsqueeze(1),x_volume.view(x_slice.shape[0],x_slice.shape[1],-1).unsqueeze(1))
-        # z = self.unet(torch.cat((x_slice,x_volume),dim=1))
-        z = self.unet(x_slice)
+        # z = self.unet(x_slice,x_volume)
+        z = self.unet(torch.cat((x_slice,x_volume),dim=1))
+        # z = self.unet(x_slice)
         # value = self.volume_conv2(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
         # key, query = self.norm1(key),self.norm2(query)

@@ -839,7 +839,7 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin):
             act_fn="silu",
             norm_num_groups=32,
             norm_eps=1e-5,
-            cross_attention_dim=768,
+            cross_attention_dim=128,
             transformer_layers_per_block=1,
             attention_head_dim=8,
             addition_embed_type=None,

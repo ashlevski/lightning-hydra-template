@@ -13,7 +13,7 @@ from src.utils.direct.data import transforms as T
 class MHA_2d(nn.Module):
     def __init__(self,embed_dim=4, num_heads=4, batch_first=True,kernel=8):
         super(MHA_2d, self).__init__()
-        self.embed_dim=embed_dim*8
+        self.embed_dim=embed_dim
         self.kernel = kernel
         self.slice_conv1 = nn.Conv2d(embed_dim, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
         self.slice_conv2 = nn.Conv2d(1, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
@@ -31,14 +31,14 @@ class MHA_2d(nn.Module):
         
         b, c, h, w = x.shape
         x = x.view(x.shape[0], self.embed_dim, -1).transpose(1, 2)
-        x = self.layernorm1(x)
+
+
         y = self.slice_conv2(y).view(y.shape[0], self.embed_dim, -1).transpose(1, 2)
-        y = self.layernorm3(y)
         x = self.pos(x)
         y = self.pos(y)
         x = self.att(x,y,y)[0] +x
-        x = self.layernorm2(x) + x
-        x = self.ff(x)
+        x = self.layernorm1(x)
+        x = self.layernorm1(self.ff(x) + x)
         x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim,  h, w))
         return x[:,:,:-pad[0],:-pad[1]]
 

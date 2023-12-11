@@ -31,7 +31,7 @@ trainer:
 
 data:
   num_workers: 4
-  batch_size: 32
+  batch_size: 16
 #  data_dir: "/work/souza_lab/amir/Data/h5"
 #  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
 #  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
@@ -39,7 +39,13 @@ data:
 #  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
 ##ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-04_01-32-17/checkpoints/epoch_201.ckpt"
 #ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2023-11-10_01-28-37/checkpoints/epoch_199.ckpt"
-#model:
+model:
+  scheduler:
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _partial_: true
+    mode: min
+    factor: 0.9
+    patience: 10
 #  net:
 #    regularizer_num_filters: 64
 #    regularizer_num_pull_layers: 4

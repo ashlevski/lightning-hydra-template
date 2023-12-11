@@ -5,13 +5,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
 from monai.networks.nets import AutoEncoder
+from sympy import reduced_totient
 from torch.nn import MultiheadAttention
 
 import src.utils.direct.data.transforms as T
 from projects.longitudinal.stable_diff import pad_to_nearest_multiple, UNet2DConditionModel
 from projects.longitudinal.unet_cross_att import UnetModel2d_att
 from src.utils.direct.nn.unet import UnetModel2d
-
+from torchmetrics.image  import StructuralSimilarityIndexMeasure
 
 class MV(nn.Module):
     def __init__(self, dim=4):
@@ -91,22 +92,31 @@ class MV(nn.Module):
         # self.vae_3d = AutoEncoder(spatial_dims=3, in_channels=1, out_channels=256, channels=(32, 256, 512),
         #                      strides=(2, 2, 2))
         # self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
+        self.ssim_vmap = torch.vmap(self.cal_ssim, in_dims=(None,1))
+        self.ssim = StructuralSimilarityIndexMeasure(data_range=1,reduction=None)
+    def cal_ssim(self,input,target):
+        return self.ssim(input.unsqueeze(1), target.unsqueeze(1))
     def forward(self, x_slice, x_volume):
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
         #                                    , mode='trilinear', align_corners=False)
         x_volume = x_volume.permute(0,2,3,1)
-        max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)),
-                               dim=1).argmax(dim=1)
-        # result_tensors = []
-        # # Index the original tensor for each batch
-        # for batch_idx, index in enumerate(max_id):
-        #     result_tensors.append(x_volume[batch_idx, index, :, :].unsqueeze(0))
-        x_volume = x_volume[torch.arange(x_volume.size(0)), max_id]
-        # Stack the individual tensors along a new batch dimension
-        # x_volume = torch.cat(result_tensors, dim=0)
         x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
         x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        # max_id = self.ssim_vmap(x_slice,x_volume).argmax(dim=0)
+        max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)),
+                               dim=1).argmax(dim=1)
+        # max_id = torch.sort(
+        #     torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)) / 100000,
+        #     dim=1).indices[:,-4:]
+        # result_tensors = []
+        # Index the original tensor for each batch
+        # for batch_idx, index in enumerate(max_id):
+        #     result_tensors.append(x_volume[batch_idx, index, :, :].unsqueeze(0))
+        # x_volume = x_volume[torch.arange(x_volume.size(0)), max_id]
+        x_volume = x_volume[torch.arange(x_volume.size(0)),max_id]
+        # Stack the individual tensors along a new batch dimension
+        # x_volume = torch.cat(result_tensors, dim=0)
         z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
