@@ -68,8 +68,8 @@ compile: false
 train_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
@@ -79,8 +79,8 @@ train_acc:
 val_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
@@ -90,8 +90,8 @@ val_acc:
 test_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
@@ -101,10 +101,10 @@ test_acc:
 criterions:
 #  mse:
 #    _target_: torch.nn.MSELoss
-#  l1:
-#    _target_: torch.nn.L1Loss
-  ssim:
-    _target_: src.models.components.losses.SSIMLoss
+ l1:
+   _target_: torch.nn.L1Loss
+  # ssim:
+  #   _target_: src.models.components.losses.SSIMLoss
 #  r2:
 #    _target_: src.models.components.losses.R2ScoreLoss
 #

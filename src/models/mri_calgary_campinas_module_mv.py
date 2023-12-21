@@ -85,8 +85,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.test_loss = MeanMetric()
 
         # for tracking best so far validation accuracy
-        self.val_acc_best = MaxMetric()
-
+        self.val_acc_best = {}#[MaxMetric() for x in self.test_acc]
+        for key ,acc in self.val_acc.items():
+            self.val_acc_best[key] = MaxMetric()
 
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -104,7 +105,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.val_loss.reset()
         for key ,acc in self.val_acc.items():
             acc.reset()
-        self.val_acc_best.reset()
+        for key ,acc in self.val_acc_best.items():
+            acc.reset()
+
 
     def model_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor]
@@ -144,7 +147,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"train_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"train_acc/{key}", acc, on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.train_loss(loss)
@@ -166,6 +169,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         """
         losses, preds, targets, output_image_svs  = self.model_step(batch)
+        # preds = preds - output_image_svs
         if (self.current_epoch % 5 == 0 and batch_idx == 10):
             # columns = [ 'prediction','ground truth']
             n = 0
@@ -206,20 +210,22 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # update and log metrics
         for key, acc in self.val_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"val_acc/{key}", acc, on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.val_loss(loss)
             self.log(f"val_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         for key, acc in self.val_acc.items():
             acc = acc.compute()  # get current val acc
-            self.val_acc_best(acc)  # update best so far val acc
+            self.val_acc_best[key](acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-            self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=False)
-            self.val_acc_best.reset()
+            self.log(f"val_acc_best/{key}", self.val_acc_best[key].compute(), sync_dist=True, prog_bar=False)
+            # self.val_acc_best.reset()
+
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
 
@@ -227,27 +233,43 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets = self.model_step(batch)
-
+        losses, preds, targets, output_image_svs = self.model_step(batch)
+        # preds = preds - output_image_svs
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
         for key, acc in self.test_acc.items():
-            acc_ = []
-            for i in range(preds.shape[0]):
-                acc(preds[i, None, None, ...], targets[i, None, None, ...])
-                acc_.append(acc.compute())
+            # acc_ = []
+            # for i in range(preds.shape[0]):
+            #     acc(preds[i, None, None, ...], targets[i, None, None, ...])
+            #     acc_.append(acc.compute())
+            
+            # if key not in accuracies:
+            #     accuracies[key] = []
 
-            if key not in accuracies:
-                accuracies[key] = []
-            accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
-            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
-            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            acc(preds.unsqueeze(0), targets.unsqueeze(0))
+            # accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
+            # self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            # self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            self.log(f"test_acc/{key}_whole", acc.compute(), on_step=True, on_epoch=True, prog_bar=False)
+            acc.reset()
+
+        # nmse = src.utils.fastMRI.evaluate.nmse(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", nmse, on_step=True, on_epoch=True, prog_bar=False)
+
+        # ssim = calgary_capinas_ssim(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", ssim, on_step=True, on_epoch=True, prog_bar=False)
+
+        # psnr = src.utils.fastMRI.evaluate.psnr(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", psnr, on_step=True, on_epoch=True, prog_bar=False)
+
+        print("micky mouse")
+            
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():
             # self.test_loss(loss)
-            self.log(f"test_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"test_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
 
         # Define JSON file path

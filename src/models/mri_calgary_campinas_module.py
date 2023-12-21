@@ -212,7 +212,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
             self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=False)
-            self.val_acc_best.reset()
+            # self.val_acc_best.reset()
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
 
@@ -236,6 +236,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
             self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
             self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            acc.reset()
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():

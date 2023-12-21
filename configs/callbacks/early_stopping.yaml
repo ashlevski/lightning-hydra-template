@@ -6,7 +6,7 @@ early_stopping:
   min_delta: 0. # minimum change in the monitored quantity to qualify as an improvement
   patience: 3 # number of checks with no improvement after which training will be stopped
   verbose: False # verbosity mode
-  mode: "min" # "max" means higher metric value is better, can be also "min"
+  mode: "max" # "max" means higher metric value is better, can be also "min"
   strict: True # whether to crash the training if monitor is not found in the validation metrics
   check_finite: True # when set True, stops training when the monitor becomes NaN or infinite
   stopping_threshold: null # stop training immediately once the monitored quantity reaches this threshold

@@ -23,8 +23,14 @@ class MHA_2d(nn.Module):
         self.layernorm1 =  nn.LayerNorm(self.embed_dim)
         self.layernorm2 =  nn.LayerNorm(self.embed_dim)
         self.layernorm3 =  nn.LayerNorm(self.embed_dim)
-        self.ff = nn.Sequential(nn.Linear(self.embed_dim,self.embed_dim),nn.LeakyReLU())
+        self.layernorm4 =  nn.LayerNorm(self.embed_dim)
+        self.groupnorm = nn.GroupNorm(8, self.embed_dim)
+        # self.ff = nn.Sequential(nn.Linear(self.embed_dim,self.embed_dim),nn.SiLU())
+        self.linear_geglu_1  = nn.Linear(self.embed_dim, 4 * self.embed_dim * 2)
+        self.linear_geglu_2 = nn.Linear(4 * self.embed_dim, self.embed_dim)
     def forward(self,x,y):
+        x = self.groupnorm(x)
+        residue_long = x
         x, pad = pad_to_nearest_multiple(x,self.kernel)
         y , _= pad_to_nearest_multiple(y,self.kernel)
         x = self.slice_conv1(x)
@@ -34,13 +40,24 @@ class MHA_2d(nn.Module):
 
 
         y = self.slice_conv2(y).view(y.shape[0], self.embed_dim, -1).transpose(1, 2)
-        x = self.pos(x)
-        y = self.pos(y)
-        x = self.att(x,y,y)[0] +x
+        # x = self.pos(x)
+        # y = self.pos(y)
+
         x = self.layernorm1(x)
-        x = self.layernorm1(self.ff(x) + x)
+        y = self.layernorm1(y)
+
+        x = self.att(x,y,y)[0] + x
+        
+        # x = self.layernorm1(self.ff(x) + x)
+        residue_short = x
+        x = self.layernorm4(x)
+        x, gate = self.linear_geglu_1(x).chunk(2, dim=-1)
+        x = x * F.gelu(gate)
+        x = self.linear_geglu_2(x)
+        x += residue_short
+
         x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim,  h, w))
-        return x[:,:,:-pad[0],:-pad[1]]
+        return x[:,:,:-pad[0],:-pad[1]] + residue_long
 
 
 def pad_to_nearest_multiple(tensor, Z):
@@ -259,7 +276,7 @@ class UnetModel2d_att(nn.Module):
         # Apply down-sampling layers
         for layer,att in zip(self.down_sample_layers,self.att_layers):
             output = layer(output)
-            output = output + att(output, att_data)
+            output = att(output, att_data)
             stack.append(output)
             output = F.avg_pool2d(output, kernel_size=2, stride=2, padding=0)
 
@@ -280,7 +297,7 @@ class UnetModel2d_att(nn.Module):
                 output = F.pad(output, padding, "reflect")
 
             output = torch.cat([output, downsample_layer], dim=1)
-            output = output + att_up(output, att_data)
+            output = att_up(output, att_data)
             output = conv(output)
 
 

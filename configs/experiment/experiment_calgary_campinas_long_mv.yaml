@@ -17,6 +17,12 @@ tags: ["mri_recon", "cascade"]
 
 seed: 12345
 
+early_stopping:
+  _target_: lightning.pytorch.callbacks.EarlyStopping
+  monitor: val_acc/SSIM # quantity to be monitored, must be specified !!!
+  min_delta: 0. # minimum change in the monitored quantity to qualify as an improvement
+  patience: 2 # number of checks with no improvement after which training will be stopped
+  
 
 logger:
   wandb:

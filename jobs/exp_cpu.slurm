@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --time=24:00:00
+#SBATCH --time=00:10:00
 #SBATCH --mem=64G
 #SBATCH --partition=gpu-a100
 #SBATCH --gpus-per-node=1
@@ -15,7 +15,7 @@
 
 source myenv/bin/activate
 EXP=experiment_calgary_campinas_long
-# metadata_test_dir="/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_mv1.csv"
+metadata_test_dir="/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_mv1.csv"
 BS=64
 RF=16
 LR=0.001
