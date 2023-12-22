@@ -1,0 +1,93 @@
+_target_: src.models.mri_calgary_campinas_module_selfsup.MRI_Calgary_Campinas_LitModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+net:
+  _target_: src.utils.direct_adaptors.varnet_engine.EndToEndVarNetEngine
+  model:
+    _target_: src.utils.direct.nn.varnet.varnet.EndToEndVarNet
+    forward_operator:
+      _partial_: true
+      _target_: src.utils.direct.data.transforms.fft2
+      centered: False
+      normalized: False
+    backward_operator:
+      _partial_: true
+      _target_: src.utils.direct.data.transforms.ifft2
+      centered: False
+      normalized: False
+    num_layers: 12
+  forward_operator:
+    _partial_: true
+    _target_: src.utils.direct.data.transforms.fft2
+    centered: False
+    normalized: False
+  backward_operator:
+    _partial_: true
+    _target_: src.utils.direct.data.transforms.ifft2
+    centered: False
+    normalized: False
+  sensitivity:
+    _target_: src.utils.direct.data.mri_transforms.EstimateSensitivityMapModule
+    backward_operator:
+      _partial_: true
+      _target_: src.utils.direct.data.transforms.ifft2
+      centered: False
+  sensitivity_model:
+    _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
+    in_channels: 2
+    out_channels: 2
+    num_filters: 8
+    num_pool_layers: 4
+    dropout_probability: 0.0
+
+
+# compile model for faster training with pytorch 2.0
+compile: false
+
+train_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
+val_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
+
+test_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+
+criterions:
+#  mse:
+#    _target_: torch.nn.MSELoss
+  l1:
+    _target_: torch.nn.L1Loss
+#  ssim:
+#    _target_: src.models.components.losses.SSIMLoss
+#  r2:
+#    _target_: src.models.components.losses.R2ScoreLoss
+#
+#criterion_2:
+#    _target_: torch.nn.L1Loss
+

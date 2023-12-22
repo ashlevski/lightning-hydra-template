@@ -15,7 +15,7 @@ defaults:
 
   # experiment configs allow for version control of specific hyperparameters
   # e.g. best hyperparameters for given model and datamodule
-  - experiment: experiment_calgary_campinas_long_win
+  - experiment: experiment_calgary_campinas_selfsup
 
   # config for hyperparameter optimization
   - hparams_search: null
