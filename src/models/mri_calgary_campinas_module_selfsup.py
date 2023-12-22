@@ -13,7 +13,7 @@ from torchmetrics import MaxMetric, MeanMetric
 
 import tests
 from src.utils.io_utils import save_tensor_to_nifti
-from src.utils.utils_selfsup import divide_matrix
+from src.utils.utils_selfsup import divide_matrix, divide_matrix_ratio
 
 
 class MRI_Calgary_Campinas_LitModule(LightningModule):
@@ -131,7 +131,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
 
         # my method
-        mask1, mask2 = divide_matrix(batch["acs_mask"])
+        mask1, mask2 = divide_matrix_ratio(batch["acs_mask"],0.8)
         input_kspace = (batch["kspace"])
 
 
