@@ -75,7 +75,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=16,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=4,dropout_probability=0.1)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=48, num_pool_layers=2,dropout_probability=0.1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -107,8 +107,9 @@ class MV(nn.Module):
         # key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
         # patch_3d = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 
-        x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)
-        x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
+        # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        x_slice = x_slice.unsqueeze(1)
         # z = self.unet(x_slice,x_volume)
         z = self.unet(torch.cat((x_slice,x_volume),dim=1))
         # z = self.unet(x_slice)

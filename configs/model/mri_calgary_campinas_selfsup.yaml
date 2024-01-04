@@ -83,6 +83,8 @@ criterions:
 #    _target_: torch.nn.MSELoss
   l1:
     _target_: torch.nn.L1Loss
+  # kl:
+  #   _target_: torch.nn.KLDivLoss
 #  ssim:
 #    _target_: src.models.components.losses.SSIMLoss
 #  r2:

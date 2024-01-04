@@ -1,4 +1,5 @@
 import json
+from multiprocessing import reduction
 import os
 from os.path import isfile, join
 from typing import Any, Dict, Tuple, Callable, List, Optional
@@ -14,7 +15,10 @@ from torchmetrics import MaxMetric, MeanMetric
 import tests
 from src.utils.io_utils import save_tensor_to_nifti
 from src.utils.utils_selfsup import divide_matrix, divide_matrix_ratio
+import torch.nn.functional as F
+from kornia.losses import total_variation
 
+from src.models.components.losses import SSIMLoss
 
 class MRI_Calgary_Campinas_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
@@ -90,6 +94,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.val_acc_best = MaxMetric()
 
 
+        self.ssimloss = SSIMLoss()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Perform a forward pass through the model `self.net`.
@@ -121,34 +126,42 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             - A tensor of target labels.
         """
 
-        # SELF-SUPERVISED PHYSICS-BASED DEEP LEARNING MRI RECONSTRUCTION WITHOUT FULLY-SAMPLED DATA
-        # mask1, mask2 = divide_matrix(batch["acs_mask"])
+        ## SELF-SUPERVISED PHYSICS-BASED DEEP LEARNING MRI RECONSTRUCTION WITHOUT FULLY-SAMPLED DATA
+        # mask2, mask1 = divide_matrix_ratio(batch["acs_mask"],0.9)
         # batch["acs_mask"] = mask1
         # output_kspace_b = (batch["kspace"] * mask2)
         # output_image, output_kspace_a, target_img = self.forward(batch)
-        # # target_img = torch.abs(batch["target"]).squeeze(1)
+        # #target_img = torch.abs(batch["target"]).squeeze(1)
         # output_kspace_a = (output_kspace_a * mask2)
 
+                # my method
+        inv_mask = 1-batch["acs_mask"]
+        # mask2, mask1 = divide_matrix_ratio(batch["acs_mask"],0.99)
+        mask2_, mask1_ = divide_matrix_ratio(batch["acs_mask"],0.9)
+        output_kspace_a = (batch["kspace"] * mask2_)
+        batch["acs_mask"] = torch.cat((batch["acs_mask"], mask1_))
+        batch["kspace"] = torch.cat((batch["kspace"], batch["kspace"]))
 
-        # my method
-        mask1, mask2 = divide_matrix_ratio(batch["acs_mask"],0.8)
-        input_kspace = (batch["kspace"])
+        output_image, output_kspace, target_img = self.forward(batch)
+        output_kspace_c, output_kspace_b = torch.chunk(output_kspace,2)
+        output_image,output_image_b = torch.chunk(output_image,2)
+        target_img,_ = torch.chunk(target_img,2)
 
 
-        output_image, output_kspace_a, target_img = self.forward(batch)
 
-        batch["acs_mask"] = mask2
-        batch["kspace"] = input_kspace
-        with torch.no_grad():
-            _, output_kspace_b, _ = self.forward(batch)
-
+        # output_kspace_c = (output_kspace_c * (mask2_))
+        
 
 
         loss = {}
-
         for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_kspace_a .view(output_kspace_a.shape[0],output_kspace_a.shape[1],-1), output_kspace_b.view(output_kspace_a.shape[0],output_kspace_a.shape[1],-1))
-
+            loss[f'{key}_1'] = 0.01*criterion((output_kspace_c*inv_mask).view((output_kspace_a).shape[0],output_kspace_a.shape[1],-1), (output_kspace_b*inv_mask).view(output_kspace_a.shape[0],output_kspace_a.shape[1],-1))
+            # loss[f'{key}_1'] = self.ssimloss(output_image,output_image_b)
+        output_kspace_b = (output_kspace_b * (mask2_))
+        # loss["tv"] = 0.1*total_variation(output_image, reduction='mean').mean()#total_variation(torch.abs(torch.view_as_complex(output_kspace_a)), reduction='mean').mean()#10*total_variation(torch.einsum('bcwhi -> bciwh',output_kspace_a),reduction='mean').mean()
+        for key, criterion in self.criterions.items():
+            loss[f'{key}_2'] = criterion(output_kspace_a.view(output_kspace_a.shape[0],output_kspace_a.shape[1],-1), output_kspace_b.view(output_kspace_a.shape[0],output_kspace_a.shape[1],-1))
+            # loss[key] = criterion(output_image,output_image_b)
         return loss, output_image, target_img
 
     def training_step(
@@ -169,7 +182,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, loss in losses.items():
             # self.train_loss(loss)
-            self.log(f"train_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"train_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
 
         # return loss or backpropagation will fail
