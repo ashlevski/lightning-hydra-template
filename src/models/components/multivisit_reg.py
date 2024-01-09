@@ -177,11 +177,11 @@ class MultiVisitNet(nn.Module):
         super(MultiVisitNet, self).__init__()
         # Initialize the single-visit network and load weights
         self.single_visit_net = single_visit_net
-        if weights_path is not None:
-            self.single_visit_net.load_state_dict(torch.load(weights_path))
-            if freeze:
-                for param in single_visit_net.parameters():
-                    param.requires_grad = False
+        # if weights_path is not None:
+        #     self.single_visit_net.load_state_dict(torch.load(weights_path))
+        #     if freeze:
+        #         for param in single_visit_net.parameters():
+        #             param.requires_grad = False
         # Initialize the multi-visit network
         # self.unet = UnetModel2d(in_channels=156,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0)
 
