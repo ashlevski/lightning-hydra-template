@@ -52,10 +52,10 @@ class MV(nn.Module):
 
         # for i in range(1):
         #     self.attention.append(MultiheadAttention(embed_dim=dim, num_heads=4, batch_first=True))
-
+        dim = 128
         kernel = 16
         # Feature extraction layers for current slice
-        # self.slice_conv1 = nn.Conv2d(1, dim, kernel_size=1, stride=1,padding=0)
+        self.slice_conv1 = nn.Conv2d(1, dim, kernel_size=kernel, stride=kernel,padding=0)
         # self.slice_conv2 = nn.Conv2d(dim, dim*2, kernel_size=1, padding=0)
 
         # Feature extraction layers for past scan
@@ -75,10 +75,11 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=16,num_pool_layers=4,dropout_probability=0)
-        # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=48, num_pool_layers=2,dropout_probability=0.1)
-        self.unet = UNetModel(in_channels=1,out_channels=1,channels=32,n_res_blocks=1,attention_levels=[2],channel_multipliers=[1,2,4,8],n_heads=4,d_cond=1)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=2,dropout_probability=0.3)
+        
+        # self.unet = UNetModel(in_channels=1,out_channels=1,channels=32,n_res_blocks=1,attention_levels=[],channel_multipliers=[1,2,4],n_heads=4,d_cond=dim)
 
-        # self.dim = dim
+        self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
         # self.norm3 = torch.nn.LayerNorm(dim)
@@ -106,15 +107,19 @@ class MV(nn.Module):
         # latent_2d = self.unet(latent_2d, latent_3d)
         # z = self.vae_2d.decode(latent_2d[0])
         # with torch.no_grad():
-        # key = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
-        # patch_3d = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
+        # x_slice = self.slice_conv1(x_slice.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
+        
 
         # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
         # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        # print(x_slice.unsqueeze(1).shape)
+        # print(x_volume.shape)
         x_slice = x_slice.unsqueeze(1)
-        x_volume = x_volume.view(x_slice.shape[0],1,-1).transpose(1,2)
-        z = self.unet(x_slice,x_volume)
-        # z = self.unet(torch.cat((x_slice,x_volume),dim=1))
+        # x_volume = self.slice_conv1(x_volume).view(x_volume.shape[0],self.dim,-1).transpose(1,2)
+        # print(x_volume.shape)
+        # x_volume = x_volume.view(x_slice.shape[0],1,-1).transpose(1,2)
+        # z = self.unet(x_slice,x_volume)
+        z = self.unet(torch.cat((x_slice,x_volume),dim=1))
         # z = self.unet(x_slice)
         # value = self.volume_conv2(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.dim,-1).transpose(1,2)
 

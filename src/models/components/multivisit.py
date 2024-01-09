@@ -76,7 +76,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=4,dropout_probability=0.1)
+        self.unet = UnetModel2d(in_channels=8, out_channels=1, num_filters=32, num_pool_layers=2,dropout_probability=0.3)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -101,23 +101,29 @@ class MV(nn.Module):
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
         #                                    , mode='trilinear', align_corners=False)
         x_volume = x_volume.permute(0,2,3,1)
-        x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
-        x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
+        # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
         # max_id = self.ssim_vmap(x_slice,x_volume).argmax(dim=0)
         max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)),
                                dim=1).argmax(dim=1)
         # max_id = torch.sort(
         #     torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)) / 100000,
         #     dim=1).indices[:,-4:]
-        # result_tensors = []
+        result_tensors = []
         # Index the original tensor for each batch
-        # for batch_idx, index in enumerate(max_id):
-        #     result_tensors.append(x_volume[batch_idx, index, :, :].unsqueeze(0))
+        for batch_idx, index in enumerate(max_id):
+            if index==0:
+                result_tensors.append(x_volume[batch_idx, index:index+7, :, :].unsqueeze(0))
+            elif index==63:
+                result_tensors.append(x_volume[batch_idx, index-7:index, :, :].unsqueeze(0))
+            else:
+                result_tensors.append(x_volume[batch_idx, index-3:index+4, :, :].unsqueeze(0))
+
         # x_volume = x_volume[torch.arange(x_volume.size(0)), max_id]
         x_volume = x_volume[torch.arange(x_volume.size(0)),max_id]
         # Stack the individual tensors along a new batch dimension
-        # x_volume = torch.cat(result_tensors, dim=0)
-        z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))
+        x_volume = torch.cat(result_tensors, dim=0)
+        z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume), dim=1))
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
         # latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))

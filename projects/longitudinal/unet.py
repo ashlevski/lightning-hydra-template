@@ -278,7 +278,7 @@ class ResBlock(nn.Module):
         self.out_layers = nn.Sequential(
             normalization(out_channels),
             nn.SiLU(),
-            nn.Dropout(0.),
+            nn.Dropout(0.3),
             nn.Conv2d(out_channels, out_channels, 3, padding=1)
         )
 

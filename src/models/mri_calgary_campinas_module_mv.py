@@ -123,15 +123,15 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
 
 
-        output_image, output_kspace, target_img, output_image_sv = self.forward(batch)
+        output_image, output_kspace, target_img, output_image_mv = self.forward(batch)
         # target_img = torch.abs(batch["target"]).squeeze(1)
 
         loss = {}
 
         for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_image, target_img)
+            loss[key] = criterion(output_image-output_image_mv, target_img)
 
-        return loss, output_image, target_img,output_image_sv
+        return loss, output_image, target_img,output_image_mv
 
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -233,8 +233,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets, output_image_svs = self.model_step(batch)
-        # preds = preds - output_image_svs
+        losses, preds, targets, output_image_mv = self.model_step(batch)
+        preds = preds - output_image_mv
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
