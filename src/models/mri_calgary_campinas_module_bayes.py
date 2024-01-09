@@ -90,11 +90,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         moped_enable_ = False
         if net_path is not None:
-            self.single_visit_net.load_state_dict(torch.load(net_path))
+            self.net.load_state_dict(torch.load(net_path))
             moped_enable_ = True
-            # if freeze:
-            #     for param in single_visit_net.parameters():
-            #         param.requires_grad = False
 
         const_bnn_prior_parameters = {
             "prior_mu": 0.0,
