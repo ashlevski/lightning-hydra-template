@@ -9,7 +9,7 @@ class NormalizeSampleTransform(nn.Module):
     def forward(self, x):
         # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
 
-        return (x / torch.abs(x).max()) * self.scale
+        return (x / torch.abs(x).amax(dim=(1,2), keepdim=True)) * self.scale
 
 
 def normalizeSampleTransform(x):

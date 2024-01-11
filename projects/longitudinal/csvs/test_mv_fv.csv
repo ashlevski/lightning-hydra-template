@@ -1,0 +1,11 @@
+,Relative path,File name,Image X res,Image Y res,k space X res,k space Y res,Phases,Slices,Echos,Channels,Scan date,TE,TI,TR,Flip angle,Type,Patient ID,Relative scan date,Number of scan
+10,datasets/Dataset_C2/12_channel/Val,e14110s3_P59904,256,256,256,218,1,170,1,12,2018-06-13,2568.0,650000.0,6344.0,8.0,healthy,NORM477,0.0,1.0
+18,datasets/Dataset_C2/12_channel/Val,e14258s3_P76800,256,256,256,218,1,170,1,12,2018-07-05,2568.0,650000.0,6344.0,8.0,healthy,NORM485,0.0,1.0
+26,datasets/Dataset_C2/12_channel/Val,e14313s5_P37888,256,256,256,218,1,170,1,12,2018-07-12,2568.0,650000.0,6344.0,8.0,healthy,NORM479,0.0,1.0
+44,datasets/Dataset_C2/12_channel/Val,e14531s6_P68096,256,256,256,218,1,170,1,12,2018-08-15,2568.0,650000.0,6344.0,8.0,healthy,NORM484,0.0,1.0
+48,datasets/Dataset_C2/12_channel/Val,e14584s5_P30208,256,256,256,218,1,170,1,12,2018-08-23,2568.0,650000.0,6344.0,8.0,healthy,NORM492,0.0,1.0
+53,datasets/Dataset_C2/12_channel/Val,e14691s3_P06656,256,256,256,218,1,170,1,12,2018-09-11,2568.0,650000.0,6344.0,8.0,healthy,NORM494,0.0,1.0
+82,datasets/Dataset_C2/12_channel/Val,e15652s14_P51712,256,256,256,218,1,180,1,12,2019-02-14,3056.0,400000.0,7376.0,10.0,healthy,NORM603,0.0,1.0
+85,datasets/Dataset_C2/12_channel/Test,e15768s13_P14848,256,256,256,218,1,170,1,12,2019-03-06,2568.0,650000.0,6344.0,8.0,healthy,NORM405,0.0,1.0
+87,datasets/Dataset_C2/12_channel/Test,e15781s3_P89088,256,256,256,218,1,180,1,12,2019-03-07,3056.0,400000.0,7376.0,10.0,healthy,NORM613,0.0,1.0
+137,datasets/Dataset_C2/12_channel/Test,e16650s3_P47104,256,256,256,218,1,180,1,12,2019-07-19,3056.0,400000.0,7376.0,10.0,healthy,NORM100,0.0,1.0
