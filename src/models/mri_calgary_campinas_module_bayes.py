@@ -2,7 +2,7 @@ import json
 import os
 from os.path import isfile, join
 from typing import Any, Dict, Tuple, Callable, List, Optional
-
+import copy
 import torch
 import torchmetrics
 import wandb
@@ -13,6 +13,7 @@ from torchmetrics import MaxMetric, MeanMetric
 
 from src.utils.io_utils import save_tensor_to_nifti
 from bayesian_torch.models.dnn_to_bnn import dnn_to_bnn, get_kl_loss
+from bayesian_torch.utils.util import predictive_entropy, mutual_information
 
 class MRI_Calgary_Campinas_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
@@ -89,9 +90,10 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.val_acc_best = MaxMetric()
 
         moped_enable_ = False
-        if net_path is not None:
-            self.net.load_state_dict(torch.load(net_path))
-            moped_enable_ = True
+        # if net_path is not None:
+        #     self.net.load_state_dict(torch.load(net_path))
+        #     print("a pretrained model is loaded")
+        #     moped_enable_ = True
 
         const_bnn_prior_parameters = {
             "prior_mu": 0.0,
@@ -184,14 +186,36 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets = self.model_step(batch)
+        # losses, preds, targets = self.model_step(batch)
+
+        # Initialize empty lists to store results
+        all_preds = []
+        # batch_ = copy.deepcopy(batch)
+        # Run the function 10 times
+        for _ in range(5):
+            # batch = batch_
+            losses, preds, targets = self.model_step(copy.deepcopy(batch))
+            
+            # Append results to lists
+            all_preds.append(preds)
+
+        # Stack the lists along a new dimension (assuming preds and targets are tensors with the same shape)
+        all_preds = torch.stack(all_preds)
+
+        # predictive_uncertainty = predictive_entropy(all_preds.cpu().numpy())
+        # model_uncertainty = mutual_information(all_preds.cpu().numpy())
+
+        preds = all_preds.mean(dim=0)  # Assuming preds is a 2D tensor (samples x features)
+        variance_preds = all_preds.var(dim=0)
+
+
         if (self.current_epoch % 5 == 0 and batch_idx == 10):
             # columns = [ 'prediction','ground truth']
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
             for n in range(preds.shape[0]):
-                fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
+                fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize as needed
                 pred =(preds[n]/preds[n].max()).cpu().detach()
                 # Plot prediction
                 im0 = axs[0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
@@ -210,6 +234,22 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
                 axs[2].title.set_text('Diff')
                 axs[2].axis('off')
                 fig.colorbar(im2, ax=axs[2])
+
+                im3 = axs[3].imshow((variance_preds[n]/variance_preds[n].max()).cpu().detach())  # Assuming targets[i] is a 2D array or an image file
+                axs[3].title.set_text('uncertainy')
+                axs[3].axis('off')
+                fig.colorbar(im3, ax=axs[3])
+
+                # im4 = axs[4].imshow(predictive_uncertainty)  # Assuming targets[i] is a 2D array or an image file
+                # axs[4].title.set_text('predictive uncertainty')
+                # axs[4].axis('off')
+                # fig.colorbar(im4, ax=axs[4])
+
+                # im5 = axs[5].imshow(model_uncertainty)  # Assuming targets[i] is a 2D array or an image file
+                # axs[5].title.set_text('model uncertainty')
+                # axs[5].axis('off')
+                # fig.colorbar(im5, ax=axs[5])
+
                 self.logger.log_image(key="samples", images=[fig])
                 plt.close()
 

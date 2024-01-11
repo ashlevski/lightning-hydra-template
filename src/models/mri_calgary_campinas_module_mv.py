@@ -129,7 +129,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         loss = {}
 
         for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_image-output_image_mv, target_img)
+            loss[key] = criterion(output_image, target_img)
 
         return loss, output_image, target_img,output_image_mv
 

@@ -91,4 +91,4 @@ criterions:
 #criterion_2:
 #    _target_: torch.nn.L1Loss
 
-net_path: null
+net_path: "null"
