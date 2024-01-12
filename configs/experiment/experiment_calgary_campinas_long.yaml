@@ -13,14 +13,14 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mri_recon", "cascade"]
+tags: ["R10", "cassingle_visitcaside"]
 
 seed: 12345
 
 
 logger:
   wandb:
-    project: 'mri_recon'
+    project: 'mri_recon_clean'
     tags: ${tags}
     group: "mri_recon"
   aim:
@@ -33,9 +33,9 @@ data:
   num_workers: 8
   batch_size: 8
   data_dir: "/work/souza_lab/amir/Data/h5"
-  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
-  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
-  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_sv1.csv"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/train_sv.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/val_sv.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/test_sv.csv"
   mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
   # data_dir: "D://h5"
   # metadata_train_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//train_sv1.csv"
