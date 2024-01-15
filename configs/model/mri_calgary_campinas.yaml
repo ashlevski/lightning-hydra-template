@@ -59,8 +59,8 @@ compile: false
 train_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
@@ -68,8 +68,8 @@ train_acc:
 val_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
@@ -78,8 +78,8 @@ val_acc:
 test_acc:
   PSNR:
     _target_: torchmetrics.image.PeakSignalNoiseRatio
-  VIF:
-    _target_: torchmetrics.image.VisualInformationFidelity
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7

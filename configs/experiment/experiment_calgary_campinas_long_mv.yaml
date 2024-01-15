@@ -13,7 +13,7 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mri_recon", "cascade"]
+tags: ["multi-visit", "R10"]
 
 seed: 12345
 
@@ -26,7 +26,7 @@ early_stopping:
 
 logger:
   wandb:
-    project: 'mri_recon'
+    project: 'mri_recon_clean'
     tags: ${tags}
     group: "mri_recon"
   aim:
