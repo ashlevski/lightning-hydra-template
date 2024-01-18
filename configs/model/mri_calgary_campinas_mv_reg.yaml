@@ -9,7 +9,7 @@ optimizer:
 scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
-  mode: min
+  mode: max
   factor: 0.1
   patience: 10
 
@@ -71,7 +71,6 @@ train_acc:
   #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
-    gaussian_kernel: false
     kernel_size: 7
   # RMSE:
   #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
@@ -83,7 +82,6 @@ val_acc:
   #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
-    gaussian_kernel: false
     kernel_size: 7
   # RMSE:
   #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
@@ -95,7 +93,6 @@ test_acc:
   #   _target_: torchmetrics.image.VisualInformationFidelity
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
-    gaussian_kernel: false
     kernel_size: 7
   # RMSE:
   #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow

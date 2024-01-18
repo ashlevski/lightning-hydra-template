@@ -225,23 +225,38 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets = self.model_step(batch)
-
+        losses, preds, targets  = self.model_step(batch)
+        # preds = preds - output_image_mv
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
         for key, acc in self.test_acc.items():
-            acc_ = []
-            for i in range(preds.shape[0]):
-                acc(preds[i, None, None, ...], targets[i, None, None, ...])
-                acc_.append(acc.compute())
+            # acc_ = []
+            # for i in range(preds.shape[0]):
+            #     acc(preds[i, None, None, ...], targets[i, None, None, ...])
+            #     acc_.append(acc.compute())
+            
+            # if key not in accuracies:
+            #     accuracies[key] = []
 
-            if key not in accuracies:
-                accuracies[key] = []
-            accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
-            self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
-            self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            acc(preds.unsqueeze(0), targets.unsqueeze(0))
+            # accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
+            # self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            # self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
+            self.log(f"test_acc/{key}_whole", acc.compute(), on_step=True, on_epoch=True, prog_bar=False)
             acc.reset()
+
+        # nmse = src.utils.fastMRI.evaluate.nmse(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", nmse, on_step=True, on_epoch=True, prog_bar=False)
+
+        # ssim = calgary_capinas_ssim(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", ssim, on_step=True, on_epoch=True, prog_bar=False)
+
+        # psnr = src.utils.fastMRI.evaluate.psnr(targets.unsqueeze(1),preds.unsqueeze(1))
+        # self.log(f"test_acc/{key}_nmse", psnr, on_step=True, on_epoch=True, prog_bar=False)
+
+        # print("micky mouse")
+            
         # update and log metrics
         # self.log('loss', loss)
         for key, loss in losses.items():

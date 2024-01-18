@@ -41,10 +41,10 @@ trainer:
 #  metadata_prev_test_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//meta_unique.csv"
 #  mask_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//poisson_sampling/R5_218x170.npy"
 #  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss_aligned/"
-model:
-  scheduler:
-    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
-    _partial_: true
-    mode: min
-    factor: 0.9
-    patience: 10
+# model:
+#   scheduler:
+#     _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+#     _partial_: true
+#     mode: min
+#     factor: 0.9
+#     patience: 10

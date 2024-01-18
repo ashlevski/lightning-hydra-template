@@ -104,7 +104,8 @@ class MV(nn.Module):
         # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
         # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
         # max_id = self.ssim_vmap(x_slice,x_volume).argmax(dim=0)
-        max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)),
+        max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)), 
+                                            torch.exp((x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True)))),
                                dim=1).argmax(dim=1)
         # max_id = torch.sort(
         #     torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)) / 100000,
