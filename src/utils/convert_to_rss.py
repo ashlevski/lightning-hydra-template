@@ -71,7 +71,7 @@ for i, row in tqdm(metadata.iterrows(), position=0, leave=True):
     img_nlinv = _process_volume(folder_to_h5, f'{row["File name"]}.h5')
     # plt.imshow(img_nlinv[100])
     # plt.show()
-    # save_tensor_to_nifti(img_nlinv, join(folder_to_target, f'{row["File name"]}.nii'))
+    save_tensor_to_nifti(img_nlinv, join(folder_to_target, f'{row["File name"]}.nii'))
     h5_file = h5py.File(f"{folder_to_target}/{row['File name']}.h5", "w")
     h5_file.create_dataset('image', data=img_nlinv)
     h5_file.close()

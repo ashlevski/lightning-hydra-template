@@ -35,6 +35,8 @@ logger:
 trainer:
   max_epochs: 200
 
+train: False
+
 data:
   num_workers: 4
   batch_size: 16

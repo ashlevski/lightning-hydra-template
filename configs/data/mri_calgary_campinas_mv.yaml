@@ -1,12 +1,12 @@
 _target_: src.data.calgary_campinas_datamodule_mv.C2DataModule
 data_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/h5"
 metadata_train_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/train_mv1.csv"
-metadata_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/val_mv1.csv"
+metadata_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/test_mv1.csv"
 metadata_test_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/test_mv1.csv"
 metadata_prev_train_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/meta_unique.csv"
 metadata_prev_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/meta_unique.csv"
 metadata_prev_test_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/meta_unique.csv"
-mask_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
+mask_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R10_218x170.npy"
 target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss_h5/"
 batch_size: 4 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
 num_workers: 0
