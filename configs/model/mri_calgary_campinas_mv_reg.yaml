@@ -10,8 +10,8 @@ scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
   mode: max
-  factor: 0.1
-  patience: 10
+  factor: 0.9
+  patience: 4
 
 net:
   _target_: src.models.components.multivisit_reg.MultiVisitNet

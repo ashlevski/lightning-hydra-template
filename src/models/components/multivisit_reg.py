@@ -75,7 +75,7 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=16,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=2,dropout_probability=0.1)
+        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=2,dropout_probability=0.3)
         
         # self.unet = UNetModel(in_channels=1,out_channels=1,channels=32,n_res_blocks=1,attention_levels=[],channel_multipliers=[1,2,4],n_heads=4,d_cond=dim)
 

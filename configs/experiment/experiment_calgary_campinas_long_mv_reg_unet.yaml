@@ -1,0 +1,50 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas_mv_reg
+  - override /model: mri_calgary_campinas_mv_reg_unet
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["multi-visit", "R10"]
+
+seed: 12345
+
+
+logger:
+  wandb:
+    project: 'mri_recon_clean'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 200
+
+#data:
+#  num_workers: 0
+#  batch_size: 16
+#  data_dir: "D://h5"
+#  metadata_train_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//train_mv1.csv"
+#  metadata_val_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//val_mv1.csv"
+#  metadata_test_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//test_mv1.csv"
+#  metadata_prev_train_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//meta_unique.csv"
+#  metadata_prev_val_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//meta_unique.csv"
+#  metadata_prev_test_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//meta_unique.csv"
+#  mask_dir: "D://Work//MRI_REC_template//data//Calgary_Campinas//poisson_sampling/R5_218x170.npy"
+#  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss_aligned/"
+# model:
+#   scheduler:
+#     _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+#     _partial_: true
+#     mode: min
+#     factor: 0.9
+#     patience: 10
