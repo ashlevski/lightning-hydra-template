@@ -10,7 +10,7 @@ from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 import pandas as pd
 
-from src.data.components.calgary_campinas_dataset_mv import SliceDataset
+from src.data.components.calgary_campinas_dataset_mv_roberto_attention import SliceDataset
 
 
 class C2DataModule(LightningDataModule):
@@ -56,14 +56,9 @@ class C2DataModule(LightningDataModule):
         metadata_train_dir : str = None,
         metadata_val_dir: str = None,
         metadata_test_dir: str = None,
-        metadata_prev_train_dir: str = None,
-        metadata_prev_val_dir: str = None,
-        metadata_prev_test_dir: str = None,
-        mask_dir: str = None,
         target_dir: str = None,
+        baseline_dir: str = None,
         transforms_input: Optional[Callable] = None,
-        transforms_target: Optional[Callable] = None,
-        sensitivity = None,
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
@@ -89,16 +84,11 @@ class C2DataModule(LightningDataModule):
             transforms_input
         )
 
-        self.transforms_target = transforms.Compose(
-            transforms_target
-        )
-
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
         self.data_test: Optional[Dataset] = None
 
         self.batch_size_per_device = batch_size
-        self.sensitivity = sensitivity
 
     @property
     def num_classes(self) -> int:
@@ -161,27 +151,21 @@ class C2DataModule(LightningDataModule):
 
         self.data_train = SliceDataset(self.hparams.data_dir,
                                        self.hparams.target_dir,
+                                       self.hparams.baseline_dir,
                                        self.hparams.metadata_train_dir,
-                                       self.hparams.metadata_prev_train_dir,
-                                       self.hparams.mask_dir,
                                        input_transforms=self.transforms_input,
-                                       target_transforms=self.transforms_target,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_val = SliceDataset(self.hparams.data_dir,
                                      self.hparams.target_dir,
+                                     self.hparams.baseline_dir,
                                        self.hparams.metadata_val_dir,
-                                       self.hparams.metadata_prev_val_dir,
-                                       self.hparams.mask_dir,
-                                       input_transforms=self.transforms_input,
-                                       target_transforms=self.transforms_target,
+                                     input_transforms=self.transforms_input,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_test = SliceDataset(self.hparams.data_dir,
                                       self.hparams.target_dir,
+                                      self.hparams.baseline_dir,
                                        self.hparams.metadata_test_dir,
-                                       self.hparams.metadata_prev_test_dir,
-                                       self.hparams.mask_dir,
-                                       input_transforms=self.transforms_input,
-                                       target_transforms=self.transforms_target,
+                                      input_transforms=self.transforms_input,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
 
 
@@ -205,10 +189,10 @@ class C2DataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.data_val,
-            batch_size=256-self.hparams.crop_slice_idx*2,#self.batch_size_per_device,
-            num_workers=0,
+            batch_size=self.batch_size_per_device,#256-self.hparams.crop_slice_idx*2,#
+            num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
-            shuffle=False,
+            shuffle=True,
         )
 
     def test_dataloader(self) -> DataLoader[Any]:

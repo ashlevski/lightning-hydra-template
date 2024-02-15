@@ -10,50 +10,11 @@ scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
   mode: max
-  factor: 0.9
-  patience: 4
+  factor: 0.5
+  patience: 10
 
 net:
-  _target_: src.models.components.multivisit_reg.MultiVisitNet
-  single_visit_net:
-    _target_: src.utils.direct_adaptors.varnet_engine.EndToEndVarNetEngine
-    model:
-      _target_: src.utils.direct.nn.varnet.varnet.EndToEndVarNet
-      forward_operator:
-        _partial_: true
-        _target_: src.utils.direct.data.transforms.fft2
-        centered: False
-        normalized: False
-      backward_operator:
-        _partial_: true
-        _target_: src.utils.direct.data.transforms.ifft2
-        centered: False
-        normalized: False
-      num_layers: 12
-    forward_operator:
-      _partial_: true
-      _target_: src.utils.direct.data.transforms.fft2
-      centered: False
-      normalized: False
-    backward_operator:
-      _partial_: true
-      _target_: src.utils.direct.data.transforms.ifft2
-      centered: False
-      normalized: False
-    sensitivity:
-      _target_: src.utils.direct.data.mri_transforms.EstimateSensitivityMapModule
-      backward_operator:
-        _partial_: true
-        _target_: src.utils.direct.data.transforms.ifft2
-        centered: False
-    sensitivity_model:
-      _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
-      in_channels: 2
-      out_channels: 2
-      num_filters: 8
-      num_pool_layers: 4
-      dropout_probability: 0.0
-  weights_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-12-11_14-45-54/model_weights.pth"
+  _target_: src.models.components.multivisit_roberto.MultiVisitNet
   multi_visit_net:
     _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
     in_channels: 2

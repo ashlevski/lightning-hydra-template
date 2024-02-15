@@ -13,7 +13,7 @@ from src.utils.direct.data import transforms as T
 class MHA_2d(nn.Module):
     def __init__(self,embed_dim=4, num_heads=4, batch_first=True,kernel=8):
         super(MHA_2d, self).__init__()
-        self.embed_dim=embed_dim
+        self.embed_dim=embed_dim*4
         self.kernel = kernel
         self.slice_conv1 = nn.Conv2d(embed_dim, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
         self.slice_conv2 = nn.Conv2d(1, self.embed_dim, kernel_size=kernel, stride=kernel, padding=0)
@@ -29,7 +29,7 @@ class MHA_2d(nn.Module):
         self.linear_geglu_1  = nn.Linear(self.embed_dim, 4 * self.embed_dim * 2)
         self.linear_geglu_2 = nn.Linear(4 * self.embed_dim, self.embed_dim)
     def forward(self,x,y):
-        x = self.groupnorm(x)
+        # x = self.groupnorm(x)
         residue_long = x
         x, pad = pad_to_nearest_multiple(x,self.kernel)
         y , _= pad_to_nearest_multiple(y,self.kernel)
@@ -44,20 +44,20 @@ class MHA_2d(nn.Module):
         # y = self.pos(y)
 
         x = self.layernorm1(x)
-        y = self.layernorm1(y)
+        y = self.layernorm2(y)
 
-        x = self.att(x,y,y)[0] + x
+        x = self.layernorm3(self.att(x,y,y)[0]) + x
         
         # x = self.layernorm1(self.ff(x) + x)
-        residue_short = x
+        # residue_short = x
         x = self.layernorm4(x)
-        x, gate = self.linear_geglu_1(x).chunk(2, dim=-1)
-        x = x * F.gelu(gate)
-        x = self.linear_geglu_2(x)
-        x += residue_short
+        # x, gate = self.linear_geglu_1(x).chunk(2, dim=-1)
+        # x = x * F.gelu(gate)
+        # x = self.linear_geglu_2(x)
+        # x += residue_short
 
         x = self.proj(x.transpose(1, 2).view(-1, self.embed_dim,  h, w))
-        return x[:,:,:-pad[0],:-pad[1]] + residue_long
+        return x[:,:,:-pad[0],:-pad[1]] #+ residue_long
 
 
 def pad_to_nearest_multiple(tensor, Z):
@@ -297,7 +297,7 @@ class UnetModel2d_att(nn.Module):
                 output = F.pad(output, padding, "reflect")
 
             output = torch.cat([output, downsample_layer], dim=1)
-            output = att_up(output, att_data)
+            # output = att_up(output, att_data)
             output = conv(output)
 
 

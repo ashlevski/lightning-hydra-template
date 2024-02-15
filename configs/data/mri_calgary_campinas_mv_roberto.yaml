@@ -1,0 +1,19 @@
+_target_: src.data.calgary_campinas_datamodule_mv_roberto.C2DataModule
+data_dir: "/home/ai2lab/datasets/roberto/Non-enhanced/10x/"
+metadata_train_dir: "/home/ai2lab/datasets/roberto/train.csv"
+metadata_val_dir: "/home/ai2lab/datasets/roberto/val.csv"
+metadata_test_dir: "/home/ai2lab/datasets/roberto/test.csv"
+target_dir: "/home/ai2lab/datasets/roberto/Reference/"
+baseline_dir: "/home/ai2lab/datasets/roberto/PS-reg/10x/"
+batch_size: 4 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+num_workers: 0
+pin_memory: False
+shuffle: True
+crop_slice_idx: 50
+transforms_input:
+  - _target_: torchvision.transforms.transforms.ToTensor
+  - _target_: src.utils.transforms.Scale
+  - _target_: src.utils.transforms.Nan_to_num
+  - _target_: torchvision.transforms.transforms.CenterCrop
+    size: [218,170]
+
