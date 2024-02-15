@@ -4,8 +4,8 @@
 # python train.py experiment=example
 
 defaults:
-  - override /data: mri_calgary_campinas_mv
-  - override /model: mri_calgary_campinas_mv
+  - override /data: mri_calgary_campinas_mv_roberto
+  - override /model: mri_calgary_campinas_mv_roberto
   - override /callbacks: default
   - override /trainer: default
   - override /logger: wandb
@@ -38,8 +38,8 @@ trainer:
 train: True
 
 data:
-  num_workers: 0
-  batch_size: 16
+  num_workers: 16
+  batch_size: 32
 #  data_dir: "/work/souza_lab/amir/Data/h5"
 #  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
 #  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
@@ -47,7 +47,7 @@ data:
 #  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
 #  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss/"
 ##ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-04_01-32-17/checkpoints/epoch_201.ckpt"
-#ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2024-02-08_11-05-14/checkpoints/epoch_066.ckpt"
+#ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2024-02-13_23-48-16/checkpoints/epoch_024.ckpt"
 # model:
 #   scheduler:
 #     _target_: torch.optim.lr_scheduler.ReduceLROnPlateau

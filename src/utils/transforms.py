@@ -9,8 +9,23 @@ class NormalizeSampleTransform(nn.Module):
     def forward(self, x):
         # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
 
-        return (x / torch.abs(x).amax(dim=(1,2), keepdim=True)) * self.scale
+        return (x / torch.abs(x).amax(dim=(0,1,2), keepdim=True)) * self.scale
 
+class Scale(nn.Module):
+    def __init__(self):
+        super(Scale, self).__init__()
+
+    def forward(self, x):
+        # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
+        return (x / torch.abs(x).max())
+
+class Nan_to_num(nn.Module):
+    def __init__(self):
+        super(Nan_to_num, self).__init__()
+
+    def forward(self, x, value=0.0):
+        # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
+        return torch.nan_to_num(x,nan=value)
 
 def normalizeSampleTransform(x):
     # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)

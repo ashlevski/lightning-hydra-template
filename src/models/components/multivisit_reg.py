@@ -194,14 +194,50 @@ class MultiVisitNet(nn.Module):
         # Forward pass through the multi-visit network
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
         output_image_mv = self.multi_visit_net(output_image,x['img_pre'])
+        # plot_tensors(output_image, x['img_pre'],0)
         output_image = output_image + output_image_mv
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         del output_kspace
         # target_img = (target_img / torch.amax(target_img,dim=(1,2),keepdim=True))
-        return output_image, 0 , target_img, output_image_mv
+        return output_image, 0 , target_img, output_image_mv, x['img_pre'].squeeze()
 
+
+import matplotlib.pyplot as plt
+import torch
+
+
+def plot_tensors(tensor1, tensor2, i=8):
+    """Plots two PyTorch tensors on CUDA side-by-side
+
+    Args:
+        tensor1 (Tensor): First PyTorch tensor on CUDA device
+        tensor2 (Tensor): Second PyTorch tensor on CUDA device
+    """
+
+    # Move tensors to CPU
+    tensor1 = tensor1.cpu().squeeze()[i]
+    tensor2 = tensor2.cpu().squeeze()[i]
+
+    # Convert to NumPy array
+    tensor1 = tensor1.numpy()/tensor1.max()
+    tensor2 = tensor2.numpy()/tensor2.max()
+    # Take absolute difference
+    difference = abs(tensor1 - tensor2)
+    # Create plot
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    ax1.imshow(tensor1,'gray')
+    ax2.imshow(tensor2,'gray')
+    ax3.imshow(difference,'gray')
+    ax1.set_title('initial rec')
+    ax2.set_title('registered previous')
+    ax2.set_title('difference')
+    plt.tight_layout()
+    plt.show()
+
+
+# Example usage
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)
 # single_visit_net = nn.Sequential(nn.Linear(10, 20), nn.ReLU(), nn.Linear(20, 10))

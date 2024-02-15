@@ -48,13 +48,6 @@ class SliceDataset(Dataset):
 
 
     def __getitem__(self, idx):
-        # metadata = self.metadata_temp.iloc[idx]
-        # path_2_data = os.path.join(self.data_dir,f'{metadata["File name"]}.h5')
-        #
-        # prev_file_name = self.metadata_prev[self.metadata_prev['Patient ID'] == metadata['Patient ID']]["File name"].item()
-        # path_2_prev_data = os.path.join(self.data_dir, f'{prev_file_name}.h5')
-        # with h5py.File(path_2_data, "r") as hf:
-        #     kspace = hf["kspace"][metadata["Slice Number"]]
         metadata = self.metadata_temp.iloc[idx]
         path_2_data = os.path.join(self.data_dir,f'{metadata["File name"]}.h5')
         # path_2_prev_data = os.path.join(self.target_dir, f'{metadata["File name"]}.h5')
@@ -63,30 +56,14 @@ class SliceDataset(Dataset):
         with h5py.File(path_2_data, "r") as hf:
             kspace = hf["kspace"][metadata["Slice Number"]]
             # target = hf["target"][metadata["Slice Number"]]
-        # with h5py.File(path_2_prev_data, "r") as hf:
-        #     kspace_pre = hf["kspace"][metadata["Slice Number"]-24:metadata["Slice Number"]+24]
-        #     z, x, y, c = kspace_pre.shape
-        #     kspace_pre = kspace_pre.transpose(1, 2, 3, 0).reshape(x, y, -1)
-        # if self.input_transforms is not None:
-        #     kspace = self.input_transforms(kspace)
-        #     kspace_pre = self.input_transforms(kspace_pre)
         with h5py.File(path_2_prev_data, "r") as hf:
-            img_pred = hf["image"][metadata["Slice Number"]-32:metadata["Slice Number"]+32]
+            img_pred = hf["image"][metadata["Slice Number"]-50:metadata["Slice Number"]+50]
 
         if self.input_transforms is not None:
             kspace = self.input_transforms(kspace)
             img_pred = self.target_transforms(img_pred)
-        # if self.target_transforms is not None:
-        #     target = self.target_transforms(target)
-        # if self.target_transforms is not None:
-        #     target = self.target_transforms(target)
-        # kspace_pre= kspace_pre.view(c, z, x, 170, 2)
-        # img_pred = T.root_sum_of_squares(
-        #     ifft2(kspace_pre.type(dtype=torch.float32), dim=(2, 3),centered=False, normalized=False),
-        #     dim=0,
-        # )  # shape (batch, height,  width)
-        sample = {}
 
+        sample = {}
         sample["acs_mask"] = torch.from_numpy(self.mask_file[0]).type(dtype=torch.float32).unsqueeze(-1).unsqueeze(0)
         sample["kspace"] = kspace.type(dtype=torch.float32)
         sample["img_pre"] = img_pred.type(dtype=torch.float32)

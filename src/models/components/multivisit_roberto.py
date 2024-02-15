@@ -14,6 +14,9 @@ from projects.longitudinal.unet_cross_att import UnetModel2d_att
 from src.utils.direct.nn.unet import UnetModel2d
 from torchmetrics.image  import StructuralSimilarityIndexMeasure
 
+from src.utils.unet_yousef import UNetBlock
+
+
 class MV(nn.Module):
     def __init__(self, dim=4):
         super(MV, self).__init__()
@@ -76,7 +79,8 @@ class MV(nn.Module):
         # self.deconv3 = nn.Conv2d(int(dim/2), 1, kernel_size=15, stride=1,padding=1)
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
-        self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=32, num_pool_layers=2,dropout_probability=0.1)
+        # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool   _layers=2,dropout_probability=0.0)
+        self.unet = UNetBlock(2,1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -100,13 +104,15 @@ class MV(nn.Module):
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
         #                                    , mode='trilinear', align_corners=False)
-        x_volume = x_volume.permute(0,2,3,1)
+        # x_volume = x_volume.permute(0,2,3,1)
+        # x_slice = torch.nan_to_num(x_slice)
+        # x_volume = torch.nan_to_num(x_volume)
         # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
         # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
         # max_id = self.ssim_vmap(x_slice,x_volume).argmax(dim=0)
-        max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)), 
-                                            torch.exp((x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True)))),
-                               dim=1).argmax(dim=1)
+        # max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)),
+        #                                     torch.exp((x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True)))),
+        #                        dim=1).argmax(dim=1)
         # max_id = torch.sort(
         #     torch.einsum('bdhw, bshw -> bs', torch.exp(x_slice.unsqueeze(1)), torch.exp(x_volume)) / 100000,
         #     dim=1).indices[:,-4:]
@@ -121,10 +127,11 @@ class MV(nn.Module):
         #         result_tensors.append(x_volume[batch_idx, index-3:index+4, :, :].unsqueeze(0))
 
         # x_volume = x_volume[torch.arange(x_volume.size(0)), max_id]
-        x_volume = x_volume[torch.arange(x_volume.size(0)),max_id]
+        # x_volume = x_volume[torch.arange(x_volume.size(0)),max_id]
         # Stack the individual tensors along a new batch dimension
         # x_volume = torch.cat(result_tensors, dim=0)
-        z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))
+        # z = self.unet(x_slice)
+        z = self.unet(torch.cat((x_slice, x_volume), dim=1))
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
         # latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))
@@ -189,15 +196,15 @@ class MV(nn.Module):
 # reconstructed_volume = mri_net(x_slice, x_volume)
 
 class MultiVisitNet(nn.Module):
-    def __init__(self, single_visit_net, weights_path, multi_visit_net,freeze=True):
+    def __init__(self,  multi_visit_net,freeze=True):
         super(MultiVisitNet, self).__init__()
         # Initialize the single-visit network and load weights
-        self.single_visit_net = single_visit_net
-        if weights_path is not None:
-            self.single_visit_net.load_state_dict(torch.load(weights_path))
-            if freeze:
-                for param in single_visit_net.parameters():
-                    param.requires_grad = False
+        # self.single_visit_net = single_visit_net
+        # if weights_path is not None:
+        #     self.single_visit_net.load_state_dict(torch.load(weights_path))
+        #     if freeze:
+        #         for param in single_visit_net.parameters():
+        #             param.requires_grad = False
         # Initialize the multi-visit network
         # self.unet = UnetModel2d(in_channels=156,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0)
 
@@ -205,17 +212,17 @@ class MultiVisitNet(nn.Module):
 
     def forward(self, x):
         # Forward pass through the single-visit network
-        with torch.no_grad():
-            output_image, output_kspace, target_img = self.single_visit_net(x)
+        # with torch.no_grad():
+        #     output_image, output_kspace, target_img = self.single_visit_net(x)
         # Forward pass through the multi-visit network
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
-        output_image_mv,x_volume  = self.multi_visit_net(output_image,x['img_pre'])
-        output_image = output_image + output_image_mv
+        output_image_mv,x_volume  = self.multi_visit_net(x["data"],x['baseline'])
+        output_image = x["data"].squeeze() + output_image_mv
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
-        del output_kspace
-        return output_image, 0 , target_img, output_image_mv, x_volume
+        # del output_kspace
+        return output_image, 0 , x["target"].squeeze(), output_image_mv, x_volume.squeeze()
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

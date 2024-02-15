@@ -123,7 +123,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         """
 
 
-        output_image, output_kspace, target_img, output_image_mv = self.forward(batch)
+        output_image, output_kspace, target_img, output_image_mv,x_volume = self.forward(batch)
         # target_img = torch.abs(batch["target"]).squeeze(1)
 
         loss = {}
@@ -131,7 +131,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         for key, criterion in self.criterions.items():
             loss[key] = criterion(output_image, target_img)
 
-        return loss, output_image, target_img,output_image_mv
+        return loss, output_image, target_img,output_image_mv,x_volume
 
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
@@ -140,10 +140,10 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         :param batch: A batch of data (a tuple) containing the input tensor of images and target
             labels.
-        :param batch_idx: The index of the current batch.
+        :param batch_idx: The index of the current batch.tele
         :return: A tensor of losses between model predictions and targets.
         """
-        losses , preds, targets, output_image_sv  = self.model_step(batch)
+        losses , preds, targets, output_image_sv,_ = self.model_step(batch)
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
@@ -151,7 +151,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, loss in losses.items():
             # self.train_loss(loss)
-            self.log(f"train_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"train_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
 
         # return loss or backpropagation will fail
@@ -168,42 +168,55 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets, output_image_svs  = self.model_step(batch)
-        # preds = preds - output_image_svs
-        if (self.current_epoch % 5 == 0 and batch_idx == 10):
+        losses, preds, targets, output_image_svs,x_volume  = self.model_step(batch)
+        initial = preds - output_image_svs
+        if (self.current_epoch % 5 == 0 and batch_idx == 0):
             # columns = [ 'prediction','ground truth']
             n = 0
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            for n in range(2):
-                fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize as needed
-                pred =(preds[n]/preds[n].max()).cpu().detach()
-                # Plot prediction
-                im0 = axs[0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
-                axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
-                fig.colorbar(im0, ax=axs[0])
-                axs[0].axis('off')  # Hide axis
+            # for n in range(2):
+            n = preds.shape[0]//2
+            fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Adjust figsize as needed
+            pred =(preds[n]/preds[n].max()).cpu().detach()
+            # Plot prediction
+            im0 = axs[0,0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
+            axs[0,0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
+            fig.colorbar(im0, ax=axs[0,0])
+            axs[0,0].axis('off')  # Hide axis
 
-                target = (targets[n]/targets[n].max()).cpu().detach()
-                # Plot ground truth
-                im1 = axs[1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
-                axs[1].title.set_text('Ground Truth')
-                fig.colorbar(im1, ax=axs[1])
-                axs[1].axis('off')
+            target = (targets[n]/targets[n].max()).cpu().detach()
+            # Plot ground truth
+            im1 = axs[0,1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
+            axs[0,1].title.set_text('Ground Truth')
+            fig.colorbar(im1, ax=axs[0,1])
+            axs[0,1].axis('off')
 
-                im2 = axs[2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
-                axs[2].title.set_text('Diff')
-                axs[2].axis('off')
-                fig.colorbar(im2, ax=axs[2])
+            im2 = axs[0,2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
+            axs[0,2].title.set_text('Diff')
+            axs[0,2].axis('off')
+            fig.colorbar(im2, ax=axs[0,2])
 
-                output_image_sv = (output_image_svs[n] / output_image_svs[n].max()).cpu().detach()
-                im3 = axs[3].imshow(output_image_sv)  # Assuming output_image_sv[i] is a 2D array or an image file
-                axs[3].title.set_text('Res')
-                axs[3].axis('off')
-                fig.colorbar(im3, ax=axs[3])
+            output_image_sv = (output_image_svs[n] / output_image_svs[n].max()).cpu().detach()
+            im3 = axs[1,0].imshow(output_image_sv)  # Assuming output_image_sv[i] is a 2D array or an image file
+            axs[1,0].title.set_text('Res')
+            axs[1,0].axis('off')
+            fig.colorbar(im3, ax=axs[1,0])
 
-                self.logger.log_image(key="samples", images=[fig])
-                plt.close()
+            img_pre = (x_volume[n] / x_volume[n].max()).cpu().detach()
+            im3 = axs[1,1].imshow(img_pre)  # Assuming output_image_sv[i] is a 2D array or an image file
+            axs[1,1].title.set_text('Previous')
+            axs[1,1].axis('off')
+            fig.colorbar(im3, ax=axs[1,1])
+
+            initial = (initial[n] / initial[n].max()).cpu().detach()
+            im3 = axs[1,2].imshow(initial)  # Assuming output_image_sv[i] is a 2D array or an image file
+            axs[1,2].title.set_text('Initial rec')
+            axs[1,2].axis('off')
+            fig.colorbar(im3, ax=axs[1,2])
+
+            self.logger.log_image(key="samples", images=[fig])
+            plt.close()
 
 
 
@@ -233,8 +246,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets, output_image_mv = self.model_step(batch)
-        preds = preds - output_image_mv
+        losses, preds, targets, output_image_mv,_ = self.model_step(batch)
+        # preds = preds - output_image_mv
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
@@ -263,7 +276,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # psnr = src.utils.fastMRI.evaluate.psnr(targets.unsqueeze(1),preds.unsqueeze(1))
         # self.log(f"test_acc/{key}_nmse", psnr, on_step=True, on_epoch=True, prog_bar=False)
 
-        print("micky mouse")
+        # print("micky mouse")
             
         # update and log metrics
         # self.log('loss', loss)
