@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib import pyplot as plt
-from monai.networks.nets import AutoEncoder
+
 from sympy import reduced_totient
 from torch.nn import MultiheadAttention
 
@@ -12,6 +12,7 @@ import src.utils.direct.data.transforms as T
 from projects.longitudinal.stable_diff import pad_to_nearest_multiple, UNet2DConditionModel
 from projects.longitudinal.unet import UNetModel
 from projects.longitudinal.unet_cross_att import UnetModel2d_att
+from projects.longitudinal.unetr_dual import UNETR
 from src.utils.direct.nn.unet import UnetModel2d
 from torchmetrics.image  import StructuralSimilarityIndexMeasure
 
@@ -64,7 +65,7 @@ class MV(nn.Module):
         # self.slice_conv2 = nn.Conv2d(dim, dim*2, kernel_size=1, padding=0)
 
         # Feature extraction layers for past scan
-        self.volume_conv1 = nn.Conv3d(1, 4, kernel_size=kernel, stride=kernel)
+        # self.volume_conv1 = nn.Conv3d(1, 4, kernel_size=kernel, stride=kernel)
         # self.volume_conv2 = nn.Conv3d(1, dim, kernel_size=kernel, stride=kernel,padding=(0,3,3))
 
         # Cross-attention layer
@@ -72,8 +73,8 @@ class MV(nn.Module):
         # self.softmax = nn.Softmax(dim=-3)
         # Reconstruction layers
 
-        self.unet = UNetModel(in_channels=1, out_channels=1, channels=32, n_res_blocks=1, attention_levels=[1],
-                  channel_multipliers=[1, 2, 4], n_heads=4, d_cond=4)
+        # self.unet = UNetModel(in_channels=1, out_channels=1, channels=32, n_res_blocks=1, attention_levels=[1],
+        #           channel_multipliers=[1, 2, 4], n_heads=4, d_cond=4)
 
         # self.recon_conv1 = nn.Conv3d(dim*2, dim, kernel_size=3, padding=1)
         # self.recon_conv2 = nn.Conv3d(dim*2, 1, kernel_size=1, padding=0)
@@ -84,7 +85,7 @@ class MV(nn.Module):
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0.05)
         # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool_layers=2,dropout_probability=0.0)
-        # self.unet = UNetBlock(2,1)
+        self.unet = UNetBlock(2,1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -102,10 +103,17 @@ class MV(nn.Module):
         # self.unet = UNet2DConditionModel(in_channels=4, out_channels=4, cross_attention_dim=512,layers_per_block=1)
         # self.ssim_vmap = torch.vmap(self.cal_ssim, in_dims=(None,1))
         # self.ssim = StructuralSimilarityIndexMeasure(data_range=1,reduction=None)
-        # self.cos = nn.CosineSimilarity(dim=-1, eps=1e-6)
-    # def cal_ssim(self,input,target):
-    #     return self.ssim(input.unsqueeze(1), target.unsqueeze(1))
+        # self.cos = nn.CosineSimilarity(dim=-1, eps=1e-
+
+        self.unetr = UNETR(in_channels=1, out_channels=1, img_size=(16, 224, 176), proj_type='conv', spatial_dims=3)
+    def cal_ssim(self,input,target):
+        return self.ssim(input, target.unsqueeze(1))
     def forward(self, x_slice, x_volume):
+        # x_slice , pad = pad_to_nearest_multiple((torch.cat((x_slice, x_volume), dim=1)), 16)
+        x_slice, pad = pad_to_nearest_multiple((x_slice), 16)
+        x_volume, pad = pad_to_nearest_multiple((x_volume), 16)
+        z = self.unetr(x_slice,x_volume.unsqueeze(1))
+        z = self.unet(torch.cat((x_slice, z), dim=1))[..., :-pad[0], :-pad[1]]
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
         #                                    , mode='trilinear', align_corners=False)
@@ -136,8 +144,8 @@ class MV(nn.Module):
         # x_volume = torch.cat(result_tensors, dim=0)
         # z = self.unet(torch.cat((x_slice, x_volume.unsqueeze(1)), dim=1))
 
-        x_volume = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],4,-1).permute(0,2,1)
-        z = self.unet(x_slice, x_volume)
+        # x_volume = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],4,-1).permute(0,2,1)
+        # z = self.unet(x_slice, x_volume)
 
         # z = self.unet(x_slice,x_volume.view(x_slice.shape[0],x_volume.shape[1],-1).unsqueeze(1))
 
@@ -238,7 +246,7 @@ class MultiVisitNet(nn.Module):
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         # del output_kspace
-        return output_image, 0 , x["target"].squeeze(), output_image_mv, x['baseline'][0].squeeze()
+        return output_image, 0 , x["target"].squeeze(), output_image_mv, x["data"].squeeze()
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)
