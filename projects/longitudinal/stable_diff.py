@@ -40,7 +40,13 @@ def pad_to_nearest_multiple(tensor, Z):
     :param Z: The number to which height and width should be padded
     :return: Padded tensor
     """
-    _, _, h, w = tensor.shape
+
+    # Get the shape of the tensor
+    shape = tensor.shape
+
+    # Extract the sizes of the last two dimensions
+    w = shape[-1]
+    h = shape[-2]
 
     # Calculate the padding needed to reach the nearest multiple of Z
     h_padding = (Z - (h % Z)) % Z

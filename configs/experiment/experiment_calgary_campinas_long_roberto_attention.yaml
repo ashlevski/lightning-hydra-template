@@ -39,8 +39,8 @@ train: True
 
 data:
   _target_: src.data.calgary_campinas_datamodule_mv_roberto_attention.C2DataModule
-  num_workers: 0
-  batch_size: 2
+  num_workers: 2
+  batch_size: 4
   baseline_dir: "/home/ai2lab/datasets/roberto/Norm-baseline-nifti-reorient/"
 #  data_dir: "/work/souza_lab/amir/Data/h5"
 #  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"

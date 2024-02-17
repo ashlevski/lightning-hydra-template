@@ -16,7 +16,7 @@ model_checkpoint:
 
 early_stopping:
   monitor: "val_acc/SSIM"
-  patience: 20
+  patience: 200
   mode: "max"
 
 model_summary:
