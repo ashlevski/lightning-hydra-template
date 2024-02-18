@@ -16,7 +16,7 @@ from projects.longitudinal.unetr_dual import UNETR
 from src.utils.direct.nn.unet import UnetModel2d
 from torchmetrics.image  import StructuralSimilarityIndexMeasure
 
-from src.utils.unet_yousef import UNetBlock
+from src.utils.unet_yousef import UNetBlock, UNetBlock_att
 
 
 class MV(nn.Module):
@@ -85,7 +85,7 @@ class MV(nn.Module):
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0.05)
         # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool_layers=2,dropout_probability=0.0)
-        self.unet = UNetBlock(2,1)
+        self.unet = UNetBlock_att(1,1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -105,15 +105,17 @@ class MV(nn.Module):
         # self.ssim = StructuralSimilarityIndexMeasure(data_range=1,reduction=None)
         # self.cos = nn.CosineSimilarity(dim=-1, eps=1e-
 
-        self.unetr = UNETR(in_channels=1, out_channels=1, img_size=(16, 224, 176), proj_type='conv', spatial_dims=3)
+        # self.unetr = UNETR(in_channels=1, out_channels=1, img_size=(16, 224, 176), proj_type='conv', spatial_dims=3)
+
     def cal_ssim(self,input,target):
         return self.ssim(input, target.unsqueeze(1))
     def forward(self, x_slice, x_volume):
         # x_slice , pad = pad_to_nearest_multiple((torch.cat((x_slice, x_volume), dim=1)), 16)
         x_slice, pad = pad_to_nearest_multiple((x_slice), 16)
         x_volume, pad = pad_to_nearest_multiple((x_volume), 16)
-        z = self.unetr(x_slice,x_volume.unsqueeze(1))
-        z = self.unet(torch.cat((x_slice, z), dim=1))[..., :-pad[0], :-pad[1]]
+        # z = self.unetr(x_slice,x_volume.unsqueeze(1))
+        z = self.unet(x_slice, x_volume.unsqueeze(1))[..., :-pad[0], :-pad[1]]
+        # z = self.unet(torch.cat((x_slice, z), dim=1))[..., :-pad[0], :-pad[1]]
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
         #                                    , mode='trilinear', align_corners=False)
