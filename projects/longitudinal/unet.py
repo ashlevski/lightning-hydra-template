@@ -160,7 +160,7 @@ class UNetModel(nn.Module):
         :param time_steps: are the time steps of shape `[batch_size]`
         :param cond: conditioning of shape `[batch_size, n_cond, d_cond]`
         """
-        x, pad = pad_to_nearest_multiple(x, 16)
+        # x, pad = pad_to_nearest_multiple(x, 16)
         # To store the input half outputs for skip connections
         x_input_block = []
 
@@ -180,7 +180,7 @@ class UNetModel(nn.Module):
             x = module(x, cond)
 
         # Final normalization and $3 \times 3$ convolution
-        return self.out(x[:,:,:-pad[0],:-pad[1]])
+        return self.out(x)
 
 
 class TimestepEmbedSequential(nn.Sequential):
@@ -278,7 +278,7 @@ class ResBlock(nn.Module):
         self.out_layers = nn.Sequential(
             normalization(out_channels),
             nn.SiLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.),
             nn.Conv2d(out_channels, out_channels, 3, padding=1)
         )
 
