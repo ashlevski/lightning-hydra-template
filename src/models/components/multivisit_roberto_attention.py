@@ -63,9 +63,9 @@ class MV(nn.Module):
         # Feature extraction layers for current slice
         # self.slice_conv1 = nn.Conv2d(kernel, kernel, kernel_size=kernel, stride=kernel,padding=0)
         # self.slice_conv2 = nn.Conv2d(dim, dim*2, kernel_size=1, padding=0)
-
+        self.d_cond = 4
         # Feature extraction layers for past scan
-        # self.volume_conv1 = nn.Conv3d(1, 4, kernel_size=kernel, stride=kernel)
+        self.volume_conv1 = nn.Conv3d(1, self.d_cond, kernel_size=kernel, stride=kernel)
         # self.volume_conv2 = nn.Conv3d(1, dim, kernel_size=kernel, stride=kernel,padding=(0,3,3))
 
         # Cross-attention layer
@@ -73,8 +73,8 @@ class MV(nn.Module):
         # self.softmax = nn.Softmax(dim=-3)
         # Reconstruction layers
 
-        # self.unet = UNetModel(in_channels=1, out_channels=1, channels=32, n_res_blocks=1, attention_levels=[1],
-        #           channel_multipliers=[1, 2, 4], n_heads=4, d_cond=4)
+        self.unet = UNetModel(in_channels=1, out_channels=1, channels=32, n_res_blocks=1, attention_levels=[2],
+                  channel_multipliers=[1, 2, 4], n_heads=4,d_cond=self.d_cond)
 
         # self.recon_conv1 = nn.Conv3d(dim*2, dim, kernel_size=3, padding=1)
         # self.recon_conv2 = nn.Conv3d(dim*2, 1, kernel_size=1, padding=0)
@@ -85,7 +85,7 @@ class MV(nn.Module):
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=2,dropout_probability=0.05)
         # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool_layers=2,dropout_probability=0.0)
-        self.unet = UNetBlock_att(1,1)
+        # self.unet = UNetBlock_att(1,1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -114,7 +114,7 @@ class MV(nn.Module):
         x_slice, pad = pad_to_nearest_multiple((x_slice), 16)
         x_volume, pad = pad_to_nearest_multiple((x_volume), 16)
         # z = self.unetr(x_slice,x_volume.unsqueeze(1))
-        z = self.unet(x_slice, x_volume.unsqueeze(1))[..., :-pad[0], :-pad[1]]
+        # z = self.unet(x_slice, x_volume.unsqueeze(1))[..., :-pad[0], :-pad[1]]
         # z = self.unet(torch.cat((x_slice, z), dim=1))[..., :-pad[0], :-pad[1]]
         # x_slice_ = F.interpolate(x_slice.unsqueeze(1), scale_factor=0.25, mode='bilinear', align_corners=False)
         # x_volume_ = F.interpolate(x_volume.unsqueeze(1), scale_factor=(1, 0.25, 0.25)
@@ -146,8 +146,8 @@ class MV(nn.Module):
         # x_volume = torch.cat(result_tensors, dim=0)
         # z = self.unet(torch.cat((x_slice, x_volume.unsqueeze(1)), dim=1))
 
-        # x_volume = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],4,-1).permute(0,2,1)
-        # z = self.unet(x_slice, x_volume)
+        x_volume = self.volume_conv1(x_volume.unsqueeze(1)).view(x_slice.shape[0],self.d_cond,-1).permute(0,2,1)
+        z = self.unet(x_slice, x_volume)[..., :-pad[0], :-pad[1]]
 
         # z = self.unet(x_slice,x_volume.view(x_slice.shape[0],x_volume.shape[1],-1).unsqueeze(1))
 
