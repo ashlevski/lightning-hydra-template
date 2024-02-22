@@ -10,11 +10,12 @@ from torch.nn import MultiheadAttention
 
 import src.utils.direct.data.transforms as T
 from projects.longitudinal.stable_diff import pad_to_nearest_multiple, UNet2DConditionModel
+from projects.longitudinal.unet import UNetModel
 from projects.longitudinal.unet_cross_att import UnetModel2d_att
 from src.utils.direct.nn.unet import UnetModel2d
 from torchmetrics.image  import StructuralSimilarityIndexMeasure
 
-from src.utils.unet_yousef import UNetBlock
+from src.utils.unet_yousef import UNetBlock, UNetBlock_3d
 
 
 class MV(nn.Module):
@@ -58,8 +59,12 @@ class MV(nn.Module):
         #     self.attention.append(MultiheadAttention(embed_dim=dim, num_heads=4, batch_first=True))
 
         kernel = 16
+        self.d_cond = 16
+        # self.unet = UNetModel(in_channels=1, out_channels=1, channels=32, n_res_blocks=1, attention_levels=[],
+        #           channel_multipliers=[1, 2, 4], n_heads=4,d_cond=self.d_cond)
+
         # Feature extraction layers for current slice
-        # self.slice_conv1 = nn.Conv2d(1, dim, kernel_size=1, stride=1,padding=0)
+        # self.slice_conv1 =  nn.Conv2d(1, self.d_cond, kernel_size=kernel, stride=kernel)
         # self.slice_conv2 = nn.Conv2d(dim, dim*2, kernel_size=1, padding=0)
 
         # Feature extraction layers for past scan
@@ -80,7 +85,8 @@ class MV(nn.Module):
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
         # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool   _layers=2,dropout_probability=0.0)
-        self.unet = UNetBlock(2,1)
+        # self.unet = UNetBlock(2,1)
+        self.unet = UNetBlock_3d(2, 1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -107,8 +113,8 @@ class MV(nn.Module):
         # x_volume = x_volume.permute(0,2,3,1)
         # x_slice = torch.nan_to_num(x_slice)
         # x_volume = torch.nan_to_num(x_volume)
-        # x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
-        # x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
+        x_slice = ((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True)))
+        x_volume = (x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True))
         # max_id = self.ssim_vmap(x_slice,x_volume).argmax(dim=0)
         # max_id = torch.softmax(torch.einsum('bdhw, bshw -> bs', torch.exp(((x_slice / torch.amax(x_slice, dim=(-1, -2), keepdim=True))).unsqueeze(1)),
         #                                     torch.exp((x_volume / torch.amax(x_volume, dim=(-1, -2), keepdim=True)))),
@@ -131,7 +137,16 @@ class MV(nn.Module):
         # Stack the individual tensors along a new batch dimension
         # x_volume = torch.cat(result_tensors, dim=0)
         # z = self.unet(x_slice)
-        z = self.unet(torch.cat((x_slice, x_volume), dim=1))
+
+        x_slice, pad = pad_to_nearest_multiple((x_slice), 16)
+        x_volume, pad = pad_to_nearest_multiple((x_volume), 16)
+        # x_volume = self.slice_conv1(x_volume).view(x_slice.shape[0],self.d_cond,-1).permute(0,2,1)
+        # z = self.unet(x_slice, x_volume)[..., :-pad[0], :-pad[1]]
+
+        z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))[..., :-pad[0], :-pad[1]]
+
+
+
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
         # latent_3d = self.vae_3d.encode(x_volume.unsqueeze(1))
@@ -222,7 +237,7 @@ class MultiVisitNet(nn.Module):
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         # del output_kspace
-        return output_image, 0 , x["target"].squeeze(), output_image_mv, x_volume.squeeze()
+        return output_image, 0 , x["target"].squeeze(), output_image_mv, x['baseline'].squeeze()
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

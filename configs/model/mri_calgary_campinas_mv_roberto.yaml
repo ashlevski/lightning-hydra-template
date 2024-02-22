@@ -61,10 +61,10 @@ test_acc:
 criterions:
 #  mse:
 #    _target_: torch.nn.MSELoss
-#  l1:
-#    _target_: torch.nn.L1Loss
-  ssim:
-    _target_: src.models.components.losses.SSIMLoss
+  l1:
+    _target_: torch.nn.L1Loss
+#  ssim:
+#    _target_: src.models.components.losses.SSIMLoss
 #  r2:
 #    _target_: src.models.components.losses.R2ScoreLoss
 #
