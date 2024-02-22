@@ -63,12 +63,15 @@ class SliceDataset(Dataset):
         path_2_baseline = os.path.join(self.baseline_dir, f'{prev_file_name}')
 
         with h5py.File(path_2_data, "r") as hf:
-            data = hf["image"][metadata["Slice Number"]]
+            data = hf["image"][metadata["Slice Number"]-8:metadata["Slice Number"]+8]
         with h5py.File(path_2_target, "r") as hf:
-            target = hf["image"][metadata["Slice Number"]]
+            target = hf["image"][metadata["Slice Number"]-8:metadata["Slice Number"]+8]
         with h5py.File(path_2_baseline, "r") as hf:
-            baseline = hf["image"][metadata["Slice Number"]]
+            baseline = hf["image"][metadata["Slice Number"]-8:metadata["Slice Number"]+8]
 
+        data = np.transpose(data, (1, 2, 0))
+        target = np.transpose(target, (1, 2, 0))
+        baseline = np.transpose(baseline, (1, 2, 0))
         if self.input_transforms is not None:
             data = self.input_transforms(data)
             target = self.input_transforms(target)

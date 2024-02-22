@@ -282,7 +282,7 @@ class FeedForward(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             GeGLU(d_model, d_model * d_mult),
-            nn.Dropout(0.),
+            nn.Dropout(0.1),
             nn.Linear(d_model * d_mult, d_model)
         )
 
