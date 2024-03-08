@@ -1,4 +1,4 @@
-_target_: src.models.mri_calgary_campinas_module_mv.MRI_Calgary_Campinas_LitModule
+_target_: src.models.mri_calgary_campinas_module_mv_3d.MRI_Calgary_Campinas_LitModule
 
 optimizer:
   _target_: torch.optim.Adam
@@ -14,7 +14,7 @@ scheduler:
   patience: 100
 
 net:
-  _target_: src.models.components.multivisit_roberto.MultiVisitNet
+  _target_: src.models.components.multivisit_roberto_3d.MultiVisitNet
   multi_visit_net:
     _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
     in_channels: 2
@@ -33,8 +33,6 @@ train_acc:
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
-  # RMSE:
-  #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
   MSE:
     _target_: torchmetrics.MeanSquaredError
 
@@ -46,8 +44,6 @@ val_acc:
   SSIM:
     _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
     kernel_size: 7
-  # RMSE:
-  #   _target_: torchmetrics.image.RootMeanSquaredErrorUsingSlidingWindow
   MSE:
     _target_: torchmetrics.MeanSquaredError
 
@@ -61,6 +57,7 @@ test_acc:
     kernel_size: 7
   MSE:
     _target_: torchmetrics.MeanSquaredError
+
 
 criterions:
 #  mse:

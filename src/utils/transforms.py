@@ -18,6 +18,15 @@ class Scale(nn.Module):
     def forward(self, x):
         # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
         return (x / torch.abs(x).max())
+    
+class ScaleChannelwise(nn.Module):
+    def __init__(self):
+        super(ScaleChannelwise, self).__init__()
+
+    def forward(self, x):
+        # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
+        return (x / torch.abs(x).amax(dim=(1,2), keepdim=True)) 
+
 
 class Nan_to_num(nn.Module):
     def __init__(self):

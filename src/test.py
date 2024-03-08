@@ -16,8 +16,6 @@ from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from torchvision import transforms
 
-from src.utils.io_utils import save_tensor_to_nifti
-from src.utils.transforms import Scale, Nan_to_num
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
@@ -108,8 +106,7 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
             if cfg.get("ckpt_path") != None:
                 log.warning(f'Using provided ckpt weights for testing... {cfg.get("ckpt_path")}')
                 ckpt_path = cfg.get("ckpt_path")
-        model.load_from_checkpoint(ckpt_path)
-        model.eval()
+        
 
     test_class = hydra.utils.instantiate(cfg.get("test_class"))
 

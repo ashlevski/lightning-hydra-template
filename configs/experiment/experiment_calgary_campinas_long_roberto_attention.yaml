@@ -26,7 +26,7 @@ seed: 12345
 
 logger:
   wandb:
-    project: 'mri_recon_clean'
+    project: 'mri_recon_repro'
     tags: ${tags}
     group: "mri_recon"
   aim:
@@ -38,7 +38,7 @@ trainer:
 train: True
 
 data:
-  _target_: src.data.calgary_campinas_datamodule_mv_roberto_attention.C2DataModule
+  # _target_: src.data.calgary_campinas_datamodule_mv_roberto_attention.C2DataModule
   num_workers: 0
   batch_size: 2
 
@@ -47,7 +47,8 @@ data:
   metadata_val_dir: "/work/souza_lab/amir/Data/roberto/val.csv"
   metadata_test_dir: "/work/souza_lab/amir/Data/roberto/test.csv"
   target_dir: "/work/souza_lab/amir/Data/roberto/Reference/"
-  baseline_dir: "/work/souza_lab/amir/Data/roberto/Norm-baseline-nifti-reorient/"
+  # baseline_dir: "/work/souza_lab/amir/Data/roberto/Norm-baseline-nifti-reorient/"
+  baseline_dir: "/work/souza_lab/amir/Data/roberto/PS-reg/10x/"
 #  data_dir: "/work/souza_lab/amir/Data/h5"
 #  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
 #  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"

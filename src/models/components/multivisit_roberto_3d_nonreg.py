@@ -85,8 +85,8 @@ class MV(nn.Module):
         # self.deconv4 = nn.Conv3d(1, 1, kernel_size=(16, 1, 1), stride=(16, 1, 1))
         # self.unet = UnetModel2d_att(in_channels=1,out_channels=1,num_filters=8,num_pool_layers=4,dropout_probability=0)
         # self.unet = UnetModel2d(in_channels=2, out_channels=1, num_filters=16, num_pool   _layers=2,dropout_probability=0.0)
-        self.unet = UNetBlock(2,1)
-        # self.unet = UNetBlock_3d(2, 1)
+        # self.unet = UNetBlock(2,1)
+        self.unet = UNetBlock_3d(2, 1)
         # self.dim = dim
         # self.norm1 = torch.nn.LayerNorm(dim)
         # self.norm2 = torch.nn.LayerNorm(dim)
@@ -143,8 +143,9 @@ class MV(nn.Module):
         # x_volume = self.slice_conv1(x_volume).view(x_slice.shape[0],self.d_cond,-1).permute(0,2,1)
         # z = self.unet(x_slice, x_volume)[..., :-pad[0], :-pad[1]]
 
-        # z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))[..., :-pad[0], :-pad[1]]
-        z = self.unet(torch.cat((x_slice, x_volume), dim=1))[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
+        z = self.unet(torch.cat((x_slice.unsqueeze(1), x_volume.unsqueeze(1)), dim=1))[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
+        # z = self.unet(torch.cat((x_slice, x_volume), dim=1))[..., :-pad[0], :-pad[1]]
+
 
         # x_slice, pad = pad_to_nearest_multiple(x_slice.unsqueeze(1), 256)
         # latent_2d = self.vae_2d.encode(x_slice)
@@ -232,11 +233,12 @@ class MultiVisitNet(nn.Module):
         # It's assumed here that the multi-visit network takes the output of the single-visit network as input
         output_image_mv,x_volume  = self.multi_visit_net(x["data"],x['baseline'])
         output_image = x["data"].squeeze() + output_image_mv
+
         # plt.imshow(output_image.cpu().detach()[0, :, :])
         # plt.title(x['metadata']["File name"])
         # plt.show()+ 0*multi_visit_output #+ self.unet(x['img_pre']).squeeze()
         # del output_kspace
-        return output_image, 0 , x["target"].squeeze(), output_image_mv, x['baseline'].squeeze()
+        return output_image, 0 , x["target"], output_image_mv, x['baseline'].squeeze()
 
 # Example usage:
 # # Define the single-visit and multi-visit networks (they should be instances of nn.Module with the same input/output dimensions)

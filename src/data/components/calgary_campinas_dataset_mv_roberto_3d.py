@@ -26,18 +26,19 @@ class SliceDataset(Dataset):
         self.data_dir = data_dir
         self.target_dir = target_dir
         self.baseline_dir = baseline_dir
-        self.metadata = pd.read_csv(metadata_dir,header=None)
-        self.len = 0 #self.metadata['k space X res'].sum()
+        self.metadata = pd.read_csv(metadata_dir, header=None)
+        self.len = 0#self.metadata['k space X res'].sum()
         self.metadata_temp = pd.DataFrame(columns=["Baseline", "Slice Number","File name"])
-        self.crop_slice_idx= crop_slice_idx
+        self.crop_slice_idx= crop_slice_idx#+8
         for index, row in self.metadata.iterrows():
             value = 256
             self.start = crop_slice_idx
             self.end = value-crop_slice_idx
-            for i in range(self.start,self.end):
-                row_ = [row.iloc[0], i, row.iloc[1]]
-                self.metadata_temp.loc[len(self.metadata_temp)] = row_
-                self.len += 1
+            i=0
+            # for i in range(self.start,self.end):
+            row_ = [row.iloc[0], i, row.iloc[1]]
+            self.metadata_temp.loc[len(self.metadata_temp)] = row_
+            self.len += 1
         self.input_transforms = input_transforms
         # self.target_transforms = target_transforms
 
@@ -60,26 +61,10 @@ class SliceDataset(Dataset):
 
         path_2_data = os.path.join(self.data_dir,f'{metadata["File name"][:-2]}.h5')
         path_2_target = os.path.join(self.target_dir,f'{metadata["File name"][:-2]}.h5')
-        prev_file_name = f'{metadata["Baseline"]}_{metadata["File name"][:-2]}.h5'
+        # prev_file_name = f'{metadata["Baseline"]}_{metadata["File name"][:-2]}.h5'
+        prev_file_name = f'{metadata["Baseline"]}.h5'
         path_2_baseline = os.path.join(self.baseline_dir, f'{prev_file_name}')
 
-            
-        with h5py.File(path_2_data, "r") as hf:
-            data = hf["image"][metadata["Slice Number"]]
-        with h5py.File(path_2_target, "r") as hf:
-            target = hf["image"][metadata["Slice Number"]]
-        with h5py.File(path_2_baseline, "r") as hf:
-            baseline = hf["image"][metadata["Slice Number"]]
-
-
-        if self.input_transforms is not None:
-            data = self.input_transforms(data)
-            target = self.input_transforms(target)
-            baseline = self.input_transforms(baseline)
-            # target = self.target_transforms(target)
-        
-
-        """        
         with h5py.File(path_2_data, "r") as hf:
             data = hf["image"][self.crop_slice_idx:-self.crop_slice_idx]
         with h5py.File(path_2_target, "r") as hf:
@@ -87,21 +72,14 @@ class SliceDataset(Dataset):
         with h5py.File(path_2_baseline, "r") as hf:
             baseline = hf["image"][self.crop_slice_idx:-self.crop_slice_idx]
 
-        scale_data = (np.abs(data).max())
-        scale_target = (np.abs(target).max())
-        scale_baseline = (np.abs(baseline).max())
-
-        data = (data / scale_data)[metadata["Slice Number"]-self.crop_slice_idx]
-        target = (target / scale_target)[metadata["Slice Number"]-self.crop_slice_idx]
-        baseline = (baseline / scale_baseline)[metadata["Slice Number"]-self.crop_slice_idx]
-
-
+        data = np.transpose(data, (1, 2, 0))
+        target = np.transpose(target, (1, 2, 0))
+        baseline = np.transpose(baseline, (1, 2, 0))
         if self.input_transforms is not None:
             data = self.input_transforms(data)
             target = self.input_transforms(target)
             baseline = self.input_transforms(baseline)
             # target = self.target_transforms(target)
-        """
 
         sample = {}
         sample["data"] = data.type(dtype=torch.float32)
