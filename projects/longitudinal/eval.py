@@ -164,8 +164,10 @@ paths = [
     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-04_20-58-41/",
     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-06_23-41-38/",
     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-07_12-02-59/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-08_11-12-56/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-08_18-48-50/"
 ]
-methods = ['Baseline', '2D', '3D', '3D non-reg', "2D DiT"]
+methods = ['Baseline', '2D', '3D', '3D non-reg', "2D DiT Small", "2D DiT Large", "2D DiT + unet"]
 
 
 ssims_list, nmse_list, psnr_list, metrics_list = [], [], [], []
@@ -220,7 +222,8 @@ sns.boxplot(data=data_psnr)
 plt.title('PSNR')
 plt.savefig(save_dir + name_ + '_psnr.png')
 
-for path, metric in zip(paths, metrics_list):
+open(save_dir + name_ + "_output.txt", "w")
+for method, metric in zip(methods, metrics_list):
     print(f"{path} : mean is {metric.means()} and std is {metric.stddevs()}")
     with open(save_dir + name_ + "_output.txt", "a") as f:
-        f.write(f"{path} : mean is {metric.means()} and std is {metric.stddevs()}\n")
+        f.write(f"{method} : mean is {metric.means()} and std is {metric.stddevs()}\n")
