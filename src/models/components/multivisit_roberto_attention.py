@@ -9,6 +9,7 @@ from sympy import reduced_totient
 from torch.nn import MultiheadAttention
 
 import src.utils.direct.data.transforms as T
+from projects.longitudinal.Patch_embeeding import PatchEmbed
 from projects.longitudinal.stable_diff import pad_to_nearest_multiple, UNet2DConditionModel
 from projects.longitudinal.unet import UNetModel
 from projects.longitudinal.unet_cross_att import UnetModel2d_att
@@ -24,16 +25,18 @@ class MV(nn.Module):
         super(MV, self).__init__()
         self.model = DiT_S_4(learn_sigma=False,input_size=224,in_channels=1)
         self.unet = UNetBlock(2,1)
-        self.conv3 = Conv3d(1,1,kernel_size=(16,1,1))
+        self.y_embedder = PatchEmbed(224, 4, 1, 384, bias=True)
+        self.pos_embed = nn.Parameter(torch.zeros(1, 3136, 384), requires_grad=False)
     def cal_ssim(self,input,target):
         return self.ssim(input, target.unsqueeze(1))
     def forward(self, x_slice, x_volume):
-        x_volume = self.conv3(x_volume.unsqueeze(1)).squeeze(1)
+
         # print(x_volume.shape)
         x_slice, pad = pad_to_nearest_multiple((x_slice), 224)
         x_volume, pad = pad_to_nearest_multiple((x_volume), 224)
         # print(x_slice.shape)
         # print(x_volume.shape)
+        x_volume = self.y_embedder(x_volume.unsqueeze(1)) + self.pos_embed
         z = self.model(x_slice,x_volume)
         z = self.unet(torch.cat((x_slice, z), dim=1))[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
         return z.squeeze(1),x_volume
