@@ -37,9 +37,9 @@ class MV(nn.Module):
         # print(x_slice.shape)
         # print(x_volume.shape)
         x_volume = self.y_embedder(x_volume.unsqueeze(1)) + self.pos_embed
-        z = self.model(x_slice,x_volume)
-        z = self.unet(torch.cat((x_slice, z), dim=1))[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
-        return z.squeeze(1),x_volume
+        x_volume = self.model(x_slice,x_volume)
+        z = self.unet(torch.cat((x_slice, x_volume), dim=1))[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
+        return z.squeeze(1),x_volume.squeeze(1)[..., pad[0]//2:-pad[0]//2, pad[1]//2:-pad[1]//2]
 
 
 class MultiVisitNet(nn.Module):
