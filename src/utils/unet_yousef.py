@@ -43,7 +43,7 @@ class UNetBlock(nn.Module):
         self.conv19 = nn.Conv2d(112, 48, kernel_size=3, padding="same")
         self.conv20 = nn.Conv2d(48, 48, kernel_size=3, padding="same")
         self.conv21 = nn.Conv2d(48, 48, kernel_size=3, padding="same")
-
+        self.dropout = nn.Dropout(0.2)
         # Output layer
         self.conv22 = nn.Conv2d(48, out_channels, kernel_size=1)
 
@@ -51,6 +51,7 @@ class UNetBlock(nn.Module):
         stack=[]
         # Downsample
         x = F.relu(self.conv1(x))
+        # x = self.dropout(x)  # added dropout here
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         stack.append(x)

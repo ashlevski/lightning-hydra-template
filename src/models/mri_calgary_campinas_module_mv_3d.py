@@ -129,7 +129,15 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         loss = {}
 
         for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_image, target_img)
+            if key == 'l1':
+                loss[key] = criterion(output_image.unsqueeze(1), target_img.unsqueeze(1))
+            else:
+                loss[key] = criterion(x_volume.unsqueeze(1), target_img.unsqueeze(1))
+            # if key == 'lncc':
+            #     loss[key] = (0.99 ** self.current_epoch) * criterion(x_volume.unsqueeze(1), target_img.unsqueeze(1))
+            # else:
+            #     loss[key] = criterion(output_image.unsqueeze(1), target_img.unsqueeze(1))
+            # loss[key] = criterion(x_volume.unsqueeze(1), target_img.unsqueeze(1), output_image.unsqueeze(1), self.current_epoch)
 
         return loss, output_image, target_img,output_image_mv,x_volume
 
@@ -179,40 +187,40 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             n = preds.shape[0]//2
             m = preds.shape[1]//2
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Adjust figsize as needed
-            print(preds.shape)
+            # print(preds.shape)
             pred =(preds[n,m]/preds[n,m].max()).cpu().detach()
             # Plot prediction
-            im0 = axs[0,0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
+            im0 = axs[0,0].imshow(pred,cmap='gray')  # Assuming preds[i] is a 2D array or an image file
             axs[0,0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
             fig.colorbar(im0, ax=axs[0,0])
             axs[0,0].axis('off')  # Hide axis
 
             target = (targets[n,m]/targets[n,m].max()).cpu().detach()
             # Plot ground truth
-            im1 = axs[0,1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
+            im1 = axs[0,1].imshow(target,cmap='gray')  # Assuming targets[i] is a 2D array or an image file
             axs[0,1].title.set_text('Ground Truth')
             fig.colorbar(im1, ax=axs[0,1])
             axs[0,1].axis('off')
 
-            im2 = axs[0,2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
+            im2 = axs[0,2].imshow(torch.abs(pred-target),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
             axs[0,2].title.set_text('Diff')
             axs[0,2].axis('off')
             fig.colorbar(im2, ax=axs[0,2])
 
             output_image_sv = (output_image_svs[n,m] / output_image_svs[n,m].max()).cpu().detach()
-            im3 = axs[1,0].imshow(output_image_sv)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,0].imshow(output_image_sv,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,0].title.set_text('Res')
             axs[1,0].axis('off')
             fig.colorbar(im3, ax=axs[1,0])
 
             img_pre = (x_volume[n,m] / x_volume[n,m].max()).cpu().detach()
-            im3 = axs[1,1].imshow(img_pre)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,1].imshow(img_pre,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,1].title.set_text('Previous')
             axs[1,1].axis('off')
             fig.colorbar(im3, ax=axs[1,1])
 
             initial = (initial[n,m] / initial[n,m].max()).cpu().detach()
-            im3 = axs[1,2].imshow(initial)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,2].imshow(initial,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,2].title.set_text('Initial rec')
             axs[1,2].axis('off')
             fig.colorbar(im3, ax=axs[1,2])
@@ -224,7 +232,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         # update and log metrics
         for key, acc in self.val_acc.items():
-            acc(preds.unsqueeze(1), targets.unsqueeze(1))
+            B, Z, H, W = preds.shape
+            acc(preds.view(B*Z, 1, H, W), targets.view(B*Z, 1, H, W))
             self.log(f"val_acc/{key}", acc, on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():

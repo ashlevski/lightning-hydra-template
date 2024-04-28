@@ -59,6 +59,7 @@ class C2DataModule(LightningDataModule):
         target_dir: str = None,
         baseline_dir: str = None,
         transforms_input: Optional[Callable] = None,
+        transforms_train: Optional[Callable] = None,
         batch_size: int = 64,
         num_workers: int = 0,
         pin_memory: bool = False,
@@ -82,6 +83,10 @@ class C2DataModule(LightningDataModule):
         # data transformations
         self.transforms_input = transforms.Compose(
             transforms_input
+        )
+
+        self.transforms_train = transforms.Compose(
+            transforms_train
         )
 
         self.data_train: Optional[Dataset] = None
@@ -154,12 +159,14 @@ class C2DataModule(LightningDataModule):
                                        self.hparams.baseline_dir,
                                        self.hparams.metadata_train_dir,
                                        input_transforms=self.transforms_input,
+                                       train_transforms=self.transforms_train,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_val = SliceDataset(self.hparams.data_dir,
                                      self.hparams.target_dir,
                                      self.hparams.baseline_dir,
                                        self.hparams.metadata_val_dir,
                                      input_transforms=self.transforms_input,
+                                    #  train_transforms=self.transforms_train,
                                        crop_slice_idx = self.hparams.crop_slice_idx)
         self.data_test = SliceDataset(self.hparams.data_dir,
                                       self.hparams.target_dir,

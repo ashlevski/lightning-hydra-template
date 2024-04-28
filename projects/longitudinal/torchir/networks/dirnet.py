@@ -54,7 +54,7 @@ class DIRNet(nn.Module):
         num_downsamplings = num_downsamplings.astype(int)
 
         in_channels = 2
-        downsample = (0 < num_downsamplings).astype(np.int) + 1  # downsample kernel
+        downsample = (0 < num_downsamplings).astype(np.int_) + 1  # downsample kernel
         conv_layers = [
             ConvBlock(
                 in_channels,
@@ -66,7 +66,7 @@ class DIRNet(nn.Module):
             )
         ]
         for i in range(1, num_conv_layers):
-            downsample = (i < num_downsamplings).astype(np.int) + 1  # downsample kernel
+            downsample = (i < num_downsamplings).astype(np.int_) + 1  # downsample kernel
             conv_layers.append(
                 ConvBlock(
                     kernels,

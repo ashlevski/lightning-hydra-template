@@ -14,7 +14,11 @@ defaults:
 # this allows you to overwrite only specified parameters
 
 tags: ["multi-visit", "R10", "3d"]
-
+callbacks:
+  early_stopping:
+    monitor: "val_acc/SSIM"
+    patience: 200
+    mode: "max"
 seed: 12345
 
 # early_stopping:
@@ -33,7 +37,7 @@ logger:
     experiment: "mri_recon"
 
 trainer:
-  max_epochs: 600
+  max_epochs: 2000
 
 train: False
 test: True
@@ -49,12 +53,35 @@ data:
   target_dir: "/work/souza_lab/amir/Data/roberto/Reference/"
   # baseline_dir: "/work/souza_lab/amir/Data/roberto/PS-reg/10x/"
   baseline_dir: "/work/souza_lab/amir/Data/roberto/Norm-baseline-nifti-reorient/"
+  crop_slice_idx: 4
+  special_transforms:
+    - _target_: torchio.RandomAffine  
+      scales: 0
+      translation: [0,45,0,0,0,0]
+      degrees: 45
 #  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss/"
 # ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2024-02-21_20-33-34/checkpoints/epoch_072.ckpt"
 # ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-02-28_18-19-40/checkpoints/epoch_182.ckpt"
 model:
   net:
     _target_: src.models.components.multivisit_roberto_3d_nonreg.MultiVisitNet
+  optimizer:
+    lr: 0.0025
+  criterions:
+    # lncc:
+    #   _target_: projects.longitudinal.torchir.metrics.AdaptiveLoss
+    lncc:
+      _target_: projects.longitudinal.torchir.metrics.NCC
+    # l1:
+    #   _target_: torch.nn.L1Loss
+    # mse:
+    #   _target_: torch.nn.MSELoss
+  scheduler:
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _partial_: true
+    mode: max
+    factor: 0.9
+    patience: 200
 
 test_class:
   _target_: projects.longitudinal.test_3d.test_3d

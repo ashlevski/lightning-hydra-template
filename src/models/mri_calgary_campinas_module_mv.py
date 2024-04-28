@@ -180,37 +180,37 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))  # Adjust figsize as needed
             pred =(preds[n]/preds[n].max()).cpu().detach()
             # Plot prediction
-            im0 = axs[0,0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
+            im0 = axs[0,0].imshow(pred,cmap='gray')  # Assuming preds[i] is a 2D array or an image file
             axs[0,0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
             fig.colorbar(im0, ax=axs[0,0])
             axs[0,0].axis('off')  # Hide axis
 
             target = (targets[n]/targets[n].max()).cpu().detach()
             # Plot ground truth
-            im1 = axs[0,1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
+            im1 = axs[0,1].imshow(target,cmap='gray')  # Assuming targets[i] is a 2D array or an image file
             axs[0,1].title.set_text('Ground Truth')
             fig.colorbar(im1, ax=axs[0,1])
             axs[0,1].axis('off')
 
-            im2 = axs[0,2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
+            im2 = axs[0,2].imshow(torch.abs(pred-target),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
             axs[0,2].title.set_text('Diff')
             axs[0,2].axis('off')
             fig.colorbar(im2, ax=axs[0,2])
 
             output_image_sv = (output_image_svs[n] / output_image_svs[n].max()).cpu().detach()
-            im3 = axs[1,0].imshow(output_image_sv)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,0].imshow(output_image_sv,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,0].title.set_text('Res')
             axs[1,0].axis('off')
             fig.colorbar(im3, ax=axs[1,0])
 
             img_pre = (x_volume[n] / x_volume[n].max()).cpu().detach()
-            im3 = axs[1,1].imshow(img_pre)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,1].imshow(img_pre,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,1].title.set_text('Previous')
             axs[1,1].axis('off')
             fig.colorbar(im3, ax=axs[1,1])
 
             initial = (initial[n] / initial[n].max()).cpu().detach()
-            im3 = axs[1,2].imshow(initial)  # Assuming output_image_sv[i] is a 2D array or an image file
+            im3 = axs[1,2].imshow(initial,cmap='gray')  # Assuming output_image_sv[i] is a 2D array or an image file
             axs[1,2].title.set_text('Initial rec')
             axs[1,2].axis('off')
             fig.colorbar(im3, ax=axs[1,2])

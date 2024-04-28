@@ -33,7 +33,7 @@ logger:
     experiment: "mri_recon"
 
 trainer:
-  max_epochs: 200
+  max_epochs: 100
 
 train: False
 test: True
@@ -41,12 +41,22 @@ test: True
 data:
   num_workers: 4
   batch_size: 8
-  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced/10x/"
+  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced_e2ev/10x/"
   metadata_train_dir: "/work/souza_lab/amir/Data/roberto/train.csv"
   metadata_val_dir: "/work/souza_lab/amir/Data/roberto/val.csv"
   metadata_test_dir: "/work/souza_lab/amir/Data/roberto/test.csv"
-  target_dir: "/work/souza_lab/amir/Data/roberto/Reference/"
-  baseline_dir: "/work/souza_lab/amir/Data/roberto/PS-reg/10x/"
+  target_dir: "/work/souza_lab/amir/Data/roberto/Reference_e2ev/"
+  baseline_dir: "/work/souza_lab/amir/Data/roberto/easyreg/10x/"
+
+model:
+  criterions:
+  #  mse:
+  #    _target_: torch.nn.MSELoss
+    # l1:
+    #   _target_: torch.nn.L1Loss
+    ssim:
+      _target_: src.models.components.losses.SSIMLoss
+
 #  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss/"
 # ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-02-29_17-40-50/checkpoints/epoch_085.ckpt"
 # ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-02-28_00-03-34/checkpoints/epoch_037.ckpt"

@@ -40,8 +40,10 @@ class PatchEmbed(nn.Module):
             bias: bool = True,
             strict_img_size: bool = True,
             dynamic_img_pad: bool = False,
+            mode: str = '2D',
     ):
         super().__init__()
+        self.mode = mode
         self.patch_size = to_2tuple(patch_size)
         if img_size is not None:
             self.img_size = to_2tuple(img_size)
@@ -61,12 +63,18 @@ class PatchEmbed(nn.Module):
             self.output_fmt = Format.NCHW
         self.strict_img_size = strict_img_size
         self.dynamic_img_pad = dynamic_img_pad
-
-        self.proj = nn.Conv3d(in_chans, embed_dim, kernel_size=(16,patch_size,patch_size), stride=patch_size, bias=bias)
+        if mode == '2D':
+            self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=bias)
+        elif mode == '3D':
+            self.proj = nn.Conv3d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=bias)
         self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
 
     def forward(self, x):
-        B, C, Z, H, W = x.shape
+        if self.mode == '2D':
+            B, C, H, W = x.shape
+        elif self.mode == '3D':
+            B, C, Z, H, W = x.shape
+
         if self.img_size is not None:
             if self.strict_img_size:
                 _assert(H == self.img_size[0], f"Input height ({H}) doesn't match model ({self.img_size[0]}).")

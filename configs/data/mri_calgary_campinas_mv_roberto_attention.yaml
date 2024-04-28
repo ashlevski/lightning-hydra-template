@@ -16,4 +16,8 @@ transforms_input:
   - _target_: torchvision.transforms.transforms.CenterCrop
     size: [218,170]
   - _target_: src.utils.transforms.Scale
-
+special_transforms:
+  - _target_: torchio.RandomAffine  
+    scales: 0
+    translation: [0,5,0,0,0,0]
+    degrees: 5

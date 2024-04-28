@@ -42,7 +42,7 @@ data:
   num_workers: 0
   batch_size: 2
 
-  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced/10x/"
+  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced_e2ev/10x/"
   metadata_train_dir: "/work/souza_lab/amir/Data/roberto/train.csv"
   metadata_val_dir: "/work/souza_lab/amir/Data/roberto/val.csv"
   metadata_test_dir: "/work/souza_lab/amir/Data/roberto/test.csv"

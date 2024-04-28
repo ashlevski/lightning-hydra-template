@@ -1,7 +1,0 @@
-,Relative path,File name,Image X res,Image Y res,k space X res,k space Y res,Phases,Slices,Echos,Channels,Scan date,TE,TI,TR,Flip angle,Type,Patient ID,Relative scan date,Number of scan
-9,datasets/Dataset_C2/12_channel/Train,e14089s3_P53248,256,256,256,218,1,170,1,12,2018-06-11,2568.0,650000.0,6344.0,8.0,healthy,NORM400,0.0,1.0
-16,datasets/Dataset_C2/12_channel/Train,e14191s3_P58368,256,256,256,218,1,170,1,12,2018-06-26,2568.0,650000.0,6344.0,8.0,healthy,NORM478,0.0,1.0
-22,datasets/Dataset_C2/12_channel/Train,e14292s3_P85504,256,256,256,218,1,170,1,12,2018-07-10,2568.0,650000.0,6344.0,8.0,healthy,NORM483,0.0,1.0
-29,datasets/Dataset_C2/12_channel/Train,e14369s5_P40960,256,256,256,218,1,170,1,12,2018-07-23,2568.0,650000.0,6344.0,8.0,healthy,NORM138,0.0,1.0
-37,datasets/Dataset_C2/12_channel/Train,e14477s5_P34816,256,256,256,218,1,170,1,12,2018-08-08,2568.0,650000.0,6344.0,8.0,healthy,NORM442,0.0,1.0
-155,datasets/Dataset_C2/12_channel/Train,e16882s14_P46080,256,256,256,218,1,170,1,12,2019-09-05,2568.0,650000.0,6344.0,8.0,healthy,NORM101,0.0,1.0

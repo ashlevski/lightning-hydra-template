@@ -64,6 +64,7 @@ class C2DataModule(LightningDataModule):
         pin_memory: bool = False,
         shuffle: bool = True,
         crop_slice_idx = 0,
+        special_transforms: Optional[Callable] = None,
     ) -> None:
         """Initialize a `MNISTDataModule`.
 
@@ -83,12 +84,16 @@ class C2DataModule(LightningDataModule):
         self.transforms_input = transforms.Compose(
             transforms_input
         )
-
+        # data transformations
+        self.special_transforms = transforms.Compose(
+            special_transforms
+        )
         self.data_train: Optional[Dataset] = None
         self.data_val: Optional[Dataset] = None
         self.data_test: Optional[Dataset] = None
 
         self.batch_size_per_device = batch_size
+        
 
     @property
     def num_classes(self) -> int:
@@ -154,7 +159,8 @@ class C2DataModule(LightningDataModule):
                                        self.hparams.baseline_dir,
                                        self.hparams.metadata_train_dir,
                                        input_transforms=self.transforms_input,
-                                       crop_slice_idx = self.hparams.crop_slice_idx)
+                                       crop_slice_idx = self.hparams.crop_slice_idx,
+                                        special_transforms = self.special_transforms)
         self.data_val = SliceDataset(self.hparams.data_dir,
                                      self.hparams.target_dir,
                                      self.hparams.baseline_dir,

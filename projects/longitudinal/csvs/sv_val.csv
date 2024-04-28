@@ -1,0 +1,19 @@
+Relative path,File name,Image X res,Image Y res,k space X res,k space Y res,Phases,Slices,Echos,Channels,Scan date,TE,TI,TR,Flip angle,Type,Patient ID,Relative scan date,Number of scan
+datasets/Dataset_C2/12_channel/new,e19850s3_P09728,256,256,256,218,1,170,1,12,2022-03-17,2584.0,650000.0,6380.0,8.0,healthy,NORM414,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19861s3_P16384,256,256,256,218,1,170,1,12,2022-03-21,2584.0,650000.0,6380.0,8.0,healthy,NORM406,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19864s3_P17408,256,256,256,218,1,170,1,12,2022-03-22,2584.0,650000.0,6380.0,8.0,healthy,NORM422,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19869s3_P60928,256,256,256,218,1,170,1,12,2022-03-23,2584.0,650000.0,6380.0,8.0,healthy,NORM438,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19870s3_P70656,256,256,256,218,1,170,1,12,2022-03-23,2584.0,650000.0,6380.0,8.0,healthy,NORM410,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19890s3_P36352,256,256,256,218,1,170,1,12,2022-03-28,2584.0,650000.0,6380.0,8.0,healthy,NORM424,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19928s3_P17408,256,256,256,218,1,170,1,12,2022-04-06,2584.0,650000.0,6380.0,8.0,healthy,NORM426,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19933s5_P59904,256,256,256,218,1,170,1,12,2022-04-07,2584.0,650000.0,6380.0,8.0,healthy,NORM441,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19932s3_P49664,256,256,256,218,1,170,1,12,2022-04-07,2584.0,650000.0,6380.0,8.0,healthy,NORM421,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19961s3_P20480,256,256,256,218,1,170,1,12,2022-04-13,2584.0,650000.0,6380.0,8.0,healthy,NORM411,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19963s3_P39936,256,256,256,218,1,170,1,12,2022-04-13,2584.0,650000.0,6380.0,8.0,healthy,NORM404,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19967s4_P16896,256,256,256,218,1,170,1,12,2022-04-14,2584.0,650000.0,6380.0,8.0,healthy,NORM435,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19977s3_P37888,256,256,256,218,1,170,1,12,2022-04-18,2584.0,650000.0,6380.0,8.0,healthy,NROM405,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19994s3_P54784,256,256,256,218,1,170,1,12,2022-04-21,2584.0,650000.0,6380.0,8.0,healthy,NORM448,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e19993s9_P50176,256,256,256,218,1,170,1,12,2022-04-21,2584.0,650000.0,6380.0,8.0,healthy,NORM440,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e20039s3_P33792,256,256,256,218,1,170,1,12,2022-05-03,2584.0,650000.0,6380.0,8.0,healthy,NORM423,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e20059s3_P51200,256,256,256,218,1,170,1,12,2022-05-05,2584.0,650000.0,6380.0,8.0,healthy,NORM446,0.0,1.0
+datasets/Dataset_C2/12_channel/new,e20060s3_P59904,256,256,256,218,1,170,1,12,2022-05-05,2584.0,650000.0,6380.0,8.0,healthy,NORM444,0.0,1.0

@@ -8,8 +8,8 @@ class NormalizeSampleTransform(nn.Module):
 
     def forward(self, x):
         # Calculate the maximum along the spatial dimensions and the real/imaginary channel (last three dimensions)
-
-        return (x / torch.abs(x).amax(dim=(0,1,2), keepdim=True)) * self.scale
+# torch.abs(x).amax(dim=(0,1,2), keepdim=True)
+        return (x) * self.scale
 
 class Scale(nn.Module):
     def __init__(self):

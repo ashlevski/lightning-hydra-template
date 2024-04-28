@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 import torch
 from torch import Tensor
-from torch.nn.modules.loss import _Loss
+from torch.nn.modules.loss import _Loss,L1Loss
 
 from projects.longitudinal.torchir.utils import stablestd
 
@@ -177,3 +177,22 @@ class NMI(_Loss):
         return -nmi_gauss_mask(
             fixed, warped, bins_fixed, bins_warped, mask, sigma=self.sigma
         )
+    
+class AdaptiveLoss(_Loss):
+    def __init__(self, lambda_init=1.0, decay_rate=0.99):
+        super().__init__()
+        self.lambda_init = lambda_init
+        self.decay_rate = decay_rate
+        self.ncc_loss = NCC()
+        self.l1_loss = L1Loss()
+
+    def forward(self, moved: Tensor, target: Tensor, enhanced: Tensor, global_step: int) -> Tensor:
+        l1_loss = self.l1_loss(enhanced, target)
+        ncc_loss = self.ncc_loss(moved, target)
+
+        # Exponentially decay the weight of NCC loss
+        lambda_t = self.lambda_init * (self.decay_rate ** global_step)
+
+        total_loss = l1_loss + lambda_t * ncc_loss
+
+        return total_loss

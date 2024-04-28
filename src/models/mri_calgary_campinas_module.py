@@ -171,31 +171,31 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         losses, preds, targets = self.model_step(batch)
         if (self.current_epoch % 5 == 0 and batch_idx == 4):
             # columns = [ 'prediction','ground truth']
-            n = 0
+            n = preds.shape[0]//2
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            for n in range(preds.shape[0]):
-                fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
-                pred =(preds[n]/preds[n].max()).cpu().detach()
-                # Plot prediction
-                im0 = axs[0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
-                axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
-                fig.colorbar(im0, ax=axs[0])
-                axs[0].axis('off')  # Hide axis
+            # for n in range(preds.shape[0]):
+            fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust figsize as needed
+            pred =(preds[n]/preds[n].max()).cpu().detach()
+            # Plot prediction
+            im0 = axs[0].imshow(pred,cmap='gray')  # Assuming preds[i] is a 2D array or an image file
+            axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
+            fig.colorbar(im0, ax=axs[0])
+            axs[0].axis('off')  # Hide axis
 
-                target = (targets[n]/targets[n].max()).cpu().detach()
-                # Plot ground truth
-                im1 = axs[1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
-                axs[1].title.set_text('Ground Truth')
-                fig.colorbar(im1, ax=axs[1])
-                axs[1].axis('off')
+            target = (targets[n]/targets[n].max()).cpu().detach()
+            # Plot ground truth
+            im1 = axs[1].imshow(target,cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            axs[1].title.set_text('Ground Truth')
+            fig.colorbar(im1, ax=axs[1])
+            axs[1].axis('off')
 
-                im2 = axs[2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
-                axs[2].title.set_text('Diff')
-                axs[2].axis('off')
-                fig.colorbar(im2, ax=axs[2])
-                self.logger.log_image(key="samples", images=[fig])
-                plt.close()
+            im2 = axs[2].imshow(torch.abs(pred-target),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            axs[2].title.set_text('Diff')
+            axs[2].axis('off')
+            fig.colorbar(im2, ax=axs[2])
+            self.logger.log_image(key="samples", images=[fig])
+            plt.close()
 
 
 

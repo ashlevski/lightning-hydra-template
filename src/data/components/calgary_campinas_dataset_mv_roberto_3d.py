@@ -21,6 +21,7 @@ class SliceDataset(Dataset):
                 metadata_dir: str,
                 input_transforms: Optional[Callable],
                 crop_slice_idx = 0,
+                special_transforms: Optional[Callable] = None,
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
@@ -41,6 +42,7 @@ class SliceDataset(Dataset):
             self.len += 1
         self.input_transforms = input_transforms
         # self.target_transforms = target_transforms
+        self.special_transforms = special_transforms
 
 
 
@@ -80,6 +82,9 @@ class SliceDataset(Dataset):
             target = self.input_transforms(target)
             baseline = self.input_transforms(baseline)
             # target = self.target_transforms(target)
+
+        if self.special_transforms is not None:
+            baseline = self.special_transforms(baseline.unsqueeze(0)).squeeze()
 
         sample = {}
         sample["data"] = data.type(dtype=torch.float32)

@@ -23,10 +23,10 @@ from projects.longitudinal.DiT_custom import DiT_S_8, DiT_S_4, DiT_B_4, DiT_L_8,
 class MV(nn.Module):
     def __init__(self, dim=4):
         super(MV, self).__init__()
-        self.model = DiT_S_4(learn_sigma=False,input_size=224,in_channels=1)
+        self.model = DiT_S_8(learn_sigma=False,input_size=224,in_channels=1)
         self.unet = UNetBlock(2,1)
-        self.y_embedder = PatchEmbed(224, 4, 1, 384, bias=True)
-        self.pos_embed = nn.Parameter(torch.zeros(1, 3136, 384), requires_grad=False)
+        self.y_embedder = PatchEmbed(224, 8, 1, 384, bias=True)
+        self.pos_embed = nn.Parameter(torch.zeros(1, 784, 384), requires_grad=False)
     def cal_ssim(self,input,target):
         return self.ssim(input, target.unsqueeze(1))
     def forward(self, x_slice, x_volume):

@@ -26,7 +26,7 @@ class SliceDataset(Dataset):
         self.data_dir = data_dir
         self.target_dir = target_dir
         self.baseline_dir = baseline_dir
-        self.metadata = pd.read_csv(metadata_dir)
+        self.metadata = pd.read_csv(metadata_dir, header=None)
         self.len = 0#self.metadata['k space X res'].sum()
         self.metadata_temp = pd.DataFrame(columns=["Baseline", "Slice Number","File name"])
         for index, row in self.metadata.iterrows():

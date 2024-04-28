@@ -19,7 +19,8 @@ class SliceDataset(Dataset):
                 target_dir: str,
                 baseline_dir: str,
                 metadata_dir: str,
-                input_transforms: Optional[Callable],
+                input_transforms: Optional[Callable] = None,
+                train_transforms: Optional[Callable ]= None,
                 crop_slice_idx = 0,
     ) -> None:
         super().__init__()
@@ -39,7 +40,7 @@ class SliceDataset(Dataset):
                 self.metadata_temp.loc[len(self.metadata_temp)] = row_
                 self.len += 1
         self.input_transforms = input_transforms
-        # self.target_transforms = target_transforms
+        self.train_transforms = train_transforms
 
 
 
@@ -77,7 +78,15 @@ class SliceDataset(Dataset):
             target = self.input_transforms(target)
             baseline = self.input_transforms(baseline)
             # target = self.target_transforms(target)
-        
+        # print(self.train_transforms)
+        # if self.train_transforms is not None:
+            
+        #     cat_images = torch.cat((data.unsqueeze(0), target.unsqueeze(0), baseline.unsqueeze(0)),0)
+        #     cat_images = self.train_transforms(cat_images)
+        #     data = cat_images[0]
+        #     target = cat_images[1]
+        #     baseline = cat_images[2]
+
 
         """        
         with h5py.File(path_2_data, "r") as hf:

@@ -17,3 +17,11 @@ transforms_input:
     size: [218,170]
   - _target_: src.utils.transforms.Scale
 
+transforms_train:
+  - _target_: torchvision.transforms.RandomAffine
+    degrees: 15
+    translate: [0.01,0.01]
+    scale: [0.9,1.1]
+  # - _target_: torchvision.transforms.RandomHorizontalFlip
+  # - _target_: torchvision.transforms.RandomVerticalFlip
+
