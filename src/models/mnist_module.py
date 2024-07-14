@@ -1,6 +1,7 @@
 from typing import Any, Dict, Tuple
 
-import torch, omegaconf
+import omegaconf
+import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
