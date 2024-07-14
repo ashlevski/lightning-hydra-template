@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple
 
-import torch
+import torch, omegaconf
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
@@ -44,6 +44,7 @@ class MNISTLitModule(LightningModule):
         net: torch.nn.Module,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
+        scheduler_tracking: omegaconf.dictconfig.DictConfig,
         compile: bool,
     ) -> None:
         """Initialize a `MNISTLitModule`.
@@ -205,9 +206,9 @@ class MNISTLitModule(LightningModule):
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val/loss",
-                    "interval": "epoch",
-                    "frequency": 1,
+                    "monitor": self.hparams.scheduler_tracking.monitor,
+                    "interval": self.hparams.scheduler_tracking.interval,
+                    "frequency": self.hparams.scheduler_tracking.frequency,
                 },
             }
         return {"optimizer": optimizer}

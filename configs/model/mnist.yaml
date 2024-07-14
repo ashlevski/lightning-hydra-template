@@ -13,6 +13,11 @@ scheduler:
   factor: 0.1
   patience: 10
 
+scheduler_tracking:
+  monitor: "val/loss"
+  interval: "epoch"
+  frequency: 1
+
 net:
   _target_: src.models.components.simple_dense_net.SimpleDenseNet
   input_size: 784
