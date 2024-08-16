@@ -1178,6 +1178,7 @@ This template was inspired by:
 
 Other useful repositories:
 
+- [tshu-w/lightning-template](https://github.com/tshu-w/lightning-template) - lightning-template uses the built-in CLI to manage experiments
 - [jxpress/lightning-hydra-template-vertex-ai](https://github.com/jxpress/lightning-hydra-template-vertex-ai) - lightning-hydra-template integration with Vertex AI hyperparameter tuning and custom training job
 
 </details>
