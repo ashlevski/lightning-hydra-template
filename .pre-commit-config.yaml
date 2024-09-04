@@ -17,40 +17,16 @@ repos:
       - id: check-case-conflict
       - id: check-added-large-files
 
-  # python code formatting
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
+  # Replace Flake8, isort, autoflake, pyupgrade, pydocstyle
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.6.3
     hooks:
-      - id: black
-        args: [--line-length, "99"]
-
-  # python import sorting
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black", "--filter-files"]
-
-  # python upgrading syntax to newer version
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
-    hooks:
-      - id: pyupgrade
-        args: [--py38-plus]
-
-  # python docstring formatting
-  - repo: https://github.com/myint/docformatter
-    rev: v1.7.4
-    hooks:
-      - id: docformatter
-        args:
-          [
-            --in-place,
-            --wrap-summaries=99,
-            --wrap-descriptions=99,
-            --style=sphinx,
-            --black,
-          ]
+      # Run the linter.
+      - id: ruff
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
 
   # python docstring coverage checking
   - repo: https://github.com/econchick/interrogate
@@ -67,20 +43,6 @@ repos:
             --ignore-nested-functions,
             -vv,
           ]
-
-  # python check (PEP8), programming errors and code complexity
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        args:
-          [
-            "--extend-ignore",
-            "E203,E402,E501,F401,F841,RST2,RST301",
-            "--exclude",
-            "logs/*,data/*",
-          ]
-        additional_dependencies: [flake8-rst-docstrings==0.3.0]
 
   # python security linter
   - repo: https://github.com/PyCQA/bandit
