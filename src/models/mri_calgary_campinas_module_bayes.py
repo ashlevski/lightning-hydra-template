@@ -52,6 +52,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self,
         net: torch.nn.Module,
         net_path: None,
+        num_of_infer,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
         compile: bool,
@@ -87,13 +88,15 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.test_loss = MeanMetric()
 
         # for tracking best so far validation accuracy
-        self.val_acc_best = MaxMetric()
-
+        self.val_acc_best = {}#[MaxMetric() for x in self.test_acc]
+        for key ,acc in self.val_acc.items():
+            self.val_acc_best[key] = MaxMetric()
+        self.num_of_infer = num_of_infer
         moped_enable_ = False
-        # if net_path is not None:
-        #     self.net.load_state_dict(torch.load(net_path))
-        #     print("a pretrained model is loaded")
-        #     moped_enable_ = True
+        if net_path is not None:
+            self.net.load_state_dict(torch.load(net_path))
+            print("a pretrained model is loaded")
+            moped_enable_ = True
 
         const_bnn_prior_parameters = {
             "prior_mu": 0.0,
@@ -102,10 +105,12 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             "posterior_rho_init": -3.0,
             "type": "Reparameterization",  # Flipout or Reparameterization
             "moped_enable": moped_enable_,  # True to initialize mu/sigma from the pretrained dnn weights
-            "moped_delta": 0.5,
+            "moped_delta": 0.005,
         }
 
         dnn_to_bnn(self.net, const_bnn_prior_parameters)
+
+        self.conv_final = torch.nn.Conv2d(1,2, kernel_size=1)
 
 
 
@@ -124,7 +129,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         self.val_loss.reset()
         for key ,acc in self.val_acc.items():
             acc.reset()
-        self.val_acc_best.reset()
+        for key ,acc in self.val_acc_best.items():
+            acc.reset()
+
 
     def model_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor]
@@ -141,6 +148,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
 
         output_image, output_kspace, target_img = self.forward(batch)
+        # print(output_image.shape)
+        # output_image = self.conv_final(output_image)
+        # print(output_image.shape)
         # target_img = torch.abs(batch["target"]).squeeze(1)
 
         loss = {}
@@ -165,7 +175,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"train_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"train_acc/{key}", acc, on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.train_loss(loss)
@@ -192,7 +202,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         all_preds = []
         # batch_ = copy.deepcopy(batch)
         # Run the function 10 times
-        for _ in range(5):
+        for _ in range(self.num_of_infer):
             # batch = batch_
             losses, preds, targets = self.model_step(copy.deepcopy(batch))
             
@@ -211,34 +221,34 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         if (self.current_epoch % 5 == 0 and batch_idx == 10):
             # columns = [ 'prediction','ground truth']
-            n = 0
+            n = preds.shape[0]//2
             # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
             # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            for n in range(preds.shape[0]):
-                fig, axs = plt.subplots(1, 4, figsize=(20, 5))  # Adjust figsize as needed
-                pred =(preds[n]/preds[n].max()).cpu().detach()
-                # Plot prediction
-                im0 = axs[0].imshow(pred)  # Assuming preds[i] is a 2D array or an image file
-                axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
-                fig.colorbar(im0, ax=axs[0])
-                axs[0].axis('off')  # Hide axis
+            # for n in range(preds.shape[0]):
+            fig, axs = plt.subplots(1, 4, figsize=(15, 5))  # Adjust figsize as needed
+            pred =(preds[n]/preds[n].max()).cpu().detach()
+            # Plot prediction
+            im0 = axs[0].imshow(pred,cmap='gray')  # Assuming preds[i] is a 2D array or an image file
+            axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
+            fig.colorbar(im0, ax=axs[0])
+            axs[0].axis('off')  # Hide axis
 
-                target = (targets[n]/targets[n].max()).cpu().detach()
-                # Plot ground truth
-                im1 = axs[1].imshow(target)  # Assuming targets[i] is a 2D array or an image file
-                axs[1].title.set_text('Ground Truth')
-                fig.colorbar(im1, ax=axs[1])
-                axs[1].axis('off')
+            target = (targets[n]/targets[n].max()).cpu().detach()
+            # Plot ground truth
+            im1 = axs[1].imshow(target,cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            axs[1].title.set_text('Ground Truth')
+            fig.colorbar(im1, ax=axs[1])
+            axs[1].axis('off')
 
-                im2 = axs[2].imshow(torch.abs(pred-target))  # Assuming targets[i] is a 2D array or an image file
-                axs[2].title.set_text('Diff')
-                axs[2].axis('off')
-                fig.colorbar(im2, ax=axs[2])
+            im2 = axs[2].imshow(torch.abs(pred-target),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            axs[2].title.set_text('Diff')
+            axs[2].axis('off')
+            fig.colorbar(im2, ax=axs[2])
 
-                im3 = axs[3].imshow((variance_preds[n]/variance_preds[n].max()).cpu().detach())  # Assuming targets[i] is a 2D array or an image file
-                axs[3].title.set_text('uncertainy')
-                axs[3].axis('off')
-                fig.colorbar(im3, ax=axs[3])
+            im3 = axs[3].imshow((variance_preds[n]/variance_preds[n].max()).cpu().detach(),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            axs[3].title.set_text('uncertainy')
+            axs[3].axis('off')
+            fig.colorbar(im3, ax=axs[3])
 
                 # im4 = axs[4].imshow(predictive_uncertainty)  # Assuming targets[i] is a 2D array or an image file
                 # axs[4].title.set_text('predictive uncertainty')
@@ -250,28 +260,30 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
                 # axs[5].axis('off')
                 # fig.colorbar(im5, ax=axs[5])
 
-                self.logger.log_image(key="samples", images=[fig])
-                plt.close()
+            self.logger.log_image(key="samples", images=[fig])
+            plt.close()
 
 
 
         # update and log metrics
         for key, acc in self.val_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
-            self.log(f"val_acc/{key}", acc.compute(), on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"val_acc/{key}", acc, on_step=False, on_epoch=True, prog_bar=False)
 
         for key, loss in losses.items():
             # self.val_loss(loss)
             self.log(f"val_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
         for key, acc in self.val_acc.items():
             acc = acc.compute()  # get current val acc
-            self.val_acc_best(acc)  # update best so far val acc
+            self.val_acc_best[key](acc)  # update best so far val acc
         # log `val_acc_best` as a value through `.compute()` method, instead of as a metric object
         # otherwise metric would be reset by lightning after each epoch
-            self.log(f"val_acc_best/{key}", self.val_acc_best.compute(), sync_dist=True, prog_bar=False)
+            self.log(f"val_acc_best/{key}", self.val_acc_best[key].compute(), sync_dist=True, prog_bar=False)
             # self.val_acc_best.reset()
+
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
 
@@ -279,8 +291,31 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets = self.model_step(batch)
+                # losses, preds, targets = self.model_step(batch)
 
+        # Initialize empty lists to store results
+        all_preds = []
+        # batch_ = copy.deepcopy(batch)
+        # Run the function 10 times
+        for _ in range(self.num_of_infer):
+            # batch = batch_
+            losses, preds, targets = self.model_step(copy.deepcopy(batch))
+            
+            # Append results to lists
+            all_preds.append(preds)
+
+        # Stack the lists along a new dimension (assuming preds and targets are tensors with the same shape)
+        all_preds = torch.stack(all_preds)
+
+        # predictive_uncertainty = predictive_entropy(all_preds.cpu().numpy())
+        # model_uncertainty = mutual_information(all_preds.cpu().numpy())
+
+        preds = all_preds.mean(dim=0)  # Assuming preds is a 2D tensor (samples x features)
+        variance_preds = all_preds.var(dim=0)
+
+        losses, preds, targets  = self.model_step(batch)
+        # preds = preds - output_image_mv
+        save_tensor_to_nifti(variance_preds/preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds_var.nii"))
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
         accuracies = {}
@@ -292,6 +327,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
             if key not in accuracies:
                 accuracies[key] = []
+            
             accuracies[key] = [(x.cpu().numpy()).tolist() for x in acc_]
             self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
             self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
@@ -300,7 +336,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # self.log('loss', loss)
         for key, loss in losses.items():
             # self.test_loss(loss)
-            self.log(f"test_loss/{key}", loss, on_step=False, on_epoch=True, prog_bar=False)
+            self.log(f"test_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
 
         # Define JSON file path

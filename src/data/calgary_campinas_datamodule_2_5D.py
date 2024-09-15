@@ -10,7 +10,7 @@ from torchvision.datasets import MNIST
 from torchvision.transforms import transforms
 import pandas as pd
 
-from src.data.components.calgary_campinas_dataset import SliceDataset
+from src.data.components.calgary_campinas_dataset_2_5D import SliceDataset
 
 
 class C2DataModule(LightningDataModule):
@@ -66,7 +66,7 @@ class C2DataModule(LightningDataModule):
         pin_memory: bool = False,
         shuffle: bool = True,
         crop_slice_idx = 0,
-        num_slices = None,
+        view= 0,
     ) -> None:
         """Initialize a `MNISTDataModule`.
 
@@ -97,8 +97,6 @@ class C2DataModule(LightningDataModule):
 
         self.batch_size_per_device = batch_size
         self.sensitivity = sensitivity
-
-        self.num_slices = num_slices
 
     @property
     def num_classes(self) -> int:
@@ -165,21 +163,21 @@ class C2DataModule(LightningDataModule):
                                        input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target,
                                        crop_slice_idx = self.hparams.crop_slice_idx,
-                                       num_slices = self.num_slices)
+                                       view=self.hparams.view)
         self.data_val = SliceDataset(self.hparams.data_dir,
                                        self.hparams.metadata_val_dir,
                                        self.hparams.mask_dir,
                                        input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target,
                                        crop_slice_idx = self.hparams.crop_slice_idx,
-                                       num_slices = self.num_slices)
+                                       view=self.hparams.view)
         self.data_test = SliceDataset(self.hparams.data_dir,
                                        self.hparams.metadata_test_dir,
                                        self.hparams.mask_dir,
                                        input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target,
                                        crop_slice_idx = 0,
-                                       num_slices = self.num_slices)
+                                       view=self.hparams.view)
 
 
     def train_dataloader(self) -> DataLoader[Any]:
@@ -215,7 +213,7 @@ class C2DataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.data_test,
-            batch_size=self.num_slices,#self.batch_size_per_device, # TODO: make 256 felixible
+            batch_size=256,#self.batch_size_per_device, # TODO: make 256 felixible
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,

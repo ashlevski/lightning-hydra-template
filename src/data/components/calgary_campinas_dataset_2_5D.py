@@ -18,7 +18,7 @@ class SliceDataset(Dataset):
                 input_transforms: Optional[Callable],
                 target_transforms: Optional[Callable],
                 crop_slice_idx = 0,
-                num_slices = None,
+                view=0
     ) -> None:
         super().__init__()
         self.data_dir = data_dir
@@ -27,11 +27,12 @@ class SliceDataset(Dataset):
         self.len = 0#self.metadata['k space X res'].sum()
         self.metadata_temp = pd.DataFrame(columns=["File name", "Slice Number"])
         for index, row in self.metadata.iterrows():
-            if num_slices is None:
+            if view == 0:
                 value = row['k space X res']
-            else:
-                value = num_slices
-
+            if view == 1:
+                value = row['k space Y res']
+            if view == 2:
+                value = row['Slice']
             start = crop_slice_idx
             end = value-crop_slice_idx
             for i in range(start,end):
@@ -40,6 +41,7 @@ class SliceDataset(Dataset):
                 self.len += 1
         self.input_transforms = input_transforms
         self.target_transforms = target_transforms
+        self.view=view
 
 
 
@@ -53,7 +55,13 @@ class SliceDataset(Dataset):
 
 
         with h5py.File(path_2_data, "r") as hf:
-            kspace = hf["kspace"][metadata["Slice Number"]]
+            if self.view == 0:
+                kspace = hf["kspace"][metadata["Slice Number"]]
+            if self.view == 1:
+                kspace = hf["kspace"][:, metadata["Slice Number"]]
+            if self.view == 2:
+                kspace = hf["kspace"][:,:,metadata["Slice Number"]]
+            
             # target = hf["target"][metadata["Slice Number"]]
 
 

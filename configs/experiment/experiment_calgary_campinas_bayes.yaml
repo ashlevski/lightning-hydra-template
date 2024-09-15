@@ -5,7 +5,7 @@
 
 defaults:
   - override /data: mri_calgary_campinas
-  - override /model: mri_calgary_campinas
+  - override /model: mri_calgary_campinas_bayes
   - override /callbacks: default
   - override /trainer: default
   - override /logger: wandb
@@ -35,9 +35,3 @@ data:
   metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
   metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
   num_slices: 256
-
-
-# model:
-#   net:
-#     regularizer_num_filters: 64
-#     regularizer_num_pull_layers: 4

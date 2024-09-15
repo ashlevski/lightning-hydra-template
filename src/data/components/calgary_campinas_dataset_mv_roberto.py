@@ -62,6 +62,8 @@ class SliceDataset(Dataset):
         path_2_data = os.path.join(self.data_dir,f'{metadata["File name"][:-2]}.h5')
         path_2_target = os.path.join(self.target_dir,f'{metadata["File name"][:-2]}.h5')
         prev_file_name = f'{metadata["Baseline"]}_{metadata["File name"][:-2]}.h5'
+        # if atlas 
+        prev_file_name = f'atlas_{metadata["File name"][:-2]}.h5'
         path_2_baseline = os.path.join(self.baseline_dir, f'{prev_file_name}')
 
             
@@ -78,14 +80,13 @@ class SliceDataset(Dataset):
             target = self.input_transforms(target)
             baseline = self.input_transforms(baseline)
             # target = self.target_transforms(target)
-        # print(self.train_transforms)
-        # if self.train_transforms is not None:
-            
-        #     cat_images = torch.cat((data.unsqueeze(0), target.unsqueeze(0), baseline.unsqueeze(0)),0)
-        #     cat_images = self.train_transforms(cat_images)
-        #     data = cat_images[0]
-        #     target = cat_images[1]
-        #     baseline = cat_images[2]
+
+        if self.train_transforms is not None:           
+            cat_images = torch.cat((data.unsqueeze(0), target.unsqueeze(0), baseline.unsqueeze(0)),0)
+            cat_images = self.train_transforms(cat_images)
+            data = cat_images[0]
+            target = cat_images[1]
+            baseline = cat_images[2]
 
 
         """        

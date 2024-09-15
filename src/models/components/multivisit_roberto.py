@@ -23,10 +23,10 @@ from monai.networks import nets
 class MV(nn.Module):
     def __init__(self, dim=4):
         super(MV, self).__init__()
-        self.dit = DiT_S_8(learn_sigma=False, input_size=224, in_channels=1,drop=0.0)
+        self.dit = DiT_S_2(learn_sigma=False, input_size=224, in_channels=1,drop=0.0)
         # self.unet = UNetBlock(2,1)
-        self.y_embedder = PatchEmbed(224, 8, 1, 384, bias=True)
-        self.pos_embed = nn.Parameter(torch.zeros(1, 12544//16, 384), requires_grad=False)
+        self.y_embedder = PatchEmbed(224, 2, 1, 384, bias=True)
+        self.pos_embed = nn.Parameter(torch.zeros(1, 12544, 384), requires_grad=False)
         # self.unet = nets.RegUNet(spatial_dims=2, in_channels=2, num_channel_initial=32, depth=5, out_channels=1)
         # self.unet = nets.SwinUNETR((224,192), in_channels=2, out_channels=1,spatial_dims=2)
     def forward(self, x_slice, x_volume):

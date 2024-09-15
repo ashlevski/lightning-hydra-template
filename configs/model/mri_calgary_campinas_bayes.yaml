@@ -92,3 +92,4 @@ criterions:
 #    _target_: torch.nn.L1Loss
 
 net_path: "null"
+num_of_infer: 5

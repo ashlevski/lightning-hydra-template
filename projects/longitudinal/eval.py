@@ -11,27 +11,64 @@ save_dir = "/home/amirmohammad.shamaei/imri_result/comp_2d_vs_3d/"
 directory_path = Path(save_dir)
 directory_path.mkdir(parents=True, exist_ok=True)
 
-# '''test
-name_ = "test"
+
+# name_ = "R20"
+# paths = [
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_22-59-31/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-30_19-14-34/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-30_19-05-08/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_23-15-39/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-30_01-44-07/",
+# ]
+# methods = ['Baseline e2e', "UNET", "Transformers"]
+
+name_ = "R15"
 paths = [
-    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-23_13-57-04/",
-    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-27_09-49-21/",
-    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-26_09-43-42/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-26_17-37-57/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-04_20-58-41/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-06_23-41-38/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-07_12-02-59/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-08_11-12-56/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-08_18-48-50/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-12_09-12-41/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-25_20-10-16/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-12_18-34-44/",
-    # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-12_18-40-54/"
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-05-01_00-33-50/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_19-21-45/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-05-01_00-20-21/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_14-09-19/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-30_11-06-35/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-06-03_17-59-04/",
+    "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-05-31_16-31-59/",
 ]
-methods = ['Baseline e2e', "UNET", "Transformers"]
+methods = [
+    'Non-enhanced [Souza et al., WW-net IKIK]',
+    'Non-enhanced [Ours, E2EVarNet]',
+    'Enhanced [Souza et al., UNet]',
+    'Enhanced [Ours, UNet]',
+    'Enhanced [Ours, Transformers]',
+    'Enhanced by atlas [Ours, Transformers, tested]',
+    'Enhanced by atlas [Ours, Transformers, trained]',
+]
+
+# '''name_ = "R5"
+# paths = [
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_19-15-43/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-29_13-26-36/",
+#     "???",
+# ]
+# methods = ['Baseline e2e', "UNET", "Transformers"]'''
+
+#test
+# name_ = "R10"
+# paths = [
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-05_01-00-20/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-23_13-57-04/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-30_18-25-07/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-27_09-49-21/",
+#     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-26_09-43-42/",
+# ]
+# methods = [
+#     'Baseline [Souza et al., WW-net IKIK]',
+#     'Baseline [Ours, E2EVarNet]',
+#     'Enhanced [Souza et al., UNet]',
+#     'Enhanced [Our, UNet]',
+#     'Enhanced [Our, Transformers]'
+# ]
 
 
-''' roberto data ieee paper 
+"""# 'roberto data ieee paper 
 name_ = "with_axial_normalization_DiT_with_att"
 paths = [
     "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-03-05_01-00-20/",
@@ -51,8 +88,8 @@ paths = [
     # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-12_18-34-44/",
     # "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2024-04-12_18-40-54/"
 ]
-methods = ['Baseline', 'Baseline e2e', '2D', "2D DiT", "2D DiT + easy_reg", "2D DiT + e2e"]
-'''
+methods = ['Baseline', 'Baseline e2e', '2D', "2D DiT", "2D DiT + easy_reg", "2D DiT + e2e"]"""
+
 
 # name_ = "single visit"
 # paths = [
@@ -97,21 +134,85 @@ data_psnr = pd.DataFrame(dict(zip(methods, psnr_list)))
 
 # Create box plots using Seaborn
 # Create box plots using Seaborn
-sns.set(style="whitegrid")
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=data_ssim)
-plt.title('SSIM')
-plt.savefig(save_dir + name_ + '_ssim.png')
+# Setting up a more appealing style
+sns.set(style="whitegrid", palette="pastel")
 
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=data_nmse)
-plt.title('NMSE')
-plt.savefig(save_dir + name_ + '_nmse.png')
+# Create a larger figure to improve readability
+plt.figure(figsize=(12, 8))
 
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=data_psnr)
-plt.title('PSNR')
-plt.savefig(save_dir + name_ + '_psnr.png')
+# Creating the boxplot with enhanced color and style
+box = sns.boxplot(data=data_ssim, width=0.5, fliersize=5, linewidth=2.5, whis=1.5)
+
+# Adding title with increased font size for better visibility
+plt.title('SSIM Distribution', fontsize=20, fontweight='bold', color='navy')
+
+# Labeling axes with increased font size
+plt.xlabel('Category', fontsize=15)
+plt.ylabel('SSIM Value', fontsize=15)
+
+# Customizing tick parameters for better readability
+plt.xticks(fontsize=12, rotation=45)  # Rotate x-ticks if necessary
+plt.yticks(fontsize=12)
+
+# Optional: Adding a grid for better readability of the plot
+plt.grid(True, linestyle='--', linewidth=0.8)
+plt.tight_layout()
+plt.savefig(f"{save_dir}{name_}_ssim.png", dpi=300)  # Save as high-res image
+
+
+# Create a larger figure to improve readability
+plt.figure(figsize=(12, 8))
+
+# Creating the boxplot with enhanced color and style
+box = sns.boxplot(data=data_psnr, width=0.5, fliersize=5, linewidth=2.5, whis=1.5)
+
+# Adding title with increased font size for better visibility
+plt.title('SSIM Distribution', fontsize=20, fontweight='bold', color='navy')
+
+# Labeling axes with increased font size
+plt.xlabel('Category', fontsize=15)
+plt.ylabel('PSNR Value', fontsize=15)
+
+# Customizing tick parameters for better readability
+plt.xticks(fontsize=12, rotation=45)  # Rotate x-ticks if necessary
+plt.yticks(fontsize=12)
+
+# Optional: Adding a grid for better readability of the plot
+plt.grid(True, linestyle='--', linewidth=0.8)
+plt.tight_layout()
+plt.savefig(f"{save_dir}{name_}_psnr.png", dpi=300)  # Save as high-res image
+
+# Create a larger figure to improve readability
+plt.figure(figsize=(12, 8))
+
+# Creating the boxplot with enhanced color and style
+box = sns.boxplot(data=data_nmse, width=0.5, fliersize=5, linewidth=2.5, whis=1.5)
+
+# Adding title with increased font size for better visibility
+plt.title('SSIM Distribution', fontsize=20, fontweight='bold', color='navy')
+
+# Labeling axes with increased font size
+plt.xlabel('Category', fontsize=15)
+plt.ylabel('SSIM Value', fontsize=15)
+
+# Customizing tick parameters for better readability
+plt.xticks(fontsize=12, rotation=45)  # Rotate x-ticks if necessary
+plt.yticks(fontsize=12)
+
+# Optional: Adding a grid for better readability of the plot
+plt.grid(True, linestyle='--', linewidth=0.8)
+plt.tight_layout()
+plt.savefig(f"{save_dir}{name_}_nmse.png", dpi=300)  # Save as high-res image
+
+# plt.figure(figsize=(10, 6))
+# sns.boxplot(data=data_nmse)
+# plt.title('NMSE')
+# plt.savefig(save_dir + name_ + '_nmse.png')
+
+# plt.figure(figsize=(10, 6))
+# sns.boxplot(data=data_psnr)
+# plt.title('PSNR')
+# plt.savefig(save_dir + name_ + '_psnr.png')
 
 
 # Concatenate the DataFrames
