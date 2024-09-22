@@ -155,5 +155,5 @@ configs/local/default.yaml
 
 /data/MNIST/
 
-/jobs/
+
 /bayesian-torch/

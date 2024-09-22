@@ -14,7 +14,7 @@ from torchmetrics import MaxMetric, MeanMetric
 from src.utils.io_utils import save_tensor_to_nifti
 from bayesian_torch.models.dnn_to_bnn import dnn_to_bnn, get_kl_loss
 from bayesian_torch.utils.util import predictive_entropy, mutual_information
-
+from bayesian_torch.layers.variational_layers import Conv2dReparameterization
 class MRI_Calgary_Campinas_LitModule(LightningModule):
     """Example of a `LightningModule` for MNIST classification.
 
@@ -110,7 +110,25 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         dnn_to_bnn(self.net, const_bnn_prior_parameters)
 
-        self.conv_final = torch.nn.Conv2d(1,2, kernel_size=1)
+        self.bayes_conv_mean = Conv2dReparameterization(
+            in_channels=1, 
+            out_channels=1, 
+            kernel_size=1,
+            prior_mean=0.0, 
+            prior_variance=1.0, 
+            posterior_mu_init=0.0, 
+            posterior_rho_init=-3.0
+        )
+        
+        self.bayes_conv_std = Conv2dReparameterization(
+            in_channels=1, 
+            out_channels=1, 
+            kernel_size=1,
+            prior_mean=0.0, 
+            prior_variance=1.0, 
+            posterior_mu_init=0.0, 
+            posterior_rho_init=-3.0
+        )
 
 
 
@@ -148,7 +166,21 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
 
         output_image, output_kspace, target_img = self.forward(batch)
-        # print(output_image.shape)
+        print(output_image.shape)
+        # Check if the output_image is 3-dimensional
+        num_dims = output_image.dim()
+        if num_dims == 3:
+            # Expand the dimensions along the first axis
+            output_image = output_image.unsqueeze(1)
+        # Predict the mean
+        # mean = self.bayes_conv_mean(output_image, return_kl=False)
+        # Predict the standard deviation
+        std, kl = torch.exp(self.bayes_conv_std(output_image, return_kl=True))  # Ensure the std is positive
+        print(kl.shape)
+        if num_dims == 3:
+            # Expand the dimensions along the first axis
+            output_image = output_image.squeeze(1)
+        # output_image = mean
         # output_image = self.conv_final(output_image)
         # print(output_image.shape)
         # target_img = torch.abs(batch["target"]).squeeze(1)
@@ -157,10 +189,13 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         for key, criterion in self.criterions.items():
             loss[key] = criterion(output_image, target_img)
-
+        loss['nll'] = self.nll_loss(target_img, output_image, std)
         loss['bayes'] = (get_kl_loss(self.net)/output_image.shape[0])
-        return loss, output_image, target_img
-
+        return loss, output_image, target_img, std
+    def nll_loss(self,y_true, y_pred_mean, y_pred_std):
+        variance = y_pred_std ** 2
+        loss = torch.mean(torch.log(variance) + (y_true - y_pred_mean) ** 2 / (2 * variance))
+        return loss
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> torch.Tensor:
@@ -171,7 +206,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         :param batch_idx: The index of the current batch.
         :return: A tensor of losses between model predictions and targets.
         """
-        losses , preds, targets = self.model_step(batch)
+        losses , preds, targets, std = self.model_step(batch)
 
         for key, acc in self.train_acc.items():
             acc(preds.unsqueeze(1), targets.unsqueeze(1))
@@ -200,65 +235,63 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
         # Initialize empty lists to store results
         all_preds = []
-        # batch_ = copy.deepcopy(batch)
-        # Run the function 10 times
+        all_aleatoric_uncertainties = []
+
+        # Run the function `num_of_infer` times to gather epistemic uncertainty
         for _ in range(self.num_of_infer):
-            # batch = batch_
-            losses, preds, targets = self.model_step(copy.deepcopy(batch))
+            losses, preds, targets, std = self.model_step(copy.deepcopy(batch))
             
             # Append results to lists
             all_preds.append(preds)
+            all_aleatoric_uncertainties.append(std)  # Aleatoric uncertainty (std from the model)
 
         # Stack the lists along a new dimension (assuming preds and targets are tensors with the same shape)
         all_preds = torch.stack(all_preds)
-
+        all_aleatoric_uncertainties = torch.stack(all_aleatoric_uncertainties)
         # predictive_uncertainty = predictive_entropy(all_preds.cpu().numpy())
         # model_uncertainty = mutual_information(all_preds.cpu().numpy())
 
-        preds = all_preds.mean(dim=0)  # Assuming preds is a 2D tensor (samples x features)
+        # Epistemic uncertainty (variance of predictions)
         variance_preds = all_preds.var(dim=0)
+        # Mean prediction
+        preds = all_preds.mean(dim=0)
+        # Mean aleatoric uncertainty
+        aleatoric_uncertainty = all_aleatoric_uncertainties.mean(dim=0)
 
 
         if (self.current_epoch % 5 == 0 and batch_idx == 10):
-            # columns = [ 'prediction','ground truth']
-            n = preds.shape[0]//2
-            # data = [[wandb.Image(x_i), wandb.Image(y_i)] for x_i, y_i in list(zip(preds[:n], targets[:n]))]
-            # self.logger.log_table(key='Comparison', columns=columns, data=data)
-            # for n in range(preds.shape[0]):
-            fig, axs = plt.subplots(1, 4, figsize=(15, 5))  # Adjust figsize as needed
-            pred =(preds[n]/preds[n].max()).cpu().detach()
+            n = preds.shape[0] // 2  # Example to pick an image to visualize
+
+            fig, axs = plt.subplots(1, 5, figsize=(18, 5))  # Adjusted figsize as needed
+            pred = (preds[n] / preds[n].max()).cpu().detach()
+
             # Plot prediction
-            im0 = axs[0].imshow(pred,cmap='gray')  # Assuming preds[i] is a 2D array or an image file
+            im0 = axs[0].imshow(pred, cmap='gray')
             axs[0].title.set_text(f'Prediction in epoch: {self.current_epoch}')
             fig.colorbar(im0, ax=axs[0])
             axs[0].axis('off')  # Hide axis
 
-            target = (targets[n]/targets[n].max()).cpu().detach()
+            target = (targets[n] / targets[n].max()).cpu().detach()
             # Plot ground truth
-            im1 = axs[1].imshow(target,cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            im1 = axs[1].imshow(target, cmap='gray')
             axs[1].title.set_text('Ground Truth')
             fig.colorbar(im1, ax=axs[1])
             axs[1].axis('off')
 
-            im2 = axs[2].imshow(torch.abs(pred-target),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
+            im2 = axs[2].imshow(torch.abs(pred - target), cmap='gray')
             axs[2].title.set_text('Diff')
             axs[2].axis('off')
             fig.colorbar(im2, ax=axs[2])
 
-            im3 = axs[3].imshow((variance_preds[n]/variance_preds[n].max()).cpu().detach(),cmap='gray')  # Assuming targets[i] is a 2D array or an image file
-            axs[3].title.set_text('uncertainy')
+            im3 = axs[3].imshow((variance_preds[n] / variance_preds[n].max()).cpu().detach(), cmap='gray')
+            axs[3].title.set_text('Epistemic Uncertainty')
             axs[3].axis('off')
             fig.colorbar(im3, ax=axs[3])
 
-                # im4 = axs[4].imshow(predictive_uncertainty)  # Assuming targets[i] is a 2D array or an image file
-                # axs[4].title.set_text('predictive uncertainty')
-                # axs[4].axis('off')
-                # fig.colorbar(im4, ax=axs[4])
-
-                # im5 = axs[5].imshow(model_uncertainty)  # Assuming targets[i] is a 2D array or an image file
-                # axs[5].title.set_text('model uncertainty')
-                # axs[5].axis('off')
-                # fig.colorbar(im5, ax=axs[5])
+            im4 = axs[4].imshow((aleatoric_uncertainty[n].squeeze() / aleatoric_uncertainty[n].max()).cpu().detach(), cmap='gray')
+            axs[4].title.set_text('Aleatoric Uncertainty')
+            axs[4].axis('off')
+            fig.colorbar(im4, ax=axs[4])
 
             self.logger.log_image(key="samples", images=[fig])
             plt.close()
@@ -286,38 +319,38 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single test step on a batch of data from the test set.
-
         :param batch: A batch of data (a tuple) containing the input tensor of images and target
             labels.
-        :param batch_idx: The index of the current batch.
-        """
-                # losses, preds, targets = self.model_step(batch)
-
+        :param batch_idx: The index of the current batch. """
         # Initialize empty lists to store results
         all_preds = []
-        # batch_ = copy.deepcopy(batch)
-        # Run the function 10 times
+        all_aleatoric_uncertainties = []
+
+        # Run the function `num_of_infer` times to gather epistemic uncertainty
         for _ in range(self.num_of_infer):
-            # batch = batch_
-            losses, preds, targets = self.model_step(copy.deepcopy(batch))
+            losses, preds, targets, std = self.model_step(copy.deepcopy(batch))
             
             # Append results to lists
             all_preds.append(preds)
+            all_aleatoric_uncertainties.append(std)  # Aleatoric uncertainty (std from the model)
 
         # Stack the lists along a new dimension (assuming preds and targets are tensors with the same shape)
         all_preds = torch.stack(all_preds)
+        all_aleatoric_uncertainties = torch.stack(all_aleatoric_uncertainties)
 
-        # predictive_uncertainty = predictive_entropy(all_preds.cpu().numpy())
-        # model_uncertainty = mutual_information(all_preds.cpu().numpy())
-
-        preds = all_preds.mean(dim=0)  # Assuming preds is a 2D tensor (samples x features)
+        # Epistemic uncertainty (variance of predictions)
         variance_preds = all_preds.var(dim=0)
+        # Mean prediction
+        preds = all_preds.mean(dim=0)
+        # Mean aleatoric uncertainty
+        aleatoric_uncertainty = all_aleatoric_uncertainties.mean(dim=0)
 
-        losses, preds, targets  = self.model_step(batch)
-        # preds = preds - output_image_mv
-        save_tensor_to_nifti(variance_preds/preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds_var.nii"))
-        save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
-        save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
+        # Save the results
+        save_tensor_to_nifti(variance_preds / preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds_var.nii"))
+        save_tensor_to_nifti(preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds.nii"))
+        save_tensor_to_nifti(targets, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_targets.nii"))
+        save_tensor_to_nifti(aleatoric_uncertainty, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_aleatoric_uncertainty.nii"))
+
         accuracies = {}
         for key, acc in self.test_acc.items():
             acc_ = []
@@ -332,12 +365,10 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             self.log(f"test_acc/{key}_mean", torch.mean(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
             self.log(f"test_acc/{key}_std", torch.std(torch.Tensor(acc_)), on_step=True, on_epoch=True, prog_bar=False)
             acc.reset()
-        # update and log metrics
-        # self.log('loss', loss)
-        for key, loss in losses.items():
-            # self.test_loss(loss)
-            self.log(f"test_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
+        # Log test losses
+        for key, loss in losses.items():
+            self.log(f"test_loss/{key}", loss, on_step=True, on_epoch=True, prog_bar=False)
 
         # Define JSON file path
         json_file_path = join(self.logger.save_dir, 'accuracies.json')
@@ -350,13 +381,13 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             data = {}
 
         # Update the JSON data with the new accuracies
-        # The key is batch['metadata']['File name'][0]
         batch_key = batch['metadata']['File name'][0]
         data[batch_key] = accuracies
 
         # Write the updated dictionary back to the file
         with open(json_file_path, 'w') as f:
             json.dump(data, f, indent=4)
+
 
     def on_test_epoch_end(self) -> None:
         """Lightning hook that is called when a test epoch ends."""
