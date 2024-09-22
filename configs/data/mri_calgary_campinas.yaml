@@ -5,7 +5,7 @@ metadata_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Camp
 metadata_test_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/test_sv1.csv"
 mask_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R10_218x170.npy"
 batch_size: 4 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
-num_workers: 0
+num_workers: 4
 pin_memory: False
 shuffle: True
 crop_slice_idx: 50

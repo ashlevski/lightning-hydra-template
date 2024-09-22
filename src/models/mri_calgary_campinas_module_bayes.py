@@ -109,20 +109,10 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         }
 
         dnn_to_bnn(self.net, const_bnn_prior_parameters)
-
-        self.bayes_conv_mean = Conv2dReparameterization(
-            in_channels=1, 
-            out_channels=1, 
-            kernel_size=1,
-            prior_mean=0.0, 
-            prior_variance=1.0, 
-            posterior_mu_init=0.0, 
-            posterior_rho_init=-3.0
-        )
         
         self.bayes_conv_std = Conv2dReparameterization(
             in_channels=1, 
-            out_channels=1, 
+            out_channels=1,
             kernel_size=1,
             prior_mean=0.0, 
             prior_variance=1.0, 
@@ -166,7 +156,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
 
 
         output_image, output_kspace, target_img = self.forward(batch)
-        print(output_image.shape)
+        # print(output_image.shape)
         # Check if the output_image is 3-dimensional
         num_dims = output_image.dim()
         if num_dims == 3:
@@ -175,11 +165,13 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # Predict the mean
         # mean = self.bayes_conv_mean(output_image, return_kl=False)
         # Predict the standard deviation
-        std, kl = torch.exp(self.bayes_conv_std(output_image, return_kl=True))  # Ensure the std is positive
-        print(kl.shape)
+        bayes_conv_out = self.bayes_conv_std(output_image, return_kl=False)
+        # mean, std = torch.split(bayes_conv_out, 1, dim=1)
+        std = torch.exp(bayes_conv_out)  # Ensure the std is positive
         if num_dims == 3:
             # Expand the dimensions along the first axis
             output_image = output_image.squeeze(1)
+            std = std.squeeze(1)
         # output_image = mean
         # output_image = self.conv_final(output_image)
         # print(output_image.shape)
@@ -349,7 +341,8 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         save_tensor_to_nifti(variance_preds / preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds_var.nii"))
         save_tensor_to_nifti(preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_targets.nii"))
-        save_tensor_to_nifti(aleatoric_uncertainty, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_aleatoric_uncertainty.nii"))
+        save_tensor_to_nifti(aleatoric_uncertainty/preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_aleatoric_uncertainty.nii"))
+        save_tensor_to_nifti(targets - preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_diff.nii"))
 
         accuracies = {}
         for key, acc in self.test_acc.items():
