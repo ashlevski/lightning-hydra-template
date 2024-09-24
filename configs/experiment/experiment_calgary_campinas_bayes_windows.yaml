@@ -37,7 +37,7 @@ data:
   num_slices: 256
 
 model:
-  criterions: {}
+  criterions:
 
 paths:
   log_dir: "E:\\Amir\\log_bayes"

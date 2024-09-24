@@ -178,9 +178,9 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # target_img = torch.abs(batch["target"]).squeeze(1)
 
         loss = {}
-
-        for key, criterion in self.criterions.items():
-            loss[key] = criterion(output_image, target_img)
+        if self.criterions != None:
+            for key, criterion in self.criterions.items():
+                loss[key] = criterion(output_image, target_img)
         loss['nll'] = self.nll_loss(target_img, output_image, std)
         loss['bayes'] = (get_kl_loss(self.net)/output_image.shape[0])
         return loss, output_image, target_img, std
