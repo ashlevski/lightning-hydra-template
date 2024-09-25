@@ -16,7 +16,8 @@ transforms_input:
   - _target_: src.utils.transforms.NormalizeSampleTransform
   - _target_: torchvision.transforms.transforms.CenterCrop
     size: [218,170]
-  - _target_: src.data.components.transforms.KSpaceSensitivityAndAffineTransform
+#  - _target_: src.data.components.transforms.KSpaceSensitivityAndAffineTransform
+  - _target_: src.data.components.transforms.KSpaceSensitivityAndRandomElasticDeformation
   - _target_: src.data.components.transforms.ComplexToReal
 
 transforms_target:
