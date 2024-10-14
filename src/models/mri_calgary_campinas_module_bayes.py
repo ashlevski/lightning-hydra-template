@@ -338,10 +338,10 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         aleatoric_uncertainty = all_aleatoric_uncertainties.mean(dim=0)
 
         # Save the results
-        save_tensor_to_nifti(variance_preds / preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds_var.nii"))
+        save_tensor_to_nifti(variance_preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds_var.nii"))
         save_tensor_to_nifti(preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_targets.nii"))
-        save_tensor_to_nifti(aleatoric_uncertainty/preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_aleatoric_uncertainty.nii"))
+        save_tensor_to_nifti(aleatoric_uncertainty, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_aleatoric_uncertainty.nii"))
         save_tensor_to_nifti(targets - preds, join(self.logger.save_dir, f"{batch['metadata']['File name'][0]}_diff.nii"))
 
         accuracies = {}

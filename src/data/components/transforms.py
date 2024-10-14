@@ -32,8 +32,9 @@ class KSpaceNoiseAdder_Real(object):
         Returns:
         torch.Tensor: The k-space data with added noise (in real form).
         """
+        scale = torch.abs(k_space_data_real).max()
         # Add noise to both real and imaginary parts (last dimension contains real and imaginary parts)
-        noise = torch.randn_like(k_space_data_real) * self.noise_level
+        noise = torch.randn_like(k_space_data_real) * self.noise_level * scale
 
         # Adding noise to the real and imaginary components
         noisy_k_space_data_real = k_space_data_real + noise
@@ -64,10 +65,10 @@ class KSpaceNoiseAdder_Complex(object):
         Returns:
         torch.Tensor: The k-space data with added noise.
         """
+        scale = torch.abs(k_space_data).max()
         # Separate real and imaginary parts
-        noise_real = torch.randn_like(k_space_data.real) * self.noise_level
-        noise_imag = torch.randn_like(k_space_data.imag) * self.noise_level
-
+        noise_real = torch.randn_like(k_space_data.real) * self.noise_level *scale
+        noise_imag = torch.randn_like(k_space_data.imag) * self.noise_level *scale
         # Add noise to real and imaginary parts
         noisy_k_space_data = k_space_data + torch.complex(noise_real, noise_imag)
 
