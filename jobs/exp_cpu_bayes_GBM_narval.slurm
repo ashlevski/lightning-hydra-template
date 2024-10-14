@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --time=4:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem=64G
 #SBATCH --account=def-rmsouza  # Specify your account here
 #SBATCH --gpus-per-node=a100:1  # Request an A100 GPU specifically
@@ -15,12 +15,12 @@
 
 
 source /home/amirsha/myenv/bin/activate
-EXP=experiment_calgary_campinas_bayes_GBM_narval
+EXP=experiment_calgary_campinas_mcdo_GBM_narval
 BS=32
 RF=16
 LR=0.001
 # TAGS = ["mnist","experiment_X"]
-TR=False
+TR=True
 SM="/lustre06/project/6054398/amirsha/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy" #data.metadata_test_dir=$metadata_test_dir  #ckpt_path=$CKP
 CKP_5="/lustre07/scratch/amirsha/logs/train/runs/R5_ssim_in10_2/checkpoints/last.ckpt"
 CKP_10="/lustre07/scratch/amirsha/logs/train/runs/R10_ssim_in10_5/checkpoints/last.ckpt"

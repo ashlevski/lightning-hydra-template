@@ -15,7 +15,7 @@
 
 
 source /home/amirsha/myenv/bin/activate
-EXP=experiment_calgary_campinas_bayes_narval
+EXP=experiment_calgary_campinas_mcdo_narval
 BS=32
 RF=16
 LR=0.001

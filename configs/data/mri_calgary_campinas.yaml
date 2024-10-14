@@ -18,8 +18,8 @@ transforms_input:
     size: [218,170]
   # - _target_: src.data.components.transforms.KSpaceSensitivityAndAffineTransform
   # - _target_: src.data.components.transforms.KSpaceSensitivityAndRandomElasticDeformation
-  - _target_: src.data.components.transforms.KSpaceNoiseAdder_Complex
-    noise_level: 0.005
+#  - _target_: src.data.components.transforms.KSpaceNoiseAdder_Complex
+#    noise_level: 0.005
   - _target_: src.data.components.transforms.ComplexToReal
 
 transforms_target:
