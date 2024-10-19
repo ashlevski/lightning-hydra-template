@@ -30,11 +30,11 @@ trainer:
   max_epochs: 20
 
 data:
-  data_dir: "/home/amirsha/scratch/GBM_norm"
-  metadata_train_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
-  metadata_val_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
-  metadata_test_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
+  data_dir: "/work/souza_lab/amir/Data/GBM/h5/_norm"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/train_gbm_chal.csv"
   num_slices: 152
 
-paths:
-  log_dir: "/lustre07/scratch/amirsha/logs/"
+# paths:
+#   log_dir: "/lustre07/scratch/amirsha/logs/"

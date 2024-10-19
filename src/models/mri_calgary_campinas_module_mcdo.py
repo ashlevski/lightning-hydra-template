@@ -165,7 +165,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         if self.criterions != None:
             for key, criterion in self.criterions.items():
                 loss[key] = criterion(output_image, target_img)
-        loss['nll'] = self.nll_loss(target_img, output_image, std)
+        loss['nll'] = 0.1*self.nll_loss(target_img, output_image, std)
         # loss['bayes'] = (get_kl_loss(self.net)/output_image.shape[0])
         return loss, output_image, target_img, std
     def nll_loss(self,y_true, y_pred_mean, y_pred_std):
@@ -212,7 +212,23 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         # Initialize empty lists to store results
         all_preds = []
         all_aleatoric_uncertainties = []
+        # Recursive function to enable dropout layers during inference
+        def enable_dropout(model):
+            for module in model.children():  # Iterate through children modules
+                if isinstance(module, nn.Dropout2d):
+                    module.train()  # Enable dropout
+                elif hasattr(module, 'dropout_probability') and module.dropout_probability > 0:
+                    # Custom ConvBlock case where dropout_probability is a parameter
+                    # module.train()  # Enable dropout for ConvBlock
+                    enable_dropout(module)
+                elif isinstance(module, (nn.ModuleList, nn.Sequential)):
+                    enable_dropout(module)  # Recursively check inside ModuleList/Sequential
+                else:
+                    enable_dropout(module)  # Recursively check all other sub-modules
 
+
+
+        enable_dropout(self.net.model)
         # Run the function `num_of_infer` times to gather epistemic uncertainty
         for _ in range(self.num_of_infer):
             losses, preds, targets, std = self.model_step(copy.deepcopy(batch))

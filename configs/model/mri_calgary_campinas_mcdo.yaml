@@ -28,7 +28,7 @@ net:
       centered: False
       normalized: False
     num_layers: 12
-    regularizer_dropout: 0.2
+    regularizer_dropout: 0.1
   forward_operator:
     _partial_: true
     _target_: src.utils.direct.data.transforms.fft2
