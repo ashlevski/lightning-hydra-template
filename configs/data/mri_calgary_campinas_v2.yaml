@@ -1,0 +1,25 @@
+_target_: src.data.calgary_campinas_datamodule_v2.C2DataModule
+metadata_train_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
+metadata_val_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
+metadata_test_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/test_sv1.csv"
+mask_dir: "/home/amir/PycharmProjects/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R10_218x170.npy"
+batch_size: 4 # Needs to be divisible by the number of devices (e.g., if in a distributed setup)
+num_workers: 4
+pin_memory: False
+shuffle: True
+crop_slice_idx: 50
+transforms_input:
+  - _target_: torchvision.transforms.transforms.ToTensor
+#  - _target_: src.data.components.transforms.KSpaceNoiseAdder_Complex
+#    noise_level: 0.005
+  - _target_: src.utils.transforms.NormalizeSampleTransform
+  - _target_: torchvision.transforms.transforms.CenterCrop
+    size: [218,170]
+  # - _target_: src.data.components.transforms.KSpaceSensitivityAndAffineTransform
+  # - _target_: src.data.components.transforms.KSpaceSensitivityAndRandomElasticDeformation
+#  - _target_: src.data.components.transforms.KSpaceNoiseAdder_Complex
+#    noise_level: 0.005
+  - _target_: src.data.components.transforms.ComplexToReal
+
+transforms_target:
+  - _target_: torchvision.transforms.transforms.ToTensor

@@ -49,7 +49,11 @@ class SliceDataset(Dataset):
 
     def __getitem__(self, idx):
         metadata = self.metadata_temp.iloc[idx]
-        path_2_data = os.path.join(self.data_dir,f'{metadata["File name"]}.h5')
+        # Check if file already has .h5 extension
+        if metadata["File name"].endswith('.h5'):
+            path_2_data = os.path.join(self.data_dir, metadata["File name"])
+        else:
+            path_2_data = os.path.join(self.data_dir, f'{metadata["File name"]}.h5')
 
 
         with h5py.File(path_2_data, "r") as hf:

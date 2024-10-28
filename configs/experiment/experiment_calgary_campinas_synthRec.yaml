@@ -13,14 +13,14 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["mri_recon", "cascade"]
+tags: ["mri_recon", "synthRec"]
 
 seed: 12345
 
 
 logger:
   wandb:
-    project: 'mri_recon_bayes'
+    project: 'synthRec'
     tags: ${tags}
     group: "mri_recon"
   aim:
@@ -30,12 +30,12 @@ trainer:
   max_epochs: 20
 
 data:
-  data_dir_train: "D:\\Work\\GMM_MRI\\synthetic_mri_data\\"
-  metadata_train_dir: "D:\\Work\\GMM_MRI\\synthetic_mri_data\\metadata.csv"
-  data_dir_val: "E:\\Amir\\_norm"
-  metadata_val_dir: "D:\\Work\\MRI_REC_template\\projects\\uncertainty\\csvs\\val_chal.csv"
-  data_dir_test: "E:\\Amir\\_norm"
-  metadata_test_dir: "D:\\Work\\MRI_REC_template\\projects\\uncertainty\\csvs\\test_chal.csv"
+  data_dir_train: "/home/amirmohammad.shamaei/data_synth"
+  metadata_train_dir: "/home/amirmohammad.shamaei/data_synth/metadata.csv"
+  data_dir_val: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
+  data_dir_test: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
   num_slices: 256
 
 model:
@@ -43,5 +43,7 @@ model:
     ssim:
       _target_: src.models.components.losses.SSIMLoss
 
-paths:
-  log_dir: "E:\\Amir\\log_bayes"
+# model:
+#   net:
+#     regularizer_num_filters: 64
+#     regularizer_num_pull_layers: 4
