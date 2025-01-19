@@ -229,7 +229,7 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
         start_time = time.time()
         
         # Your code snippet
-        losses, preds, targets, output_image_mv, _ = self.model_step(batch)
+        losses, preds, targets = self.model_step(batch)
         
         # End the timer
         end_time = time.time()
