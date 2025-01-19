@@ -178,7 +178,7 @@ class C2DataModule(LightningDataModule):
                                        self.hparams.mask_dir,
                                        input_transforms=self.transforms_input,
                                        target_transforms=self.transforms_target,
-                                       crop_slice_idx = 0,
+                                       crop_slice_idx = self.hparams.crop_slice_idx,
                                        num_slices = self.num_slices)
 
 
@@ -215,7 +215,7 @@ class C2DataModule(LightningDataModule):
         """
         return DataLoader(
             dataset=self.data_test,
-            batch_size=self.num_slices,#self.batch_size_per_device, # TODO: make 256 felixible
+            batch_size=self.num_slices-self.batch_size_per_device, # TODO: make 256 felixible
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
