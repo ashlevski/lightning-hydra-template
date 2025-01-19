@@ -2,7 +2,7 @@ import json
 import os
 from os.path import isfile, join
 from typing import Any, Dict, Tuple, Callable, List, Optional
-
+import time
 import torch
 import torchmetrics
 import wandb
@@ -225,7 +225,18 @@ class MRI_Calgary_Campinas_LitModule(LightningModule):
             labels.
         :param batch_idx: The index of the current batch.
         """
-        losses, preds, targets  = self.model_step(batch)
+                # Start the timer
+        start_time = time.time()
+        
+        # Your code snippet
+        losses, preds, targets, output_image_mv, _ = self.model_step(batch)
+        
+        # End the timer
+        end_time = time.time()
+        
+        # Calculate execution time
+        execution_time = end_time - start_time
+        print(f"Execution time: {execution_time:.4f} seconds")
         # preds = preds - output_image_mv
         save_tensor_to_nifti(preds, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_preds.nii"))
         save_tensor_to_nifti(targets, join(self.logger.save_dir,f"{batch['metadata']['File name'][0]}_targets.nii"))
