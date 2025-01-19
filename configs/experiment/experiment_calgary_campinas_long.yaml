@@ -1,0 +1,39 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas
+  - override /model: mri_calgary_campinas
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["R10", "cassingle_visitcaside"]
+
+seed: 12345
+
+
+logger:
+  wandb:
+    project: 'mri_recon_clean'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 200
+
+data:
+  num_workers: 8
+  batch_size: 8
+  data_dir: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/sv_train.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/sv_val.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/longitudinal/csvs/mv.csv"
+  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R10_218x170.npy"

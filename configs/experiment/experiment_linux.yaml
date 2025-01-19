@@ -1,0 +1,33 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri
+  - override /model: mri
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["mri_recon", "cascade"]
+
+seed: 12345
+
+data:
+  data_dir: '/home/amirmohammad.shamaei/home/pasala/Data/12-channel/'
+  smaps_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/sensitivity_maps/218_170'
+  mask_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/undersampling_masks/218_170'
+  batch_size: 8
+
+
+logger:
+  wandb:
+    project: 'mri_recon'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"

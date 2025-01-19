@@ -3,7 +3,7 @@
 # overfits to 3 batches
 
 defaults:
-  - default.yaml
+  - default
 
 trainer:
   max_epochs: 20

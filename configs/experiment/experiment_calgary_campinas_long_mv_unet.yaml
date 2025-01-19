@@ -1,0 +1,61 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas_mv_roberto
+  - override /model: mri_calgary_campinas_mv_roberto
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["multi-visit", "R10", "3d"]
+
+seed: 12345
+
+early_stopping:
+  _target_: lightning.pytorch.callbacks.EarlyStopping
+  monitor: val_acc/SSIM # quantity to be monitored, must be specified !!!
+  min_delta: 0. # minimum change in the monitored quantity to qualify as an improvement
+  patience: 10 # number of checks with no improvement after which training will be stopped
+  mode: "max"
+
+logger:
+  wandb:
+    project: 'mri_recon_repro'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 100
+
+train: False
+test: True
+
+data:
+  num_workers: 4
+  batch_size: 8
+  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced_e2ev/10x/"
+  metadata_train_dir: "/work/souza_lab/amir/Data/roberto/train.csv"
+  metadata_val_dir: "/work/souza_lab/amir/Data/roberto/val.csv"
+  metadata_test_dir: "/work/souza_lab/amir/Data/roberto/test.csv"
+  target_dir: "/work/souza_lab/amir/Data/roberto/Reference_e2ev/"
+  baseline_dir: "/work/souza_lab/amir/Data/roberto/easyreg/10x/"
+
+model:
+  net:
+    _target_: src.models.components.multivisit_roberto_unet.MultiVisitNet
+  scheduler:
+    _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+    _partial_: true
+    mode: max
+    factor: 0.5
+    patience: 10
+
+

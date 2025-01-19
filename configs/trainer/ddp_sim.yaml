@@ -1,5 +1,5 @@
 defaults:
-  - default.yaml
+  - default
 
 # simulate DDP on CPU, useful for debugging
 accelerator: cpu

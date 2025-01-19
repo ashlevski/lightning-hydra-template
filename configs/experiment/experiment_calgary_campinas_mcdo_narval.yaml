@@ -1,0 +1,59 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas
+  - override /model: mri_calgary_campinas_mcdo
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["mri_recon", "cascade"]
+
+seed: 12345
+
+
+logger:
+  wandb:
+    project: 'mri_recon_bayes'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 30
+
+# data:
+#   data_dir: "/lustre06/project/6054398/amirsha/_norm"
+#   metadata_train_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/train_chal.csv"
+#   metadata_val_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
+#   metadata_test_dir: "/lustre06/project/6054398/amirsha/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
+#   num_slices: 256
+data:
+  data_dir: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/train_chal.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
+  num_slices: 256
+# criterions:
+#  mse:
+#    _target_: torch.nn.MSELoss
+#  l1:
+#    _target_: torch.nn.L1Loss
+  # ssim:
+  #   _target_: src.models.components.losses.SSIMLoss
+#  r2:
+#    _target_: src.models.components.losses.R2ScoreLoss
+#
+#criterion_2:
+#    _target_: torch.nn.L1Loss
+
+
+# paths:
+#   log_dir: "/lustre07/scratch/amirsha/logs/"

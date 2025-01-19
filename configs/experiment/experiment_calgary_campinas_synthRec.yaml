@@ -1,0 +1,49 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas_v2
+  - override /model: mri_calgary_campinas
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["mri_recon", "synthRec"]
+
+seed: 12345
+
+
+logger:
+  wandb:
+    project: 'synthRec'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 20
+
+data:
+  data_dir_train: "/home/amirmohammad.shamaei/data_synth"
+  metadata_train_dir: "/home/amirmohammad.shamaei/data_synth/metadata.csv"
+  data_dir_val: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
+  data_dir_test: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
+  num_slices: 256
+
+model:
+  criterions:
+    ssim:
+      _target_: src.models.components.losses.SSIMLoss
+
+# model:
+#   net:
+#     regularizer_num_filters: 64
+#     regularizer_num_pull_layers: 4

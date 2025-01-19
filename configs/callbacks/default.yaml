@@ -1,21 +1,22 @@
 defaults:
-  - model_checkpoint.yaml
-  - early_stopping.yaml
-  - model_summary.yaml
-  - rich_progress_bar.yaml
+  - model_checkpoint
+  - early_stopping
+  - model_summary
+  - learning_rate_logger
+  - rich_progress_bar
   - _self_
 
 model_checkpoint:
   dirpath: ${paths.output_dir}/checkpoints
   filename: "epoch_{epoch:03d}"
-  monitor: "val/acc"
+  monitor: "val_acc/SSIM"
   mode: "max"
   save_last: True
   auto_insert_metric_name: False
 
 early_stopping:
-  monitor: "val/acc"
-  patience: 100
+  monitor: "val_acc/SSIM"
+  patience: 200
   mode: "max"
 
 model_summary:

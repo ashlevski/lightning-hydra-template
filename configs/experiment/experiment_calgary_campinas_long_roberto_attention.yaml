@@ -1,0 +1,72 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas_mv_roberto_attention
+  - override /model: mri_calgary_campinas_mv_roberto
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["multi-visit", "R10"]
+
+seed: 12345
+
+# early_stopping:
+#   _target_: lightning.pytorch.callbacks.EarlyStopping
+#   monitor: val_acc/SSIM # quantity to be monitored, must be specified !!!
+#   min_delta: 0. # minimum change in the monitored quantity to qualify as an improvement
+#   patience: 2 # number of checks with no improvement after which training will be stopped
+  
+
+logger:
+  wandb:
+    project: 'mri_recon_repro'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 200
+
+train: True
+
+data:
+  # _target_: src.data.calgary_campinas_datamodule_mv_roberto_attention.C2DataModule
+  num_workers: 0
+  batch_size: 2
+
+  data_dir: "/work/souza_lab/amir/Data/roberto/Non-enhanced_e2ev/10x/"
+  metadata_train_dir: "/work/souza_lab/amir/Data/roberto/train.csv"
+  metadata_val_dir: "/work/souza_lab/amir/Data/roberto/val.csv"
+  metadata_test_dir: "/work/souza_lab/amir/Data/roberto/test.csv"
+  target_dir: "/work/souza_lab/amir/Data/roberto/Reference/"
+  baseline_dir: "/work/souza_lab/amir/Data/roberto/Norm-baseline-nifti-reorient/"
+  # baseline_dir: "/work/souza_lab/amir/Data/roberto/PS-reg/10x/"
+#  data_dir: "/work/souza_lab/amir/Data/h5"
+#  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_sv1.csv"
+#  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_sv1.csv"
+#  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_sv1.csv"
+#  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
+#  target_dir: "/home/ai2lab/datasets/Dataset_C2/12_channel/target_rss/"
+#  baseline_dir: "/home/ai2lab/datasets/roberto/Norm-baseline-nifti-reorient/"
+##ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-04_01-32-17/checkpoints/epoch_201.ckpt"
+#ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2024-02-13_23-48-16/checkpoints/epoch_024.ckpt"
+model:
+  net:
+    _target_: src.models.components.multivisit_roberto_attention.MultiVisitNet
+#   scheduler:
+#     _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+#     _partial_: true
+#     mode: min
+#     factor: 0.9
+#     patience: 10
+#  net:
+#    regularizer_num_filters: 64
+#    regularizer_num_pull_layers: 4

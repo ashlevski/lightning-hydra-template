@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from tests.helpers.run_if import RunIf
@@ -9,8 +11,11 @@ overrides = ["logger=[]"]
 
 @RunIf(sh=True)
 @pytest.mark.slow
-def test_experiments(tmp_path):
-    """Test running all available experiment configs with fast_dev_run=True."""
+def test_experiments(tmp_path: Path) -> None:
+    """Test running all available experiment configs with `fast_dev_run=True.`
+
+    :param tmp_path: The temporary logging path.
+    """
     command = [
         startfile,
         "-m",
@@ -23,8 +28,11 @@ def test_experiments(tmp_path):
 
 @RunIf(sh=True)
 @pytest.mark.slow
-def test_hydra_sweep(tmp_path):
-    """Test default hydra sweep."""
+def test_hydra_sweep(tmp_path: Path) -> None:
+    """Test default hydra sweep.
+
+    :param tmp_path: The temporary logging path.
+    """
     command = [
         startfile,
         "-m",
@@ -38,8 +46,11 @@ def test_hydra_sweep(tmp_path):
 
 @RunIf(sh=True)
 @pytest.mark.slow
-def test_hydra_sweep_ddp_sim(tmp_path):
-    """Test default hydra sweep with ddp sim."""
+def test_hydra_sweep_ddp_sim(tmp_path: Path) -> None:
+    """Test default hydra sweep with ddp sim.
+
+    :param tmp_path: The temporary logging path.
+    """
     command = [
         startfile,
         "-m",
@@ -56,8 +67,11 @@ def test_hydra_sweep_ddp_sim(tmp_path):
 
 @RunIf(sh=True)
 @pytest.mark.slow
-def test_optuna_sweep(tmp_path):
-    """Test optuna sweep."""
+def test_optuna_sweep(tmp_path: Path) -> None:
+    """Test Optuna hyperparam sweeping.
+
+    :param tmp_path: The temporary logging path.
+    """
     command = [
         startfile,
         "-m",
@@ -72,8 +86,11 @@ def test_optuna_sweep(tmp_path):
 
 @RunIf(wandb=True, sh=True)
 @pytest.mark.slow
-def test_optuna_sweep_ddp_sim_wandb(tmp_path):
-    """Test optuna sweep with wandb and ddp sim."""
+def test_optuna_sweep_ddp_sim_wandb(tmp_path: Path) -> None:
+    """Test Optuna sweep with wandb logging and ddp sim.
+
+    :param tmp_path: The temporary logging path.
+    """
     command = [
         startfile,
         "-m",

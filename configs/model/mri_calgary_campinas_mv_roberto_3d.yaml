@@ -1,0 +1,76 @@
+_target_: src.models.mri_calgary_campinas_module_mv_3d.MRI_Calgary_Campinas_LitModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: max
+  factor: 0.5
+  patience: 50
+
+net:
+  _target_: src.models.components.multivisit_roberto_3d.MultiVisitNet
+  multi_visit_net:
+    _target_: src.utils.direct.nn.unet.unet_2d.UnetModel2d
+    in_channels: 2
+    out_channels: 2
+    num_filters: 8
+    num_pool_layers: 4
+    dropout_probability: 0.0
+# compile model for faster training with pytorch 2.0
+compile: false
+
+train_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
+
+val_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
+
+test_acc:
+  PSNR:
+    _target_: torchmetrics.image.PeakSignalNoiseRatio
+  # VIF:
+  #   _target_: torchmetrics.image.VisualInformationFidelity
+  SSIM:
+    _target_: torchmetrics.image.StructuralSimilarityIndexMeasure
+    kernel_size: 7
+  MSE:
+    _target_: torchmetrics.MeanSquaredError
+
+
+criterions:
+  # mse:
+  #   _target_: torch.nn.MSELoss
+  # lncc:
+  #   _target_: projects.longitudinal.torchir.metrics.NCC
+  # l1:
+  #   _target_: torch.nn.L1Loss
+  # ssim:
+  #   _target_: src.models.components.losses.SSIMLoss
+#  r2:
+#    _target_: src.models.components.losses.R2ScoreLoss
+#
+#criterion_2:
+#    _target_: torch.nn.L1Loss
+

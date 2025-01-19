@@ -21,9 +21,10 @@ channels:
 # compatibility is usually guaranteed
 
 dependencies:
+  - python=3.10
   - pytorch=2.*
   - torchvision=0.*
-  - pytorch-lightning=2.*
+  - lightning=2.*
   - torchmetrics=0.*
   - hydra-core=1.*
   - rich=13.*
@@ -35,9 +36,10 @@ dependencies:
   # - neptune-client
   # - mlflow
   # - comet-ml
+  # - aim>=3.16.2 # no lower than 3.16.2, see https://github.com/aimhubio/aim/issues/2550
 
   - pip>=23
   - pip:
       - hydra-optuna-sweeper
       - hydra-colorlog
-      - pyrootutils
+      - rootutils

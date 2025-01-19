@@ -2,17 +2,26 @@
 
 defaults:
   - _self_
-  - data: mnist.yaml # choose datamodule with `test_dataloader()` for evaluation
-  - model: mnist.yaml
+  - data: mri_calgary_campinas # choose datamodule with `test_dataloader()` for evaluation
+  - model: mri_calgary_campinas
   - logger: null
-  - trainer: default.yaml
-  - paths: default.yaml
-  - extras: default.yaml
-  - hydra: default.yaml
+  - trainer: default
+  - paths: default
+  - extras: default
+  - hydra: default
 
 task_name: "eval"
 
 tags: ["dev"]
-
+data:
+  num_workers: 8
+  batch_size: 32
+  data_dir: "/work/souza_lab/amir/Data/h5"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/train_chal.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/val_chal.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/test_chal.csv"
+  mask_dir: "/home/amirmohammad.shamaei/MRI_REC_template/data/Calgary_Campinas/poisson_sampling/R5_218x170.npy"
+#ckpt_path: "/home/amir/PycharmProjects/MRI_REC_template/logs/train/runs/2023-11-02_19-37-46/checkpoints/epoch_199.ckpt"
+ckpt_path: "/home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2023-11-05_17-43-01/checkpoints/epoch_305.ckpt"
 # passing checkpoint path is necessary for evaluation
-ckpt_path: ???
+

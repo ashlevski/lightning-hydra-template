@@ -1,0 +1,15 @@
+,Relative path,File name,Image X res,Image Y res,k space X res,k space Y res,Phases,Slices,Echos,Channels,Scan date,TE,TI,TR,Flip angle,Type,Patient ID,Relative scan date,Number of scan
+0,datasets/Dataset_C2/12_channel/Val,e14120s11_P66048,256,256,256,218,1,170,1,12,2018-06-14,2568.0,650000.0,6344.0,8.0,healthy,NORM477,1.0,2.0
+1,datasets/Dataset_C2/12_channel/Val,e14264s3_P08192,256,256,256,218,1,170,1,12,2018-07-06,2568.0,650000.0,6344.0,8.0,healthy,NORM485,1.0,2.0
+2,datasets/Dataset_C2/12_channel/Val,e14498s5_P60928,256,256,256,218,1,170,1,12,2018-08-10,2568.0,650000.0,6344.0,8.0,healthy,NORM479,29.0,2.0
+3,datasets/Dataset_C2/12_channel/Val,e14542s5_P52224,256,256,256,218,1,170,1,12,2018-08-16,2568.0,650000.0,6344.0,8.0,healthy,NORM484,1.0,2.0
+4,datasets/Dataset_C2/12_channel/Val,e16673s3_P24576,256,256,256,218,1,180,1,12,2019-07-25,3056.0,400000.0,7376.0,10.0,healthy,NORM100,6.0,2.0
+5,datasets/Dataset_C2/12_channel/Val,e16673s13_P31744,256,256,256,218,1,170,1,12,2019-07-25,2568.0,650000.0,6344.0,8.0,healthy,NORM100,6.0,2.0
+6,datasets/Dataset_C2/12_channel/new,e19219s4_P49664,256,256,256,218,1,180,1,12,2021-10-20,3064.0,400000.0,7392.0,10.0,healthy,NORM100,824.0,5.0
+7,datasets/Dataset_C2/12_channel/new,e19219s14_P56832,256,256,256,218,1,170,1,12,2021-10-20,2584.0,650000.0,6380.0,8.0,healthy,NORM100,824.0,5.0
+8,datasets/Dataset_C2/12_channel/Test,e15866s13_P72192,256,256,256,218,1,170,1,12,2019-03-20,2568.0,650000.0,6344.0,8.0,healthy,NORM613,13.0,2.0
+9,datasets/Dataset_C2/12_channel/Test,e15866s3_P65024,256,256,256,218,1,180,1,12,2019-03-20,3056.0,400000.0,7376.0,10.0,healthy,NORM613,13.0,2.0
+10,datasets/Dataset_C2/12_channel/new,e19277s5_P29696,256,256,256,218,1,180,1,12,2021-10-29,3064.0,400000.0,7392.0,10.0,healthy,NORM100,833.0,6.0
+11,datasets/Dataset_C2/12_channel/new,e19303s3_P56320,256,256,256,218,1,180,1,12,2021-11-03,3064.0,400000.0,7392.0,10.0,healthy,NORM100,838.0,7.0
+12,datasets/Dataset_C2/12_channel/Test,e16031s13_P70656,256,256,256,218,1,170,1,12,2019-04-15,2568.0,650000.0,6344.0,8.0,healthy,NORM613,39.0,3.0
+13,datasets/Dataset_C2/12_channel/Test,e16031s3_P63488,256,256,256,218,1,180,1,12,2019-04-15,3056.0,400000.0,7376.0,10.0,healthy,NORM613,39.0,3.0

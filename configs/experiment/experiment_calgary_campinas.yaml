@@ -1,0 +1,43 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_calgary_campinas
+  - override /model: mri_calgary_campinas
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["mri_recon", "cascade"]
+
+seed: 12345
+
+
+logger:
+  wandb:
+    project: 'mri_recon_bayes'
+    tags: ${tags}
+    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+trainer:
+  max_epochs: 20
+
+data:
+  data_dir: "/work/souza_lab/amir/Data/h5/_norm"
+  metadata_train_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/train_chal.csv"
+  metadata_val_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/val_chal.csv"
+  metadata_test_dir: "/home/amirmohammad.shamaei/MRI_REC_template/projects/uncertainty/csvs/test_chal.csv"
+  num_slices: 256
+
+
+# model:
+#   net:
+#     regularizer_num_filters: 64
+#     regularizer_num_pull_layers: 4

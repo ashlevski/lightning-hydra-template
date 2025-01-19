@@ -1,23 +1,24 @@
 import warnings
 from importlib.util import find_spec
-from typing import Callable
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from omegaconf import DictConfig
 
 from src.utils import pylogger, rich_utils
 
-log = pylogger.get_pylogger(__name__)
+log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 
 
 def extras(cfg: DictConfig) -> None:
     """Applies optional utilities before the task is started.
 
     Utilities:
-    - Ignoring python warnings
-    - Setting tags from command line
-    - Rich config printing
-    """
+        - Ignoring python warnings
+        - Setting tags from command line
+        - Rich config printing
 
+    :param cfg: A DictConfig object containing the config tree.
+    """
     # return if no `extras` config
     if not cfg.get("extras"):
         log.warning("Extras config not found! <cfg.extras=null>")
@@ -43,23 +44,25 @@ def task_wrapper(task_func: Callable) -> Callable:
     """Optional decorator that controls the failure behavior when executing the task function.
 
     This wrapper can be used to:
-    - make sure loggers are closed even if the task function raises an exception (prevents multirun failure)
-    - save the exception to a `.log` file
-    - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later)
-    - etc. (adjust depending on your needs)
+        - make sure loggers are closed even if the task function raises an exception (prevents multirun failure)
+        - save the exception to a `.log` file
+        - mark the run as failed with a dedicated file in the `logs/` folder (so we can find and rerun it later)
+        - etc. (adjust depending on your needs)
 
     Example:
     ```
     @utils.task_wrapper
-    def train(cfg: DictConfig) -> Tuple[dict, dict]:
-
+    def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         ...
-
         return metric_dict, object_dict
     ```
+
+    :param task_func: The task function to be wrapped.
+
+    :return: The wrapped task function.
     """
 
-    def wrap(cfg: DictConfig):
+    def wrap(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         # execute the task
         try:
             metric_dict, object_dict = task_func(cfg=cfg)
@@ -92,9 +95,13 @@ def task_wrapper(task_func: Callable) -> Callable:
     return wrap
 
 
-def get_metric_value(metric_dict: dict, metric_name: str) -> float:
-    """Safely retrieves value of the metric logged in LightningModule."""
+def get_metric_value(metric_dict: Dict[str, Any], metric_name: Optional[str]) -> Optional[float]:
+    """Safely retrieves value of the metric logged in LightningModule.
 
+    :param metric_dict: A dict containing metric values.
+    :param metric_name: If provided, the name of the metric to retrieve.
+    :return: If a metric name was provided, the value of the metric.
+    """
     if not metric_name:
         log.info("Metric name is None! Skipping metric value retrieval...")
         return None

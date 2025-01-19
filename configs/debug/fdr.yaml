@@ -3,7 +3,7 @@
 # runs 1 train, 1 validation and 1 test step
 
 defaults:
-  - default.yaml
+  - default
 
 trainer:
   fast_dev_run: true

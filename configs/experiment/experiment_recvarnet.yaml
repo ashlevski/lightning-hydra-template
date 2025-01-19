@@ -1,0 +1,50 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: mri_direct
+  - override /model: mri_direct
+  - override /callbacks: default
+  - override /trainer: default
+  - override /logger: wandb
+
+# all parameters below will be merged with parameters from default configurations set above
+# this allows you to overwrite only specified parameters
+
+tags: ["mri_recon", "recvarnet"]
+
+seed: 12345
+
+data:
+  data_dir: 'D:\Datasets\home\pasala\Data\12-channel\'
+  smaps_dir: 'D:\Work\MRI_REC_template\data\MRI\sensitivity_maps\218_170'
+  mask_dir: 'D:\Work\MRI_REC_template\data\MRI\undersampling_masks\218_170'
+  batch_size: 1
+
+#data:
+#  data_dir: '/home/amirmohammad.shamaei/home/pasala/Data/12-channel/'
+#  smaps_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/sensitivity_maps/218_170'
+#  mask_dir: '/home/amirmohammad.shamaei/MRI_REC_template/data/MRI/undersampling_masks/218_170'
+#  batch_size: 32
+
+logger:
+  wandb:
+    project: 'mri_recon_recvarnet'
+    tags: ${tags}
+#    group: "mri_recon"
+  aim:
+    experiment: "mri_recon"
+
+callbacks:
+  model_checkpoint:
+    monitor: "val_acc/SSIM"
+  early_stopping:
+    monitor: "val_acc/SSIM"
+
+trainer:
+  max_epochs: 200
+
+
+#ckpt_path: /home/amirmohammad.shamaei/MRI_REC_template/logs/train/runs/2023-10-10_15-07-26/checkpoints/epoch_030.ckpt
